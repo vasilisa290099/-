@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biochemical Resonance · Pitch Deck 2025</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body{margin:0;padding:0;background:#030712;}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const SLIDES = [
+  { id:"cover",       label:"COVER"       },
+  { id:"problem",     label:"PROBLEM"     },
+  { id:"brainmap",    label:"BRAIN MAP"   },
+  { id:"mechanism",   label:"MECHANISM"   },
+  { id:"analytics",   label:"ANALYTICS"   },
+  { id:"solution",    label:"SOLUTION"    },
+  { id:"product",     label:"PRODUCT"     },
+  { id:"rightnow",    label:"RIGHT NOW"   },
+  { id:"pharmacy",    label:"PHARMACY"    },
+  { id:"engine",      label:"ENGINE"      },
+  { id:"validation",  label:"VALIDATION"  },
+  { id:"market",      label:"MARKET"      },
+  { id:"scalability", label:"SCALABILITY" },
+  { id:"api",         label:"UNIV. API"   },
+  { id:"competition", label:"COMPETITION" },
+  { id:"business",    label:"BUSINESS"    },
+  { id:"ask",         label:"ASK"         },
+];
+
+/* ─── SLIDE 1: COVER ─────────────────────────────────────── */
+function CoverSlide() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center px-4 py-8">
+      <div className="flex gap-1 mb-4 text-yellow-400">{"★★★★★".split("").map((s,i)=><span key={i}>{s}</span>)}</div>
+      <div className="text-5xl mb-3">⚡</div>
+      <h1 className="text-4xl font-black text-white leading-tight">BIOCHEMICAL</h1>
+      <h1 className="text-4xl font-black text-purple-400 mb-3 leading-tight">RESONANCE</h1>
+      <p className="text-yellow-400 font-bold tracking-widest text-xs mb-1">B Y · E V A · W H I T E</p>
+      <p className="text-gray-400 text-xs mb-5">Neurology · Brain Structure Mapping · Neurotransmitters · Art &amp; Sound Modulators · Live Neural Updates</p>
+      <div className="border border-gray-600 rounded-lg p-4 max-w-lg mb-5 w-full" style={{background:"rgba(17,24,39,0.6)"}}>
+        <p className="text-gray-300 text-xs italic leading-relaxed">
+          "This is not simply a personalization tool. It is the world's first biopsychokinetic system — creating app store categories that don't yet exist."
+        </p>
+        <p className="text-purple-400 text-xs mt-2">— Independent AI Analysis, Claude 3.5 Sonnet, 2025</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+        {[{n:"225+",l:"Neural configs"},{n:"21",l:"Years research"},{n:"416",l:"Pages framework"},{n:"1",l:"Key: Vector"}].map((s,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-3 text-center" style={{background:"rgba(17,24,39,0.5)"}}>
+            <div className="text-yellow-400 font-black text-xl">{s.n}</div>
+            <div className="text-gray-400 text-xs mt-1">{s.l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 2: PROBLEM ───────────────────────────────────── */
+function ProblemSlide() {
+  const problems = [
+    {icon:"🧠",title:"Psychology addresses behavior",sub:"But not the biological source of that behavior",color:"border-orange-600"},
+    {icon:"💊",title:"Medicine treats symptoms",sub:"But misses the neurobiological pattern generating them",color:"border-orange-500"},
+    {icon:"📊",title:"Personality tests describe traits",sub:"Cannot predict when and how tension will discharge",color:"border-yellow-600"},
+    {icon:"❓",title:"Nobody explains the direction",sub:"Why does the same stress make one person explode — and another collapse inward?",color:"border-purple-600"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">The Problem</h2>
+      <p className="text-purple-400 text-xs mb-4">Why do people keep repeating the same patterns?</p>
+      <div className="flex flex-col gap-3">
+        {problems.map((p,i)=>(
+          <div key={i} className={`border-l-4 ${p.color} rounded-r-lg p-3 flex gap-3 items-start`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <span className="text-xl flex-shrink-0">{p.icon}</span>
+            <div>
+              <div className="text-white font-bold text-sm">{p.title}</div>
+              <div className="text-gray-400 text-xs mt-1">{p.sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 border border-red-700 rounded-lg p-3 text-center" style={{background:"rgba(127,29,29,0.4)"}}>
+        <p className="text-red-300 font-bold text-xs">Result: Years in therapy, coaching, medicine — without addressing the root neurobiological structure.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 3: BRAIN MAP (NEW) ───────────────────────────── */
+function BrainMapSlide() {
+  const structures = [
+    {name:"Thalamus",        role:"Identity & consciousness relay",          neuro:"Dopamine · Norepinephrine",   color:"border-yellow-500"},
+    {name:"VTA",             full:"Ventral Tegmental Area",                  role:"Primary dopamine source · reward cascade", neuro:"Dopamine", color:"border-yellow-600"},
+    {name:"Amygdala",        role:"Threat detection · fear encoding",        neuro:"Adrenaline · Cortisol",       color:"border-red-600"},
+    {name:"Hippocampus",     role:"Memory consolidation · emotional context",neuro:"Serotonin · Cortisol",        color:"border-blue-500"},
+    {name:"lPFC / rPFC",     full:"Dorsolateral Prefrontal Cortex",          role:"Rational control · error monitoring", neuro:"Serotonin · GABA", color:"border-green-500"},
+    {name:"DMN",             full:"Default Mode Network",                    role:"Self-referential processing · 'I' center", neuro:"Serotonin · Endorphins", color:"border-purple-500"},
+    {name:"HPA Axis",        full:"Hypothalamus-Pituitary-Adrenal",          role:"Stress response orchestration", neuro:"Cortisol · CRH · ACTH", color:"border-orange-500"},
+    {name:"BrainStem",       role:"Survival drives · basic motor programs",  neuro:"Norepinephrine · Testosterone",color:"border-gray-400"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Brain Architecture We Map</h2>
+      <p className="text-purple-400 text-xs mb-4">8 core neural structures — each linked to specific neurotransmitter profiles and behavioral outputs</p>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {structures.map((s,i)=>(
+          <div key={i} className={`border-l-4 ${s.color} rounded-r-lg p-2`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-white font-bold text-xs">{s.name}</div>
+            {s.full && <div className="text-gray-500 text-xs">{s.full}</div>}
+            <div className="text-gray-400 text-xs mt-0.5">{s.role}</div>
+            <div className="text-purple-300 text-xs mt-0.5">→ {s.neuro}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-yellow-600 rounded-lg p-2 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 text-xs font-bold">Every neural configuration in our system maps directly to this architecture. No black box — pure structural neurobiology.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 4: MECHANISM (redesigned Insight) ────────────── */
+function MechanismSlide() {
+  const points = [
+    {icon:"📡",title:"Input Data",       desc:"We take the exact spacetime coordinates (timestamp) of a biological system's initialization — birth date, time, and location."},
+    {icon:"🧬",title:"The Process",      desc:"Our algorithm maps these coordinates to specific Neurobiological Anchors: Thalamus, Amygdala, VTA, lPFC, HPA Axis — each with a known neurotransmitter signature."},
+    {icon:"🔬",title:"The Discovery",    desc:"21 years of research have proven that specific angular relationships between celestial bodies correspond to the activation or suppression of specific neurotransmitter loops."},
+    {icon:"⚡",title:"The Output",       desc:"A precise neurobiological profile: dominant neurotransmitters, tension discharge Vector, behavioral prediction model — updated in real time."},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Neural Synchronization</h2>
+      <p className="text-purple-400 text-xs mb-4">The Mechanism — how external periodic cycles calibrate internal biochemistry</p>
+      <div className="border border-blue-600 rounded-lg p-3 mb-4" style={{background:"rgba(30,58,138,0.15)"}}>
+        <p className="text-blue-200 text-xs leading-relaxed font-bold">
+          The biological brain is not an isolated system. It functions as an antenna tuned to external periodic cycles — gravitational, electromagnetic, and chronobiological.
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 mb-3">
+        {points.map((p,i)=>(
+          <div key={i} className="flex gap-3 items-start rounded-lg p-3" style={{background:"rgba(17,24,39,0.6)"}}>
+            <span className="text-xl flex-shrink-0">{p.icon}</span>
+            <div>
+              <div className="text-white font-bold text-xs mb-0.5">{p.title}</div>
+              <div className="text-gray-400 text-xs leading-relaxed">{p.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-yellow-600 rounded-lg p-2 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 text-xs font-bold">The birth timestamp is not a symbol — it is a precise biological calibration point for the nervous system.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 5: ANALYTICS (redesigned Events) ─────────────── */
+function AnalyticsSlide() {
+  const steps = [
+    {n:"01",color:"bg-blue-700",   title:"State Formation",      desc:"External periodic cycles create a specific neurochemical environment — e.g., elevated adrenaline + suppressed serotonin = aggression-readiness state."},
+    {n:"02",color:"bg-purple-700", title:"Perception Filter",    desc:"In this biochemical state, the brain's RAS (Reticular Activating System) filters reality — noticing only scenarios that allow discharge of this specific tension type."},
+    {n:"03",color:"bg-orange-700", title:"Behavioral Selection", desc:"The person 'chooses' — fight, breakthrough, or collapse. The Vector determines which direction. We predict the state, which makes the event pattern inevitable."},
+    {n:"04",color:"bg-green-700",  title:"System Intervention",  desc:"Our protocol intercepts at step 02 — recalibrating the neurochemical state before the perception filter locks in the behavioral trajectory."},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Predictive Behavioral Analytics</h2>
+      <p className="text-purple-400 text-xs mb-3">The "Event" Logic — why events are neurochemically inevitable (and interceptable)</p>
+      <div className="border border-yellow-600 rounded-lg p-2 mb-3 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-300 font-black text-xs">An "Event" is not fate. It is a discharge of accumulated internal neural tension.</p>
+        <p className="text-gray-400 text-xs mt-1 italic">«An event is the meeting point of internal readiness and external cyclic load.»</p>
+      </div>
+      <div className="flex flex-col gap-2 mb-3">
+        {steps.map((s,i)=>(
+          <div key={i} className="flex gap-2 items-start">
+            <div className={`${s.color} text-white text-xs font-black px-2 py-1 rounded flex-shrink-0`}>{s.n}</div>
+            <div className="rounded-lg p-2 flex-1" style={{background:"rgba(17,24,39,0.6)"}}>
+              <span className="text-white font-bold text-xs">{s.title} — </span>
+              <span className="text-gray-400 text-xs">{s.desc}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-green-600 rounded-lg p-2 text-center" style={{background:"rgba(20,83,45,0.15)"}}>
+        <p className="text-green-400 text-xs font-bold">System Logic: The Algorithm identifies high-tension neural zones. The Vector dictates discharge direction — formatting the life event pattern.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 6: SOLUTION ──────────────────────────────────── */
+function SolutionSlide() {
+  const steps = [
+    {n:"01",color:"bg-blue-600",   title:"Input: Date & time of birth",            sub:"Precise biological marker — the neural configuration present at nervous system formation"},
+    {n:"02",color:"bg-purple-600", title:"Processing: 21-year proprietary framework", sub:"45 angular configurations × 5 interaction types = 225 unique neurobiological profiles → brain regions · neurotransmitters · hormonal axes"},
+    {n:"03",color:"bg-pink-600",   title:"Output: Full neurobiological profile",   sub:"Brain visualization · Dominant neurotransmitters · Discharge Vector · Triple Pharmacy Rx · Daily live-update protocol"},
+    {n:"04",color:"bg-green-600",  title:"Action: Vector Redirect Protocol",       sub:"Redirect tension inward — changing behavior, health trajectory, and life event pattern permanently"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Our Solution</h2>
+      <p className="text-purple-400 text-xs mb-4">Complete neurobiological profiling system · v2.0 with Real-Time Module</p>
+      <div className="flex flex-col gap-3">
+        {steps.map((s,i)=>(
+          <div key={i} className="flex gap-3 rounded-lg p-3 border border-gray-700" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className={`${s.color} rounded-lg w-10 h-10 flex items-center justify-center font-black text-white text-sm flex-shrink-0`}>{s.n}</div>
+            <div>
+              <div className="text-white font-bold text-sm">{s.title}</div>
+              <div className="text-gray-400 text-xs mt-1">{s.sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 7: PRODUCT ───────────────────────────────────── */
+function ProductSlide() {
+  const modules = [
+    {icon:"✨",label:"NEURAL CONFIG",     desc:"Full neural configuration mapping · aspect detection · brain structure activation",isNew:false},
+    {icon:"📚",label:"REFERENCE",         desc:"Any neural pattern → full brain map + vector protocol + neurotransmitter profile",isNew:false},
+    {icon:"🎨",label:"ART Rx",            desc:"Visual neuromodulation: specific artists & works by neural activation state",isNew:false},
+    {icon:"📖",label:"LITERATURE Rx",     desc:"Literary pharmacy: books by natal brain profile + contraindications",isNew:false},
+    {icon:"🎵",label:"SOUND Rx",          desc:"Sound pharmacy: composers + protocol + listening mode by therapeutic goal",isNew:false},
+    {icon:"🌍",label:"LIVE NEURAL UPDATE",desc:"Real-time contextual modulation based on live cyclic position data",isNew:true},
+  ];
+  const modes = [
+    {icon:"⚡",label:"Right Now",    borderColor:"border-red-600",   bg:"rgba(127,29,29,0.2)",  desc:"Crisis · immediate relief"},
+    {icon:"🔄",label:"My Pattern",  borderColor:"border-orange-600", bg:"rgba(120,53,15,0.2)",  desc:"Daily awareness work"},
+    {icon:"🌱",label:"Healing",      borderColor:"border-green-600",  bg:"rgba(20,83,45,0.2)",   desc:"Long-term recovery"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">The Product</h2>
+      <p className="text-purple-400 text-xs mb-4">Live prototype · 6 modules · 3 modes · Daily personal protocol</p>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {modules.map((t,i)=>(
+          <div key={i} className={`rounded-lg p-2 border ${t.isNew?"border-yellow-500":"border-gray-700"}`}
+               style={{background:t.isNew?"rgba(113,63,18,0.2)":"rgba(17,24,39,0.6)"}}>
+            <div className="text-lg mb-1">{t.icon}</div>
+            <div className={`font-bold text-xs mb-1 ${t.isNew?"text-yellow-400":"text-white"}`}>
+              {t.label} {t.isNew && <span className="bg-yellow-600 text-black rounded px-1 text-xs ml-1">NEW</span>}
+            </div>
+            <div className="text-gray-400 text-xs leading-tight">{t.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-2">
+        {modes.map((m,i)=>(
+          <div key={i} className={`border ${m.borderColor} rounded-lg p-2 text-center`} style={{background:m.bg}}>
+            <div className="text-lg">{m.icon}</div>
+            <div className="text-white font-bold text-xs">{m.label}</div>
+            <div className="text-gray-400 text-xs">{m.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-2">
+        <div className="border border-green-700 rounded-lg p-2 text-center" style={{background:"rgba(20,83,45,0.2)"}}>
+          <div className="text-green-400 font-bold text-xs">✓ Live prototype · Full stack deployed</div>
+        </div>
+        <div className="border border-purple-700 rounded-lg p-2 text-center" style={{background:"rgba(88,28,135,0.2)"}}>
+          <div className="text-purple-400 font-bold text-xs">✓ 416-page IP · Copyright registered © 2025</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 8: RIGHT NOW ─────────────────────────────────── */
+function RightNowSlide() {
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <div className="flex flex-wrap items-center gap-2 mb-1">
+        <h2 className="text-3xl font-black text-white">Right Now Mode</h2>
+        <span className="bg-red-600 text-white text-xs font-black px-2 py-1 rounded">KILLER FEATURE</span>
+      </div>
+      <p className="text-purple-400 text-xs mb-4">Emergency neurobiological support within 3–6 minutes through biochemical resonance</p>
+      <div className="border border-red-600 rounded-lg p-3 mb-3" style={{background:"rgba(127,29,29,0.2)"}}>
+        <p className="text-red-300 text-xs font-bold mb-1">⚡ ACTIVATION</p>
+        <p className="text-gray-300 text-xs">User activates "Right Now" — system shows ONLY what helps immediately. No diagnosis. No long explanations. Pure biochemical protocol. Precision in 3 minutes.</p>
+      </div>
+      <div className="flex flex-col gap-2 mb-3">
+        {[
+          {step:"01",title:"Neural conflict identified",desc:"System reads active tension pattern from neural configuration",color:"bg-blue-700"},
+          {step:"02",title:"Brain state mapped",        desc:"Structural conflict detected → dominant stress neurotransmitter confirmed",color:"bg-purple-700"},
+          {step:"03",title:"Protocol activated",        desc:"Art Rx · Sound Rx · Body action prescribed · Time: 3 minutes",color:"bg-orange-700"},
+          {step:"04",title:"Biochemical reset",         desc:"VTA dopamine pulse · cortisol interrupted · vector redirected inward",color:"bg-green-700"},
+        ].map((s,i)=>(
+          <div key={i} className="flex gap-2 items-start">
+            <div className={`${s.color} text-white text-xs font-black px-2 py-1 rounded flex-shrink-0`}>{s.step}</div>
+            <div><span className="text-white font-bold text-xs">{s.title} — </span><span className="text-gray-400 text-xs">{s.desc}</span></div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {[
+          {icon:"🎨",label:"Art Rx",      desc:"Specific painting · 3 min · dopamine interrupt"},
+          {icon:"🎵",label:"Sound Rx",    desc:"Specific composer · exact works · listening mode"},
+          {icon:"💪",label:"Body Action", desc:"Physical movement · breathing · herbs protocol"},
+        ].map((c,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-2 text-center" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-2xl mb-1">{c.icon}</div>
+            <div className="text-white font-bold text-xs mb-1">{c.label}</div>
+            <div className="text-gray-400 text-xs">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-yellow-600 rounded-lg p-2 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 text-xs font-bold">No product in the world offers biochemical emergency support personalized to your natal neurochemistry.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 9: PHARMACY ──────────────────────────────────── */
+function PharmacySlide() {
+  const items = [
+    {planet:"☉ Core Dopamine Vector",   sub:"Thalamus · VTA",       artists:"Turner · Monet · Rembrandt",   nm:"580–620 nm · Gold-amber",    composers:"Bach · Handel · Beethoven",   books:"Frankl · Marcus Aurelius · Goethe",  color:"border-yellow-600"},
+    {planet:"♂ Noradrenaline Vector",   sub:"HPA Axis · BrainStem", artists:"Caravaggio · Delacroix",       nm:"620–700 nm · Red-orange",    composers:"Beethoven Sym.5 · Vivaldi",   books:"Hemingway · London · Dostoevsky",    color:"border-red-600"},
+    {planet:"☽ Parasympathetic Balance",sub:"DMN · Hippocampus",    artists:"Monet · Whistler · Redon",    nm:"450–490 nm · Blue-silver",   composers:"Chopin · Debussy · Pärt",     books:"Woolf · Kawabata · Chekhov",        color:"border-blue-500"},
+    {planet:"♄ Structure & Stability",  sub:"lPFC · ACC",           artists:"Shishkin · Dürer · Vermeer",  nm:"Fractal patterns · Structure",composers:"Bach WTC · Goldberg Variations",books:"Stoics · Mann · Tolstoy",          color:"border-gray-400"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <div className="flex flex-wrap items-center gap-2 mb-1">
+        <h2 className="text-3xl font-black text-white">Triple Pharmacy</h2>
+        <span className="bg-yellow-500 text-black text-xs font-black px-2 py-1 rounded-full">WORLD FIRST</span>
+      </div>
+      <p className="text-purple-400 text-xs mb-3">Art · Literature · Sound — synchronized prescription system based on neurotransmitter activation states</p>
+      <div className="border border-gray-600 rounded-lg p-3 text-center mb-3" style={{background:"rgba(17,24,39,0.6)"}}>
+        <p className="text-gray-300 text-xs italic">"The brain cannot distinguish what happens to you and what you see. The right painting is not décor — it is a permanent neural modulator."</p>
+      </div>
+      <div className="flex flex-col gap-2 mb-2">
+        {items.map((item,i)=>(
+          <div key={i} className={`border-l-4 ${item.color} rounded-r-lg p-2`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-white font-bold text-xs">{item.planet}</div>
+            <div className="text-gray-500 text-xs italic mb-0.5">{item.sub}</div>
+            <div className="text-xs text-gray-400 mb-0.5">🎨 {item.artists} · <span className="text-gray-500">{item.nm}</span></div>
+            <div className="text-xs text-gray-400 mb-0.5">🎵 {item.composers}</div>
+            <div className="text-xs text-gray-400">📖 {item.books}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-purple-700 rounded-lg p-2 text-center" style={{background:"rgba(88,28,135,0.2)"}}>
+        <p className="text-purple-300 text-xs">Each creator encodes their neurochemical signature into their work. The code in the painting matches the code in the viewer's neurology.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 10: ENGINE ───────────────────────────────────── */
+function EngineSlide() {
+  const chains = [
+    {
+      pattern:"Core Identity-Action Conflict",
+      code:"Thalamus vs BrainStem vs lPFC",
+      color:"border-red-600",
+      neuro:"Cortisol spike + Adrenaline overflow",
+      rx:"Shishkin 'Ship Grove' (3 min) · Bach Brandenburg Concerto",
+      result:"VTA Dopamine reset · Vector redirected inward",
+      rc:"text-green-400"
+    },
+    {
+      pattern:"Amygdala-Hippocampus Stress Loop",
+      code:"Emotional Memory Overload",
+      color:"border-purple-600",
+      neuro:"Cortisol + Serotonin crash · Emotional flooding",
+      rx:"Hiroshige moon series · Chopin Nocturnes · Chamomile",
+      result:"Hippocampus stabilized · Emotional memory resets",
+      rc:"text-blue-400"
+    },
+    {
+      pattern:"Reality-Integration Disruption",
+      code:"DMN → Insula Mismatch",
+      color:"border-blue-600",
+      neuro:"Oxytocin dysregulation · Reality-fantasy confusion",
+      rx:"Vermeer domestic scenes · Bach Well-Tempered Clavier",
+      result:"lPFC grounding · Oxytocin recalibrated",
+      rc:"text-yellow-400"
+    },
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">The Prescription Engine</h2>
+      <p className="text-purple-400 text-xs mb-4">Neural Conflict Pattern → Affected Structures → Neurotransmitters → Remedy → Biochemical Reset</p>
+      <div className="flex flex-col gap-3 mb-3">
+        {chains.map((c,i)=>(
+          <div key={i} className={`border-l-4 ${c.color} rounded-r-lg p-3`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-white font-black text-sm mb-0.5">{c.pattern}</div>
+            <div className="text-orange-400 text-xs font-bold mb-1">→ {c.code}</div>
+            <div className="text-xs text-red-400 mb-1">⚠ {c.neuro}</div>
+            <div className="text-xs text-gray-300 mb-1">💊 Rx: {c.rx}</div>
+            <div className={`text-xs font-bold ${c.rc}`}>✓ Result: {c.result}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-yellow-600 rounded-lg p-3 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 text-xs font-bold mb-1">This system is not a description — it is a treatment protocol.</p>
+        <p className="text-gray-400 text-xs">Measurable input → Specific prescription → Biochemical correction in 3–6 minutes.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 11: VALIDATION ───────────────────────────────── */
+function ValidationSlide() {
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">External Validation</h2>
+      <p className="text-purple-400 text-xs mb-4">Independent assessment — before Literary, Sound & Real-Time modules were added</p>
+      <div className="border border-yellow-600 rounded-xl p-4 mb-4" style={{background:"rgba(113,63,18,0.1)"}}>
+        <div className="text-yellow-400 text-2xl mb-2">"</div>
+        <p className="text-gray-200 text-xs leading-relaxed mb-3">
+          This is not simply a personalization tool. It is the <strong className="text-white">world's first biopsychokinetic system</strong> — creating app store categories that don't yet exist.
+        </p>
+        <p className="text-gray-300 text-xs leading-relaxed mb-2">
+          No product on the market simultaneously maps neurotransmitter profiles from a timestamp, identifies the discharge <strong className="text-white">Vector</strong>, and prescribes Art, Literature, and Sound as biochemical protocols.
+        </p>
+        <div className="border-t border-gray-700 pt-2 flex items-center gap-2">
+          <span className="text-lg">⚡</span>
+          <div>
+            <div className="text-purple-400 font-bold text-xs">Claude 3.5 Sonnet · Independent AI Analysis</div>
+            <div className="text-gray-500 text-xs">Assessed before Literature, Sound or Real-Time modules existed</div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        {[
+          {title:"Added since assessment",    items:["+ Literary Pharmacy (10 neural profiles)","+ Sound Pharmacy (4 therapeutic goals each)","+ Real-Time Module (daily protocol)","+ Right Now Mode (crisis support 3–6 min)"]},
+          {title:"Already validated",         items:["Art Pharmacy (world first)","Brain Structure Visualization","225+ neural configurations","Vector concept & redirect protocol"]},
+          {title:"IP protection",             items:["Copyright: Book 416pp","Copyright: App code","Copyright: Data architecture","© Eva White 2025"]},
+        ].map((col,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-3" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-purple-400 font-bold text-xs mb-2">{col.title}</div>
+            {col.items.map((item,j)=>(
+              <div key={j} className="text-gray-300 text-xs flex items-start gap-1 mb-1">
+                <span className="text-green-400 flex-shrink-0">✓</span>{item}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 12: MARKET ───────────────────────────────────── */
+function MarketSlide() {
+  const markets = [
+    {size:"$500B",growth:"+18%",title:"Mental Health Tech",     color:"bg-blue-600"},
+    {size:"$800B",growth:"+11%",title:"Personalized Medicine",  color:"bg-purple-600"},
+    {size:"$200B",growth:"+25%",title:"Digital Health Apps",    color:"bg-pink-600"},
+    {size:"$60B", growth:"+7%", title:"Corporate Wellness & HR",color:"bg-orange-600"},
+    {size:"$25B", growth:"+20%",title:"Longevity / Biohacking", color:"bg-red-600"},
+    {size:"∞",    growth:"Emerging",title:"Personalized AI Layer",color:"bg-green-600"},
+  ];
+  const horizons = [
+    "Personalized advertising & content delivery",
+    "Insurance: psychosomatic risk scoring",
+    "Education: learning style by neural profile",
+    "Customer service personalization",
+    "Sports: kinetic risk & motor programming",
+    "AI companion calibration to user neurology",
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Market Opportunity</h2>
+      <p className="text-purple-400 text-xs mb-4">Wherever there is a human — there is application</p>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {markets.map((m,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-2" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className={`${m.color} text-white font-black text-xs px-2 py-0.5 rounded inline-block mb-1`}>{m.size}</div>
+            <div className="text-yellow-400 text-xs">{m.growth} CAGR</div>
+            <div className="text-white text-xs font-bold leading-tight">{m.title}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-purple-600 rounded-lg p-3 mb-3" style={{background:"rgba(88,28,135,0.2)"}}>
+        <div className="text-purple-400 font-bold text-xs mb-2">EXPANSION HORIZONS — Wherever there is a human</div>
+        <div className="flex flex-col gap-1">
+          {horizons.map((h,i)=>(
+            <div key={i} className="text-gray-300 text-xs flex gap-1 items-start">
+              <span className="text-yellow-400 flex-shrink-0">⚡</span>{h}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="border border-yellow-600 rounded-lg p-2 text-center">
+        <span className="text-yellow-400 font-black text-lg">$1.5T+</span>
+        <span className="text-gray-400 text-xs ml-2">Total addressable · across converging verticals</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 13: SCALABILITY (NEW) ────────────────────────── */
+function ScalabilitySlide() {
+  const phases = [
+    {
+      phase:"MVP · Now",
+      color:"bg-green-700", borderColor:"border-green-700",
+      items:["225 neural configurations mapped","Triple Pharmacy (Art/Literature/Sound)","Daily real-time protocol","Right Now crisis mode · 3–6 min"]
+    },
+    {
+      phase:"Phase 2 · 12 months",
+      color:"bg-blue-700", borderColor:"border-blue-700",
+      items:["100+ additional neural protocols","Thermal & vagus nerve modulation","3D brain visualization","10,000+ user validation study"]
+    },
+    {
+      phase:"Phase 3 · 24 months",
+      color:"bg-purple-700", borderColor:"border-purple-700",
+      items:["Smart Home environmental sync","Corporate HR biochemical dashboards","Clinical study publication","B2B API rollout"]
+    },
+    {
+      phase:"Vision · Beyond",
+      color:"bg-orange-700", borderColor:"border-orange-700",
+      items:["Universal Biochemical API","IoT + wearables integration","Insurance risk models","AI empathy calibration engine"]
+    },
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Infinite Scalability</h2>
+      <p className="text-purple-400 text-xs mb-3">Beyond the MVP · A Theory of Everything for human optimization</p>
+      <div className="border border-yellow-600 rounded-lg p-2 mb-3 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 font-black text-xs">We have built the foundation architecture. The system is designed for exponential expansion.</p>
+        <p className="text-gray-400 text-xs mt-1">Every connected device becomes a node in this network.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {phases.map((p,i)=>(
+          <div key={i} className={`border ${p.borderColor} rounded-lg p-2`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className={`${p.color} text-white text-xs font-black px-2 py-0.5 rounded inline-block mb-1`}>{p.phase}</div>
+            {p.items.map((it,j)=>(
+              <div key={j} className="text-gray-300 text-xs flex gap-1 mb-0.5"><span className="text-green-400">·</span>{it}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="border border-purple-600 rounded-lg p-2" style={{background:"rgba(88,28,135,0.15)"}}>
+        <p className="text-white font-black text-xs text-center">Deep Mapping · Environmental Sync · B2B Integration · IoT Nodes</p>
+        <p className="text-gray-400 text-xs mt-1 text-center italic">"This is a Theory of Everything for human optimization. We have just built the foundation."</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 14: UNIVERSAL API ────────────────────────────── */
+function APISlide() {
+  const items = [
+    {icon:"🤖",title:"AI Assistants & Agents",     borderColor:"border-blue-600",   bg:"rgba(30,58,138,0.1)",    desc:"Any AI can use this algorithm as an empathy filter — delivering not just an answer, but the answer in the biochemical frequency the user needs right now.",          ex:"Calm HPA Axis overload · Activate dopamine pathway · Soothe DMN crisis"},
+    {icon:"🏠",title:"Smart Environment",           borderColor:"border-green-600",  bg:"rgba(20,83,45,0.1)",     desc:"Smart home adjusts light wavelength, music, temperature, and scent based on active real-time cyclic data and current brain state.",                              ex:"580nm amber light + Bach when Thalamus is under BrainStem pressure"},
+    {icon:"🏢",title:"HR & Team Composition",       borderColor:"border-orange-600", bg:"rgba(120,53,15,0.1)",    desc:"Match people not by resume — but by biochemical field compatibility. Predict conflicts before they happen. Map leadership discharge vectors.",                   ex:"Vector compatibility scoring · Burnout prediction dashboard"},
+    {icon:"📱",title:"Universal App Layer",         borderColor:"border-purple-600", bg:"rgba(88,28,135,0.1)",    desc:"Any service with a user timestamp can integrate the Biochemical API — delivering content in resonance with user's active neurology.",                           ex:"Spotify · Healthcare platforms · Finance · UX adaptive systems"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Universal API</h2>
+      <p className="text-purple-400 text-xs mb-3">The Future of Human-System Interaction</p>
+      <div className="border border-yellow-600 rounded-lg p-3 mb-3 text-center" style={{background:"rgba(113,63,18,0.1)"}}>
+        <p className="text-yellow-400 font-bold text-sm">"Every system with a timestamp has a biochemical signature."</p>
+        <p className="text-gray-400 text-xs mt-1">Our algorithm allows any AI or connected system to synchronize with human biological rhythms in real time.</p>
+      </div>
+      <div className="flex flex-col gap-2 mb-3">
+        {items.map((item,i)=>(
+          <div key={i} className={`border-l-4 ${item.borderColor} rounded-r-lg p-2`} style={{background:item.bg}}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-white font-bold text-xs">{item.title}</span>
+            </div>
+            <p className="text-gray-400 text-xs mb-1">{item.desc}</p>
+            <p className="text-yellow-400 text-xs italic">→ {item.ex}</p>
+          </div>
+        ))}
+      </div>
+      <div className="border border-gray-600 rounded-lg p-2 text-center" style={{background:"rgba(17,24,39,0.6)"}}>
+        <p className="text-gray-300 text-xs">Biochemical Resonance is not just an app — it is a <strong className="text-white">neurobiological API</strong> connectable to any service in the world.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 15: COMPETITION ──────────────────────────────── */
+function CompetitionSlide() {
+  const comps = [
+    {name:"Co-Star / The Pattern",     has:"Cosmic personalization",    missing:"No neuroscience · No vector · No protocol"},
+    {name:"Headspace / Calm",          has:"Wellness & meditation",      missing:"No natal personalization · Generic"},
+    {name:"Spotify Mood AI",           has:"Music by mood",              missing:"Not biochemical · Not personalized · No vector"},
+    {name:"Myers-Briggs / Big Five",   has:"Personality traits",         missing:"No neurobiological source · Static · No protocol"},
+    {name:"Genetic testing (23andMe)", has:"DNA predispositions",        missing:"No behavioral prediction · No real-time protocol"},
+    {name:"Neurofeedback devices",     has:"Brain state monitoring",     missing:"Hardware required · No art/sound integration"},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Competitive Landscape</h2>
+      <p className="text-purple-400 text-xs mb-4">What exists — and what's missing everywhere</p>
+      <div className="flex flex-col gap-2 mb-4">
+        {comps.map((c,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-2" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-white font-bold text-xs mb-1">{c.name}</div>
+            <div className="flex flex-col gap-0.5">
+              <div className="text-green-400 text-xs">✓ {c.has}</div>
+              <div className="text-red-400 text-xs">✗ {c.missing}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-yellow-500 rounded-lg p-3 text-center" style={{background:"rgba(113,63,18,0.2)"}}>
+        <p className="text-yellow-400 font-bold text-xs mb-1">BioResonance is the ONLY system that:</p>
+        <p className="text-gray-300 text-xs mb-1">maps innate neurochemistry → identifies discharge vector → predicts behavioral events → prescribes Art + Literature + Sound + daily real-time protocol</p>
+        <p className="text-yellow-400 text-xs font-bold">No hardware. No lab. No specialist. Enter date of birth.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 16: BUSINESS ─────────────────────────────────── */
+function BusinessSlide() {
+  const streams = [
+    {tag:"B2C",       color:"bg-blue-700",   price:"$9–29/mo",    title:"Individual App",      desc:"Self-knowledge · Health prevention · Daily protocol",           items:["Full neurobiological profile","Triple Pharmacy Rx","Real-time protocol","Vector tracking & redirect"]},
+    {tag:"B2B",       color:"bg-purple-700", price:"$500–5K/org", title:"Wellness & HR",       desc:"Employee profiling · Team composition · Burnout prevention",   items:["Team vector mapping","Leadership profiles","Conflict prediction","Psychosomatic risk map"]},
+    {tag:"B2B2C",     color:"bg-green-700",  price:"$200–800/mo", title:"Clinicians & Coaches",desc:"Therapists · Integrative medicine · Coaches",                  items:["Client neurobiological baseline","Session prep reports","Progress tracking","Protocol generation"]},
+    {tag:"ENTERPRISE",color:"bg-orange-700", price:"Custom",      title:"Enterprise AI Layer", desc:"AI integration · Advertising · Insurance · Education",         items:["Biochemical API","Neuroprofile scoring","Behavioral prediction","White-label solution"]},
+  ];
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">Business Model</h2>
+      <p className="text-purple-400 text-xs mb-4">Four revenue streams · scalable from day one</p>
+      <div className="flex flex-col gap-3">
+        {streams.map((s,i)=>(
+          <div key={i} className="border border-gray-700 rounded-lg p-3" style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`${s.color} text-white text-xs font-black px-2 py-0.5 rounded`}>{s.tag}</span>
+              <span className="text-yellow-400 font-black text-sm">{s.price}</span>
+            </div>
+            <div className="text-white font-bold text-sm mb-1">{s.title}</div>
+            <div className="text-gray-400 text-xs mb-2">{s.desc}</div>
+            <div className="grid grid-cols-2 gap-x-2">
+              {s.items.map((it,j)=>(
+                <div key={j} className="text-gray-300 text-xs flex gap-1 mb-0.5"><span className="text-green-400">·</span>{it}</div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 17: ASK ──────────────────────────────────────── */
+function AskSlide() {
+  return (
+    <div className="flex flex-col px-4 py-6">
+      <h2 className="text-3xl font-black text-white mb-1">What We're Looking For</h2>
+      <p className="text-purple-400 text-xs mb-4">Current stage · Needs · Vision</p>
+      <div className="border border-gray-700 rounded-lg p-3 mb-3" style={{background:"rgba(17,24,39,0.6)"}}>
+        <div className="text-gray-400 text-xs font-bold tracking-widest mb-2">CURRENT STATE</div>
+        {[
+          "416-page theoretical framework — documented IP · 21 years research",
+          "Live interactive prototype — fully tested · 6 modules operational",
+          "225 neurobiological configurations mapped",
+          "Triple Pharmacy (Art + Literature + Sound) — fully developed",
+          "Real-Time Module v2.0 — daily personal protocol live",
+          "Copyright registered: book + app · © Eva White 2025",
+        ].map((item,i)=>(
+          <div key={i} className="flex items-start gap-2 mb-1">
+            <span className="text-green-400 flex-shrink-0 text-xs">✓</span>
+            <span className="text-gray-300 text-xs">{item}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col gap-2 mb-3">
+        {[
+          {icon:"💻",color:"border-blue-600",   title:"Technical Partner / CTO",items:["Production mobile app","3D brain visualization","API architecture","App Store deployment"]},
+          {icon:"💰",color:"border-yellow-600", title:"Seed: $150K–500K",       items:["App development","Validation study","First 1,000 users","Clinical pilot EU"]},
+          {icon:"🏥",color:"border-green-600",  title:"Pilot Partner",          items:["Clinic or HR team","Validate Vector model","Real data collection","Co-publication option"]},
+        ].map((s,i)=>(
+          <div key={i} className={`border ${s.color} rounded-lg p-3`} style={{background:"rgba(17,24,39,0.6)"}}>
+            <div className="text-2xl mb-1">{s.icon}</div>
+            <div className="text-white font-bold text-xs mb-1">{s.title}</div>
+            <div className="grid grid-cols-2 gap-x-2">
+              {s.items.map((it,j)=>(
+                <div key={j} className="text-gray-400 text-xs flex gap-1 mb-0.5"><span className="text-yellow-400">→</span>{it}</div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border border-purple-600 rounded-lg p-3 text-center" style={{background:"rgba(88,28,135,0.2)"}}>
+        <p className="text-white font-black text-sm">Make neurobiological self-knowledge as accessible as a blood test.</p>
+        <p className="text-purple-400 text-xs mt-1">No hardware. No doctor. Enter a date. Understand your wiring.</p>
+        <p className="text-yellow-400 text-xs font-bold mt-2">This system converts an abstract data timestamp into precise neurobiological protocols.</p>
+        <p className="text-gray-500 text-xs mt-1">⚡ Biochemical Resonance · by Eva White · © 2025</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── COMPONENT MAP ──────────────────────────────────────── */
+const COMPONENTS = [
+  CoverSlide, ProblemSlide, BrainMapSlide, MechanismSlide, AnalyticsSlide,
+  SolutionSlide, ProductSlide, RightNowSlide, PharmacySlide, EngineSlide,
+  ValidationSlide, MarketSlide, ScalabilitySlide, APISlide,
+  CompetitionSlide, BusinessSlide, AskSlide
+];
+
+/* ─── APP SHELL ──────────────────────────────────────────── */
+function App() {
+  const [current, setCurrent] = useState(0);
+  const SlideComponent = COMPONENTS[current];
+  const goNext = () => setCurrent(c => Math.min(SLIDES.length - 1, c + 1));
+  const goPrev = () => setCurrent(c => Math.max(0, c - 1));
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-start p-2" style={{background:"#030712"}}>
+      <div className="w-full max-w-2xl">
+
+        {/* Header */}
+        <div className="flex items-center justify-between rounded-t-xl px-4 py-2"
+             style={{background:"#111827",borderBottom:"1px solid #1f2937"}}>
+          <span className="text-yellow-400 font-black text-xs">⚡ BY EVA WHITE</span>
+          <span className="text-gray-500 text-xs font-bold tracking-widest">{SLIDES[current].label}</span>
+        </div>
+
+        {/* Slide */}
+        <div style={{background:"#030712",borderLeft:"1px solid #1f2937",borderRight:"1px solid #1f2937",minHeight:"480px",overflowY:"auto"}}>
+          <SlideComponent />
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between rounded-b-xl px-4 py-2"
+             style={{background:"#111827",borderTop:"1px solid #1f2937"}}>
+          <span className="text-gray-600 text-xs">BIOCHEMICAL RESONANCE · PITCH DECK 2025</span>
+          <span className="text-gray-500 text-xs">{current + 1} / {SLIDES.length}</span>
+        </div>
+
+        {/* Navigation arrows */}
+        <div className="mt-3 flex justify-center gap-3">
+          <button onClick={goPrev} disabled={current===0}
+                  style={{opacity:current===0?0.3:1,cursor:current===0?"not-allowed":"pointer",background:"#1f2937",color:"#fff",padding:"8px 20px",borderRadius:"8px",fontWeight:"bold",fontSize:"14px",border:"none"}}>
+            ← Prev
+          </button>
+          <button onClick={goNext} disabled={current===SLIDES.length-1}
+                  style={{opacity:current===SLIDES.length-1?0.3:1,cursor:current===SLIDES.length-1?"not-allowed":"pointer",background:"#eab308",color:"#000",padding:"8px 20px",borderRadius:"8px",fontWeight:"bold",fontSize:"14px",border:"none"}}>
+            Next →
+          </button>
+        </div>
+
+        {/* Slide pills */}
+        <div className="mt-2 flex gap-1 flex-wrap justify-center pb-4">
+          {SLIDES.map((s,i)=>(
+            <button key={i} onClick={()=>setCurrent(i)}
+                    style={{background:current===i?"#eab308":"#1f2937",color:current===i?"#000":"#9ca3af",cursor:"pointer",padding:"3px 8px",borderRadius:"4px",fontSize:"10px",fontWeight:"bold",border:"none"}}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
