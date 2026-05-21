@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Biochemical Resonance · Eva White · 2025</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #030712;
+  color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+.deck { width: 100%; max-width: 680px; }
+.deck-header {
+  background: #111827;
+  border-bottom: 1px solid #1f2937;
+  border-radius: 12px 12px 0 0;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { color: #eab308; font-weight: 900; font-size: 12px; letter-spacing: 1px; }
+.slide-label-el { color: #6b7280; font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+.progress-bar { height: 3px; background: #1f2937; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #eab308); transition: width 0.3s ease; }
+.slide-area {
+  background: #030712;
+  border-left: 1px solid #1f2937;
+  border-right: 1px solid #1f2937;
+  min-height: 520px;
+  overflow-y: auto;
+  max-height: 75vh;
+}
+.deck-footer {
+  background: #111827;
+  border-top: 1px solid #1f2937;
+  border-radius: 0 0 12px 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-copy { color: #4b5563; font-size: 10px; }
+.footer-count { color: #6b7280; font-size: 11px; }
+.nav-buttons { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+.btn-prev, .btn-next { border: none; cursor: pointer; padding: 9px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; transition: opacity 0.2s; }
+.btn-prev { background: #1f2937; color: #fff; }
+.btn-next { background: #eab308; color: #000; }
+.btn-prev:disabled, .btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
+.slide-tabs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 8px; padding-bottom: 16px; }
+.tab-btn { background: #1f2937; color: #9ca3af; border: none; cursor: pointer; padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; transition: all 0.2s; }
+.tab-btn.active { background: #eab308; color: #000; }
+.slide { display: none; padding: 22px 16px; }
+.slide.active { display: block; }
+h2 { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 4px; line-height: 1.1; }
+.subtitle { color: #a855f7; font-size: 11px; margin-bottom: 14px; line-height: 1.4; }
+.card { background: rgba(17,24,39,0.65); border: 1px solid #1f2937; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.card-bl { background: rgba(17,24,39,0.65); border-radius: 0 8px 8px 0; padding: 10px 12px; margin-bottom: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.box-y { background: rgba(113,63,18,0.18); border: 1px solid #92400e; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.box-p { background: rgba(88,28,135,0.2); border: 1px solid #6d28d9; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.box-r { background: rgba(127,29,29,0.3); border: 1px solid #991b1b; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.box-g { background: rgba(20,83,45,0.2); border: 1px solid #166534; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.box-b { background: rgba(30,58,138,0.15); border: 1px solid #1d4ed8; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.box-d { background: rgba(17,24,39,0.7); border: 1px solid #374151; border-radius: 10px; padding: 11px; margin-bottom: 9px; }
+.ty { color: #eab308; } .tp { color: #a855f7; } .tg { color: #22c55e; }
+.tr { color: #ef4444; } .tb { color: #60a5fa; } .tgr { color: #9ca3af; }
+.tw { color: #f9fafb; } .to { color: #f97316; }
+.fb { font-weight: 700; } .fk { font-weight: 900; }
+.xs { font-size: 11px; line-height: 1.5; } .sm { font-size: 13px; line-height: 1.5; }
+.tc { text-align: center; }
+.fl { display: flex; } .fc { flex-direction: column; }
+.aic { align-items: center; } .ais { align-items: flex-start; }
+.jb { justify-content: space-between; }
+.gap2 { gap: 8px; } .gap3 { gap: 12px; }
+.bl { display: flex; gap: 6px; margin-bottom: 4px; font-size: 11px; color: #d1d5db; }
+.bl .dot { color: #eab308; flex-shrink: 0; }
+.ck { display: flex; gap: 6px; margin-bottom: 4px; font-size: 11px; color: #d1d5db; }
+.ck .ch { color: #22c55e; flex-shrink: 0; }
+.sr { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+.sn { display: flex; align-items: center; justify-content: center; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 900; color: #fff; flex-shrink: 0; }
+.stat-box { background: rgba(17,24,39,0.55); border: 1px solid #374151; border-radius: 8px; padding: 10px; text-align: center; }
+.stat-n { color: #eab308; font-weight: 900; font-size: 22px; }
+.stat-l { color: #6b7280; font-size: 10px; margin-top: 2px; }
+@media (max-width: 420px) {
+  h2 { font-size: 20px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .slide-area { max-height: 68vh; }
+}
+</style>
+</head>
+<body>
+<div class="deck">
+  <div class="deck-header">
+    <span class="brand">⚡ BIOCHEMICAL RESONANCE</span>
+    <span class="slide-label-el" id="slide-label">COVER</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:5.6%"></div>
+  </div>
+  <div class="slide-area">
+
+    <!-- S1: COVER -->
+    <div class="slide active" id="slide-0">
+      <div class="tc" style="color:#eab308;font-size:15px;letter-spacing:3px;margin-bottom:10px;">★ ★ ★ ★ ★</div>
+      <div class="tc" style="font-size:46px;margin-bottom:8px;">⚡</div>
+      <div class="tc fk" style="font-size:34px;color:#fff;line-height:1;">BIOCHEMICAL</div>
+      <div class="tc fk" style="font-size:34px;color:#a855f7;margin-bottom:6px;">RESONANCE</div>
+      <div class="tc fb xs ty" style="letter-spacing:3px;margin-bottom:4px;">B Y · E V A · W H I T E</div>
+      <div class="tc xs tgr" style="margin-bottom:16px;">Neurology · Brain Structure Mapping · Neurotransmitters · Art & Sound Modulators · Live Neural Updates</div>
+      <div class="box-d">
+        <p class="xs tc" style="color:#e5e7eb;font-style:italic;line-height:1.7;">
+          "No existing system simultaneously maps a neurotransmitter profile from a birth timestamp, identifies the discharge Vector, and prescribes Art, Literature, and Sound as precision biochemical protocols. This is a new product category."
+        </p>
+        <p class="xs tp fb tc" style="margin-top:8px;">— Eva White · System Architect · 2025</p>
+      </div>
+      <div class="grid-2">
+        <div class="stat-box"><div class="stat-n">225+</div><div class="stat-l">Neural configs</div></div>
+        <div class="stat-box"><div class="stat-n">21</div><div class="stat-l">Years research</div></div>
+        <div class="stat-box"><div class="stat-n">416</div><div class="stat-l">Pages framework</div></div>
+        <div class="stat-box"><div class="stat-n">1</div><div class="stat-l">Key: Vector</div></div>
+      </div>
+    </div>
+
+    <!-- S2: FOUNDATION -->
+    <div class="slide" id="slide-1">
+      <h2>The Foundation</h2>
+      <p class="subtitle">21 years of research · Three milestones · One integrated system</p>
+      <div class="card-bl" style="border-left:4px solid #ca8a04;">
+        <div class="fl aic gap2" style="margin-bottom:6px;">
+          <span class="tag" style="background:#78350f;color:#fde68a;">21 YEARS OF RESEARCH</span>
+          <span class="xs tgr">2003 — 2024</span>
+        </div>
+        <div class="sm fb tw" style="margin-bottom:7px;">The Theoretical Framework</div>
+        <div class="bl"><span class="dot">·</span>Mapping neural configurations to behavioral outcomes</div>
+        <div class="bl"><span class="dot">·</span>45 configurations × 5 aspect types = 225 profiles</div>
+        <div class="bl"><span class="dot">·</span>Neurotransmitter & hormonal axes per configuration</div>
+        <div class="bl"><span class="dot">·</span>Discharge Vector concept — first in methodology</div>
+        <div class="bl"><span class="dot">·</span>"Code of Reality" · 416 pages · Copyright © 2025</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #7c3aed;">
+        <div class="fl aic gap2" style="margin-bottom:6px;">
+          <span class="tag" style="background:#4c1d95;color:#e9d5ff;">APP v1 — PROOF OF CONCEPT</span>
+          <span class="xs tgr">2024</span>
+        </div>
+        <div class="sm fb tw" style="margin-bottom:7px;">First Digital Implementation</div>
+        <div class="bl"><span class="dot">·</span>Core neural configuration module deployed</div>
+        <div class="bl"><span class="dot">·</span>Art & Sound pharmacy (first version)</div>
+        <div class="bl"><span class="dot">·</span>Brain structure visualization (SVG animated)</div>
+        <div class="bl"><span class="dot">·</span>Validated with initial user group</div>
+        <div class="bl"><span class="dot">·</span>Copyright registered © 2025</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #16a34a;">
+        <div class="fl aic gap2" style="margin-bottom:6px;">
+          <span class="tag" style="background:#14532d;color:#bbf7d0;">APP v2 — FULL SYSTEM</span>
+          <span class="xs tgr">2025</span>
+        </div>
+        <div class="sm fb tw" style="margin-bottom:7px;">Biochemical Resonance — Current</div>
+        <div class="bl"><span class="dot">·</span>6 modules · 225+ neural configurations</div>
+        <div class="bl"><span class="dot">·</span>Triple Pharmacy: Art + Literature + Sound</div>
+        <div class="bl"><span class="dot">·</span>Real-Time Transit Module (daily protocol)</div>
+        <div class="bl"><span class="dot">·</span>Right Now crisis mode · 3–6 min relief</div>
+        <div class="bl"><span class="dot">·</span>Live prototype deployed · Copyright © 2025</div>
+      </div>
+      <div class="box-y tc"><p class="xs ty fb">The book is the theory. App v1 is the proof. App v2 is the product.</p></div>
+    </div>
+
+    <!-- S3: PROBLEM -->
+    <div class="slide" id="slide-2">
+      <h2>The Problem</h2>
+      <p class="subtitle">Why do people keep repeating the same patterns?</p>
+      <div class="card-bl" style="border-left:4px solid #ea580c;">
+        <div class="fl ais gap2"><span style="font-size:20px;flex-shrink:0;">🧠</span><div><div class="sm fb tw">Psychology addresses behavior</div><div class="xs tgr" style="margin-top:3px;">But not the biological source of that behavior</div></div></div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #f97316;">
+        <div class="fl ais gap2"><span style="font-size:20px;flex-shrink:0;">💊</span><div><div class="sm fb tw">Medicine treats symptoms</div><div class="xs tgr" style="margin-top:3px;">But misses the neurobiological pattern generating them</div></div></div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #ca8a04;">
+        <div class="fl ais gap2"><span style="font-size:20px;flex-shrink:0;">📊</span><div><div class="sm fb tw">Personality tests describe traits</div><div class="xs tgr" style="margin-top:3px;">Cannot predict when and how tension will discharge</div></div></div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #9333ea;">
+        <div class="fl ais gap2"><span style="font-size:20px;flex-shrink:0;">❓</span><div><div class="sm fb tw">Nobody explains the direction</div><div class="xs tgr" style="margin-top:3px;">Why does the same stress make one person explode — and another collapse inward?</div></div></div>
+      </div>
+      <div class="box-r tc"><p class="xs fb" style="color:#fca5a5;">Result: Years in therapy, coaching, medicine — without addressing the root neurobiological structure.</p></div>
+    </div>
+
+    <!-- S4: BRAIN MAP -->
+    <div class="slide" id="slide-3">
+      <h2>Brain Architecture We Map</h2>
+      <p class="subtitle">8 core neural structures — linked to specific neurotransmitter profiles and behavioral outputs</p>
+      <div class="grid-2">
+        <div class="card-bl" style="border-left:4px solid #ca8a04;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">Thalamus</div><div class="xs tgr" style="margin-top:2px;">Identity & consciousness relay</div><div class="xs tp" style="margin-top:2px;">→ Dopamine · Norepinephrine</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #eab308;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">VTA</div><div class="xs" style="color:#6b7280;">Ventral Tegmental Area</div><div class="xs tgr" style="margin-top:2px;">Primary dopamine source</div><div class="xs tp" style="margin-top:2px;">→ Dopamine</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #dc2626;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">Amygdala</div><div class="xs tgr" style="margin-top:2px;">Threat detection · fear encoding</div><div class="xs tp" style="margin-top:2px;">→ Adrenaline · Cortisol</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #3b82f6;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">Hippocampus</div><div class="xs tgr" style="margin-top:2px;">Memory consolidation · context</div><div class="xs tp" style="margin-top:2px;">→ Serotonin · Cortisol</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #22c55e;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">lPFC / rPFC</div><div class="xs tgr" style="margin-top:2px;">Rational control · error monitoring</div><div class="xs tp" style="margin-top:2px;">→ Serotonin · GABA</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #9333ea;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">DMN</div><div class="xs" style="color:#6b7280;">Default Mode Network</div><div class="xs tgr" style="margin-top:2px;">Self-referential processing</div><div class="xs tp" style="margin-top:2px;">→ Serotonin · Endorphins</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #f97316;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">HPA Axis</div><div class="xs tgr" style="margin-top:2px;">Stress response orchestration</div><div class="xs tp" style="margin-top:2px;">→ Cortisol · CRH · ACTH</div>
+        </div>
+        <div class="card-bl" style="border-left:4px solid #9ca3af;background:rgba(17,24,39,0.6);">
+          <div class="xs fb tw">BrainStem</div><div class="xs tgr" style="margin-top:2px;">Survival drives · basic motor</div><div class="xs tp" style="margin-top:2px;">→ Norepinephrine · Testosterone</div>
+        </div>
+      </div>
+      <div class="box-y tc"><p class="xs ty fb">Every neural configuration maps directly to this architecture. No black box — pure structural neurobiology.</p></div>
+    </div>
+
+    <!-- S5: MECHANISM -->
+    <div class="slide" id="slide-4">
+      <h2>Neural Synchronization</h2>
+      <p class="subtitle">The Mechanism — how external periodic cycles calibrate internal biochemistry</p>
+      <div class="box-b">
+        <p class="xs fb" style="color:#bfdbfe;line-height:1.7;">The biological brain is not an isolated system. It functions as an antenna tuned to external periodic cycles — gravitational, electromagnetic, and chronobiological.</p>
+      </div>
+      <div class="card fl ais gap2">
+        <span style="font-size:20px;flex-shrink:0;">📡</span>
+        <div><div class="xs fb tw" style="margin-bottom:3px;">Input Data</div><div class="xs tgr">We take the exact spacetime coordinates (timestamp) of a biological system's initialization — birth date, time, and location.</div></div>
+      </div>
+      <div class="card fl ais gap2">
+        <span style="font-size:20px;flex-shrink:0;">🧬</span>
+        <div><div class="xs fb tw" style="margin-bottom:3px;">The Process</div><div class="xs tgr">Our algorithm maps these coordinates to specific Neurobiological Anchors: Thalamus, Amygdala, VTA, lPFC, HPA Axis — each with a known neurotransmitter signature.</div></div>
+      </div>
+      <div class="card fl ais gap2">
+        <span style="font-size:20px;flex-shrink:0;">🔬</span>
+        <div><div class="xs fb tw" style="margin-bottom:3px;">The Framework</div><div class="xs tgr">21 years of observational research have systematically mapped specific angular configurations between celestial bodies to activation or suppression patterns in specific neurotransmitter loops.</div></div>
+      </div>
+      <div class="card fl ais gap2">
+        <span style="font-size:20px;flex-shrink:0;">⚡</span>
+        <div><div class="xs fb tw" style="margin-bottom:3px;">The Output</div><div class="xs tgr">A precise neurobiological profile: dominant neurotransmitters, tension discharge Vector, behavioral prediction model — updated in real time.</div></div>
+      </div>
+      <div class="box-y tc"><p class="xs ty fb">The birth timestamp is not a symbol — it is a precise biological calibration point for the nervous system.</p></div>
+    </div>
+
+    <!-- S6: ANALYTICS -->
+    <div class="slide" id="slide-5">
+      <h2>Predictive Behavioral Analytics</h2>
+      <p class="subtitle">The "Event" Logic — why events are neurochemically inevitable (and interceptable)</p>
+      <div class="box-y tc" style="margin-bottom:12px;">
+        <p class="xs fb ty">An "Event" is not fate. It is a discharge of accumulated internal neural tension.</p>
+        <p class="xs tgr" style="margin-top:4px;font-style:italic;">"An event is the meeting point of internal readiness and external cyclic load."</p>
+      </div>
+      <div class="sr"><div class="sn" style="background:#1d4ed8;">01</div><div class="card" style="flex:1;margin-bottom:0;"><span class="xs fb tw">State Formation — </span><span class="xs tgr">External periodic cycles create a specific neurochemical environment — e.g., elevated adrenaline + suppressed serotonin = aggression-readiness state.</span></div></div>
+      <div style="height:6px;"></div>
+      <div class="sr"><div class="sn" style="background:#7c3aed;">02</div><div class="card" style="flex:1;margin-bottom:0;"><span class="xs fb tw">Perception Filter — </span><span class="xs tgr">In this biochemical state, the brain's RAS filters reality — noticing only scenarios that allow discharge of this specific tension type.</span></div></div>
+      <div style="height:6px;"></div>
+      <div class="sr"><div class="sn" style="background:#c2410c;">03</div><div class="card" style="flex:1;margin-bottom:0;"><span class="xs fb tw">Behavioral Selection — </span><span class="xs tgr">The person 'chooses' — fight, breakthrough, or collapse. The Vector determines direction. We predict the state, which makes the event pattern inevitable.</span></div></div>
+      <div style="height:6px;"></div>
+      <div class="sr"><div class="sn" style="background:#15803d;">04</div><div class="card" style="flex:1;margin-bottom:0;"><span class="xs fb tw">System Intervention — </span><span class="xs tgr">Our protocol intercepts at step 02 — recalibrating the neurochemical state before the perception filter locks in the behavioral trajectory.</span></div></div>
+      <div style="height:8px;"></div>
+      <div class="box-g tc"><p class="xs tg fb">System Logic: The Algorithm identifies high-tension neural zones. The Vector dictates discharge direction — formatting the life event pattern.</p></div>
+    </div>
+
+    <!-- S7: SOLUTION -->
+    <div class="slide" id="slide-6">
+      <h2>Our Solution</h2>
+      <p class="subtitle">Complete neurobiological profiling system · v2.0 with Real-Time Module</p>
+      <div class="card fl ais gap2" style="border:1px solid #3b82f6;">
+        <div style="background:#1d4ed8;border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">01</div>
+        <div><div class="sm fb tw">Input: Date & time of birth</div><div class="xs tgr" style="margin-top:3px;">Precise biological marker — the neural configuration present at nervous system formation</div></div>
+      </div>
+      <div class="card fl ais gap2" style="border:1px solid #9333ea;">
+        <div style="background:#7c3aed;border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">02</div>
+        <div><div class="sm fb tw">Processing: 21-year proprietary framework</div><div class="xs tgr" style="margin-top:3px;">45 angular configurations × 5 interaction types = 225 unique neurobiological profiles → brain regions · neurotransmitters · hormonal axes</div></div>
+      </div>
+      <div class="card fl ais gap2" style="border:1px solid #db2777;">
+        <div style="background:#be185d;border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">03</div>
+        <div><div class="sm fb tw">Output: Full neurobiological profile</div><div class="xs tgr" style="margin-top:3px;">Brain visualization · Dominant neurotransmitters · Discharge Vector · Triple Pharmacy Rx · Daily live-update protocol</div></div>
+      </div>
+      <div class="card fl ais gap2" style="border:1px solid #16a34a;">
+        <div style="background:#15803d;border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">04</div>
+        <div><div class="sm fb tw">Action: Vector Redirect Protocol</div><div class="xs tgr" style="margin-top:3px;">Redirect tension inward — changing behavior, health trajectory, and life event pattern permanently</div></div>
+      </div>
+    </div>
+
+    <!-- S8: PRODUCT -->
+    <div class="slide" id="slide-7">
+      <h2>The Product</h2>
+      <p class="subtitle">Live prototype · 6 modules · 3 modes · Daily personal protocol</p>
+      <div class="grid-2">
+        <div class="card"><div style="font-size:18px;margin-bottom:4px;">✨</div><div class="xs fb tw" style="margin-bottom:3px;">NEURAL CONFIG</div><div class="xs tgr">Full neural config mapping · aspect detection · brain structure activation</div></div>
+        <div class="card"><div style="font-size:18px;margin-bottom:4px;">📚</div><div class="xs fb tw" style="margin-bottom:3px;">REFERENCE</div><div class="xs tgr">Any neural pattern → full brain map + vector protocol + neurotransmitter profile</div></div>
+        <div class="card"><div style="font-size:18px;margin-bottom:4px;">🎨</div><div class="xs fb tw" style="margin-bottom:3px;">ART Rx</div><div class="xs tgr">Visual neuromodulation: specific artists & works by neural activation state</div></div>
+        <div class="card"><div style="font-size:18px;margin-bottom:4px;">📖</div><div class="xs fb tw" style="margin-bottom:3px;">LITERATURE Rx</div><div class="xs tgr">Literary pharmacy: books by natal brain profile + contraindications</div></div>
+        <div class="card"><div style="font-size:18px;margin-bottom:4px;">🎵</div><div class="xs fb tw" style="margin-bottom:3px;">SOUND Rx</div><div class="xs tgr">Sound pharmacy: composers + protocol + listening mode by therapeutic goal</div></div>
+        <div class="card" style="border:1px solid #ca8a04;background:rgba(113,63,18,0.15);">
+          <div style="font-size:18px;margin-bottom:4px;">🌍</div>
+          <div class="xs fb ty" style="margin-bottom:3px;">LIVE NEURAL UPDATE <span style="background:#854d0e;color:#fde68a;padding:1px 5px;border-radius:3px;margin-left:3px;font-size:9px;">NEW</span></div>
+          <div class="xs tgr">Real-time contextual modulation based on live cyclic position data</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="border:1px solid #991b1b;background:rgba(127,29,29,0.2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:18px;">⚡</div><div class="xs fb tw">Right Now</div><div class="xs tgr">Crisis · relief</div></div>
+        <div style="border:1px solid #c2410c;background:rgba(124,45,18,0.2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:18px;">🔄</div><div class="xs fb tw">My Pattern</div><div class="xs tgr">Daily work</div></div>
+        <div style="border:1px solid #166534;background:rgba(20,83,45,0.2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:18px;">🌱</div><div class="xs fb tw">Healing</div><div class="xs tgr">Long-term</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="box-g tc" style="margin-bottom:0;padding:8px;"><p class="xs tg fb">✓ Live prototype · Full stack deployed</p></div>
+        <div class="box-p tc" style="margin-bottom:0;padding:8px;"><p class="xs tp fb">✓ 416-page IP · Copyright © 2025</p></div>
+      </div>
+    </div>
+
+    <!-- S9: RIGHT NOW -->
+    <div class="slide" id="slide-8">
+      <div class="fl aic gap2" style="flex-wrap:wrap;margin-bottom:4px;">
+        <h2 style="margin-bottom:0;">Right Now Mode</h2>
+        <span class="tag" style="background:#991b1b;color:#fecaca;">KILLER FEATURE</span>
+      </div>
+      <p class="subtitle">Emergency neurobiological support within 3–6 minutes through biochemical resonance</p>
+      <div class="box-r"><p class="xs fb" style="color:#fca5a5;">⚡ ACTIVATION</p><p class="xs tgr" style="margin-top:4px;">User activates "Right Now" — system shows ONLY what helps immediately. No diagnosis. No long explanations. Pure biochemical protocol. Precision in 3 minutes.</p></div>
+      <div class="sr"><div class="sn" style="background:#1d4ed8;">01</div><div><span class="xs fb tw">Neural conflict identified — </span><span class="xs tgr">System reads active tension pattern from neural configuration</span></div></div>
+      <div style="height:5px;"></div>
+      <div class="sr"><div class="sn" style="background:#7c3aed;">02</div><div><span class="xs fb tw">Brain state mapped — </span><span class="xs tgr">Structural conflict detected → dominant stress neurotransmitter confirmed</span></div></div>
+      <div style="height:5px;"></div>
+      <div class="sr"><div class="sn" style="background:#c2410c;">03</div><div><span class="xs fb tw">Protocol activated — </span><span class="xs tgr">Art Rx · Sound Rx · Body action prescribed · Time: 3 minutes</span></div></div>
+      <div style="height:5px;"></div>
+      <div class="sr"><div class="sn" style="background:#15803d;">04</div><div><span class="xs fb tw">Biochemical reset — </span><span class="xs tgr">VTA dopamine pulse · cortisol interrupted · vector redirected inward</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;">
+        <div class="card tc" style="padding:8px;"><div style="font-size:18px;margin-bottom:4px;">🎨</div><div class="xs fb tw" style="margin-bottom:3px;">Art Rx</div><div class="xs tgr">Specific painting · 3 min · dopamine interrupt</div></div>
+        <div class="card tc" style="padding:8px;"><div style="font-size:18px;margin-bottom:4px;">🎵</div><div class="xs fb tw" style="margin-bottom:3px;">Sound Rx</div><div class="xs tgr">Specific composer · exact works</div></div>
+        <div class="card tc" style="padding:8px;"><div style="font-size:18px;margin-bottom:4px;">💪</div><div class="xs fb tw" style="margin-bottom:3px;">Body Action</div><div class="xs tgr">Movement · breathing · herbs</div></div>
+      </div>
+      <div class="box-y tc"><p class="xs ty fb">No product in the world offers biochemical emergency support personalized to your natal neurochemistry.</p></div>
+    </div>
+
+    <!-- S10: PHARMACY -->
+    <div class="slide" id="slide-9">
+      <div class="fl aic gap2" style="flex-wrap:wrap;margin-bottom:4px;">
+        <h2 style="margin-bottom:0;">Triple Pharmacy</h2>
+        <span style="background:#eab308;color:#000;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:900;">WORLD FIRST</span>
+      </div>
+      <p class="subtitle">Art · Literature · Sound — synchronized prescription based on neurotransmitter activation states</p>
+      <div class="card tc" style="margin-bottom:12px;">
+        <p class="xs" style="color:#e5e7eb;font-style:italic;line-height:1.7;">"The brain cannot distinguish what happens to you and what you see. The right painting is not décor — it is a permanent neural modulator."</p>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #ca8a04;background:rgba(17,24,39,0.65);margin-bottom:8px;">
+        <div class="xs fb tw">☉ Core Dopamine Vector</div><div class="xs tgr" style="font-style:italic;margin-bottom:4px;">Thalamus · VTA</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎨 Turner · Monet · Rembrandt · 580–620 nm Gold-amber</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎵 Bach · Handel · Beethoven</div>
+        <div class="xs tgr">📖 Frankl · Marcus Aurelius · Goethe</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #dc2626;background:rgba(17,24,39,0.65);margin-bottom:8px;">
+        <div class="xs fb tw">♂ Noradrenaline Vector</div><div class="xs tgr" style="font-style:italic;margin-bottom:4px;">HPA Axis · BrainStem</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎨 Caravaggio · Delacroix · 620–700 nm Red-orange</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎵 Beethoven Sym.5 · Vivaldi</div>
+        <div class="xs tgr">📖 Hemingway · London · Dostoevsky</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #3b82f6;background:rgba(17,24,39,0.65);margin-bottom:8px;">
+        <div class="xs fb tw">☽ Parasympathetic Balance</div><div class="xs tgr" style="font-style:italic;margin-bottom:4px;">DMN · Hippocampus</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎨 Monet · Whistler · Redon · 450–490 nm Blue-silver</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎵 Chopin · Debussy · Pärt</div>
+        <div class="xs tgr">📖 Woolf · Kawabata · Chekhov</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #9ca3af;background:rgba(17,24,39,0.65);margin-bottom:8px;">
+        <div class="xs fb tw">♄ Structure & Stability</div><div class="xs tgr" style="font-style:italic;margin-bottom:4px;">lPFC · ACC</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎨 Shishkin · Dürer · Vermeer · Fractal patterns</div>
+        <div class="xs tgr" style="margin-bottom:3px;">🎵 Bach WTC · Goldberg Variations</div>
+        <div class="xs tgr">📖 Stoics · Mann · Tolstoy</div>
+      </div>
+      <div class="box-p tc"><p class="xs tp">Each creator encodes their neurochemical signature into their work. The code in the painting matches the code in the viewer's neurology.</p></div>
+    </div>
+
+    <!-- S11: ENGINE -->
+    <div class="slide" id="slide-10">
+      <h2>The Prescription Engine</h2>
+      <p class="subtitle">Neural Conflict → Brain Structures → Neurotransmitters → Remedy → Biochemical Reset</p>
+      <div class="card-bl" style="border-left:4px solid #dc2626;background:rgba(17,24,39,0.65);margin-bottom:10px;">
+        <div class="sm fb tw" style="margin-bottom:4px;">Core Identity-Action Conflict</div>
+        <div class="xs to" style="margin-bottom:3px;">→ Thalamus vs BrainStem vs lPFC</div>
+        <div class="xs tr" style="margin-bottom:3px;">⚠ Cortisol spike + Adrenaline overflow</div>
+        <div class="xs tgr" style="margin-bottom:3px;">💊 Rx: Shishkin 'Ship Grove' (3 min) · Bach Brandenburg Concerto</div>
+        <div class="xs tg fb">✓ VTA Dopamine reset · Vector redirected inward</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #9333ea;background:rgba(17,24,39,0.65);margin-bottom:10px;">
+        <div class="sm fb tw" style="margin-bottom:4px;">Amygdala-Hippocampus Stress Loop</div>
+        <div class="xs to" style="margin-bottom:3px;">→ Emotional Memory Overload</div>
+        <div class="xs tr" style="margin-bottom:3px;">⚠ Cortisol + Serotonin crash · Emotional flooding</div>
+        <div class="xs tgr" style="margin-bottom:3px;">💊 Rx: Hiroshige moon series · Chopin Nocturnes · Chamomile</div>
+        <div class="xs tb fb">✓ Hippocampus stabilized · Emotional memory resets</div>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #3b82f6;background:rgba(17,24,39,0.65);margin-bottom:10px;">
+        <div class="sm fb tw" style="margin-bottom:4px;">Reality-Integration Disruption</div>
+        <div class="xs to" style="margin-bottom:3px;">→ DMN → Insula Mismatch</div>
+        <div class="xs tr" style="margin-bottom:3px;">⚠ Oxytocin dysregulation · Reality-fantasy confusion</div>
+        <div class="xs tgr" style="margin-bottom:3px;">💊 Rx: Vermeer domestic scenes · Bach Well-Tempered Clavier</div>
+        <div class="xs ty fb">✓ lPFC grounding · Oxytocin recalibrated</div>
+      </div>
+      <div class="box-y tc">
+        <p class="xs ty fb" style="margin-bottom:4px;">This system is not a description — it is a treatment protocol.</p>
+        <p class="xs tgr">Measurable input → Specific prescription → Biochemical correction in 3–6 minutes.</p>
+      </div>
+    </div>
+
+    <!-- S12: VALIDATION -->
+    <div class="slide" id="slide-11">
+      <h2>System Validation</h2>
+      <p class="subtitle">IP documentation · Live deployment · Differentiation thesis</p>
+      <div class="box-y" style="margin-bottom:12px;">
+        <div class="ty" style="font-size:20px;margin-bottom:6px;">"</div>
+        <p class="xs" style="color:#f3f4f6;line-height:1.7;margin-bottom:8px;">No existing system simultaneously maps a neurotransmitter profile from a birth timestamp, identifies the discharge <strong>Vector</strong>, and prescribes Art, Literature, and Sound as precision biochemical protocols.</p>
+        <p class="xs tgr" style="line-height:1.7;margin-bottom:10px;">This system does not describe traits. It maps the direction of tension discharge — and intercepts it before the behavioral loop locks in. This is a new product category.</p>
+        <div style="border-top:1px solid #374151;padding-top:8px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">⚡</span>
+          <div><div class="xs fb tp">Eva White · System Architect & Researcher</div><div class="xs tgr">21-year framework development · © 2025</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:8px;">
+        <div class="xs fb tp" style="margin-bottom:6px;">Added in v2.0</div>
+        <div class="ck"><span class="ch">✓</span>+ Literary Pharmacy (10 neural profiles)</div>
+        <div class="ck"><span class="ch">✓</span>+ Sound Pharmacy (4 therapeutic goals each)</div>
+        <div class="ck"><span class="ch">✓</span>+ Real-Time Transit Module (daily protocol)</div>
+        <div class="ck"><span class="ch">✓</span>+ Right Now Mode (crisis support 3–6 min)</div>
+      </div>
+      <div class="card" style="margin-bottom:8px;">
+        <div class="xs fb tp" style="margin-bottom:6px;">In v1.0 (validated)</div>
+        <div class="ck"><span class="ch">✓</span>Art Pharmacy — world first</div>
+        <div class="ck"><span class="ch">✓</span>Brain Structure Visualization</div>
+        <div class="ck"><span class="ch">✓</span>225+ neural configurations</div>
+        <div class="ck"><span class="ch">✓</span>Vector concept & redirect protocol</div>
+      </div>
+      <div class="card">
+        <div class="xs fb tp" style="margin-bottom:6px;">IP Protection</div>
+        <div class="ck"><span class="ch">✓</span>Copyright: Book 416pp © 2025</div>
+        <div class="ck"><span class="ch">✓</span>Copyright: App v1 code © 2025</div>
+        <div class="ck"><span class="ch">✓</span>Copyright: Data architecture © 2025</div>
+        <div class="ck"><span class="ch">✓</span>App v2 registration in progress</div>
+      </div>
+    </div>
+
+    <!-- S13: MARKET -->
+    <div class="slide" id="slide-12">
+      <h2>Market Opportunity</h2>
+      <p class="subtitle">Wherever there is a human — there is application</p>
+      <div class="grid-2" style="margin-bottom:10px;">
+        <div class="card tc" style="padding:10px;"><div class="fk tb" style="font-size:20px;">$500B</div><div class="xs ty">+18% CAGR</div><div class="xs fb tw" style="margin-top:3px;">Mental Health Tech</div></div>
+        <div class="card tc" style="padding:10px;"><div class="fk tp" style="font-size:20px;">$800B</div><div class="xs ty">+11% CAGR</div><div class="xs fb tw" style="margin-top:3px;">Personalized Medicine</div></div>
+        <div class="card tc" style="padding:10px;"><div class="fk" style="font-size:20px;color:#ec4899;">$200B</div><div class="xs ty">+25% CAGR</div><div class="xs fb tw" style="margin-top:3px;">Digital Health Apps</div></div>
+        <div class="card tc" style="padding:10px;"><div class="fk to" style="font-size:20px;">$60B</div><div class="xs ty">+7% CAGR</div><div class="xs fb tw" style="margin-top:3px;">Corporate Wellness & HR</div></div>
+        <div class="card tc" style="padding:10px;"><div class="fk tr" style="font-size:20px;">$25B</div><div class="xs ty">+20% CAGR</div><div class="xs fb tw" style="margin-top:3px;">Longevity / Biohacking</div></div>
+        <div class="card tc" style="padding:10px;border:1px solid #166534;"><div class="fk tg" style="font-size:20px;">∞</div><div class="xs ty">Emerging</div><div class="xs fb tw" style="margin-top:3px;">Personalized AI Layer</div></div>
+      </div>
+      <div class="box-p" style="margin-bottom:10px;">
+        <div class="xs fb tp" style="margin-bottom:6px;">EXPANSION HORIZONS — Wherever there is a human</div>
+        <div class="bl"><span style="color:#eab308;">⚡</span>Personalized advertising & content delivery</div>
+        <div class="bl"><span style="color:#eab308;">⚡</span>Insurance: psychosomatic risk scoring</div>
+        <div class="bl"><span style="color:#eab308;">⚡</span>Education: learning style by neural profile</div>
+        <div class="bl"><span style="color:#eab308;">⚡</span>Sports: kinetic risk & motor programming</div>
+        <div class="bl"><span style="color:#eab308;">⚡</span>AI companion calibration to user neurology</div>
+      </div>
+      <div class="box-y tc"><span class="fk ty" style="font-size:22px;">$1.5T+</span><span class="xs tgr" style="margin-left:8px;">Total addressable · across converging verticals</span></div>
+    </div>
+
+    <!-- S14: SCALABILITY -->
+    <div class="slide" id="slide-13">
+      <h2>Infinite Scalability</h2>
+      <p class="subtitle">Beyond the MVP · A Theory of Everything for human optimization</p>
+      <div class="box-y tc" style="margin-bottom:12px;">
+        <p class="xs ty fb">We have built the foundation architecture. The system is designed for exponential expansion.</p>
+        <p class="xs tgr" style="margin-top:4px;">Every connected device becomes a node in this network.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="border:1px solid #166534;"><span class="tag" style="background:#14532d;color:#bbf7d0;margin-bottom:6px;display:inline-block;">MVP · Now</span>
+          <div class="bl"><span class="dot">·</span>225 neural configurations</div>
+          <div class="bl"><span class="dot">·</span>Triple Pharmacy live</div>
+          <div class="bl"><span class="dot">·</span>Real-time protocol</div>
+          <div class="bl"><span class="dot">·</span>Right Now crisis mode</div>
+        </div>
+        <div class="card" style="border:1px solid #1d4ed8;"><span class="tag" style="background:#1e3a8a;color:#bfdbfe;margin-bottom:6px;display:inline-block;">Phase 2 · 12mo</span>
+          <div class="bl"><span class="dot">·</span>100+ more protocols</div>
+          <div class="bl"><span class="dot">·</span>3D brain visualization</div>
+          <div class="bl"><span class="dot">·</span>10,000 user study</div>
+          <div class="bl"><span class="dot">·</span>Vagus nerve module</div>
+        </div>
+        <div class="card" style="border:1px solid #7c3aed;"><span class="tag" style="background:#4c1d95;color:#e9d5ff;margin-bottom:6px;display:inline-block;">Phase 3 · 24mo</span>
+          <div class="bl"><span class="dot">·</span>Smart home sync</div>
+          <div class="bl"><span class="dot">·</span>Corporate dashboards</div>
+          <div class="bl"><span class="dot">·</span>Clinical publication</div>
+          <div class="bl"><span class="dot">·</span>B2B API rollout</div>
+        </div>
+        <div class="card" style="border:1px solid #c2410c;"><span class="tag" style="background:#7c2d12;color:#fed7aa;margin-bottom:6px;display:inline-block;">Vision · Beyond</span>
+          <div class="bl"><span class="dot">·</span>Universal API</div>
+          <div class="bl"><span class="dot">·</span>IoT + wearables</div>
+          <div class="bl"><span class="dot">·</span>Insurance models</div>
+          <div class="bl"><span class="dot">·</span>AI empathy engine</div>
+        </div>
+      </div>
+      <div class="box-p tc">
+        <p class="xs fb tw">Deep Mapping · Environmental Sync · B2B Integration · IoT Nodes</p>
+        <p class="xs tgr" style="margin-top:4px;font-style:italic;">"This is a Theory of Everything for human optimization. We have just built the foundation."</p>
+      </div>
+    </div>
+
+    <!-- S15: API -->
+    <div class="slide" id="slide-14">
+      <h2>Universal API</h2>
+      <p class="subtitle">The Future of Human-System Interaction</p>
+      <div class="box-y tc" style="margin-bottom:12px;">
+        <p class="fb ty" style="font-size:14px;">"Every system with a timestamp has a biochemical signature."</p>
+        <p class="xs tgr" style="margin-top:4px;">Our algorithm allows any AI or connected system to synchronize with human biological rhythms in real time.</p>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #3b82f6;background:rgba(30,58,138,0.1);margin-bottom:8px;">
+        <div class="fl aic gap2" style="margin-bottom:4px;"><span style="font-size:18px;">🤖</span><span class="xs fb tw">AI Assistants & Agents</span></div>
+        <p class="xs tgr" style="margin-bottom:4px;">Any AI can use this algorithm as an empathy filter — delivering the answer in the biochemical frequency the user needs right now.</p>
+        <p class="xs ty" style="font-style:italic;">→ Calm HPA Axis overload · Activate dopamine · Soothe DMN crisis</p>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #22c55e;background:rgba(20,83,45,0.1);margin-bottom:8px;">
+        <div class="fl aic gap2" style="margin-bottom:4px;"><span style="font-size:18px;">🏠</span><span class="xs fb tw">Smart Environment</span></div>
+        <p class="xs tgr" style="margin-bottom:4px;">Smart home adjusts light wavelength, music, temperature, and scent based on active real-time cyclic data and current brain state.</p>
+        <p class="xs ty" style="font-style:italic;">→ 580nm amber light + Bach when Thalamus is under BrainStem pressure</p>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #f97316;background:rgba(120,53,15,0.1);margin-bottom:8px;">
+        <div class="fl aic gap2" style="margin-bottom:4px;"><span style="font-size:18px;">🏢</span><span class="xs fb tw">HR & Team Composition</span></div>
+        <p class="xs tgr" style="margin-bottom:4px;">Match people not by resume — but by biochemical field compatibility. Predict conflicts before they happen. Map leadership discharge vectors.</p>
+        <p class="xs ty" style="font-style:italic;">→ Vector compatibility scoring · Burnout prediction dashboard</p>
+      </div>
+      <div class="card-bl" style="border-left:4px solid #9333ea;background:rgba(88,28,135,0.1);margin-bottom:8px;">
+        <div class="fl aic gap2" style="margin-bottom:4px;"><span style="font-size:18px;">📱</span><span class="xs fb tw">Universal App Layer</span></div>
+        <p class="xs tgr" style="margin-bottom:4px;">Any service with a user timestamp can integrate the Biochemical API — delivering content in resonance with user's active neurology.</p>
+        <p class="xs ty" style="font-style:italic;">→ Spotify · Healthcare · Finance · UX adaptive systems</p>
+      </div>
+      <div class="card tc"><p class="xs tgr">Biochemical Resonance is not just an app — it is a <strong class="tw">neurobiological API</strong> connectable to any service in the world.</p></div>
+    </div>
+
+    <!-- S16: COMPETITION -->
+    <div class="slide" id="slide-15">
+      <h2>Competitive Landscape</h2>
+      <p class="subtitle">What exists — and what's missing everywhere</p>
+      <div class="card" style="margin-bottom:7px;"><div class="xs fb tw" style="margin-bottom:4px;">Co-Star / The Pattern</div><div class="xs tg" style="margin-bottom:3px;">✓ Cosmic personalization</div><div class="xs tr">✗ No neuroscience · No vector · No protocol</div></div>
+      <div class="card" style="margin-bottom:7px;"><div class="xs fb tw" style="margin-bottom:4px;">Headspace / Calm</div><div class="xs tg" style="margin-bottom:3px;">✓ Wellness & meditation</div><div class="xs tr">✗ No natal personalization · Generic</div></div>
+      <div class="card" style="margin-bottom:7px;"><div class="xs fb tw" style="margin-bottom:4px;">Spotify Mood AI</div><div class="xs tg" style="margin-bottom:3px;">✓ Music by mood</div><div class="xs tr">✗ Not biochemical · Not personalized · No vector</div></div>
+      <div class="card" style="margin-bottom:7px;"><div class="xs fb tw" style="margin-bottom:4px;">Myers-Briggs / Big Five</div><div class="xs tg" style="margin-bottom:3px;">✓ Personality traits</div><div class="xs tr">✗ No neurobiological source · Static · No protocol</div></div>
+      <div class="card" style="margin-bottom:7px;"><div class="xs fb tw" style="margin-bottom:4px;">Genetic testing (23andMe)</div><div class="xs tg" style="margin-bottom:3px;">✓ DNA predispositions</div><div class="xs tr">✗ No behavioral prediction · No real-time protocol</div></div>
+      <div class="card" style="margin-bottom:12px;"><div class="xs fb tw" style="margin-bottom:4px;">Neurofeedback devices</div><div class="xs tg" style="margin-bottom:3px;">✓ Brain state monitoring</div><div class="xs tr">✗ Hardware required · No art/sound integration</div></div>
+      <div class="box-y tc">
+        <p class="xs ty fb" style="margin-bottom:4px;">BioResonance is the ONLY system that:</p>
+        <p class="xs tgr" style="margin-bottom:4px;">maps innate neurochemistry → identifies discharge vector → predicts behavioral events → prescribes Art + Literature + Sound + daily real-time protocol</p>
+        <p class="xs ty fb">No hardware. No lab. No specialist. Enter date of birth.</p>
+      </div>
+    </div>
+
+    <!-- S17: BUSINESS -->
+    <div class="slide" id="slide-16">
+      <h2>Business Model</h2>
+      <p class="subtitle">Four revenue streams · scalable from day one</p>
+      <div class="card" style="margin-bottom:10px;border:1px solid #374151;">
+        <div class="fl jb aic" style="margin-bottom:6px;"><span class="tag" style="background:#1e3a8a;color:#bfdbfe;">B2C</span><span class="fk ty" style="font-size:18px;">$9–29/mo</span></div>
+        <div class="sm fb tw" style="margin-bottom:3px;">Individual App</div>
+        <div class="xs tgr" style="margin-bottom:6px;">Self-knowledge · Health prevention · Daily protocol</div>
+        <div class="grid-2" style="margin-bottom:0;"><div class="bl"><span class="dot">·</span>Full neurobiological profile</div><div class="bl"><span class="dot">·</span>Triple Pharmacy Rx</div><div class="bl"><span class="dot">·</span>Real-time protocol</div><div class="bl"><span class="dot">·</span>Vector tracking</div></div>
+      </div>
+      <div class="card" style="margin-bottom:10px;border:1px solid #374151;">
+        <div class="fl jb aic" style="margin-bottom:6px;"><span class="tag" style="background:#4c1d95;color:#e9d5ff;">B2B</span><span class="fk ty" style="font-size:18px;">$500–5K/org</span></div>
+        <div class="sm fb tw" style="margin-bottom:3px;">Wellness & HR</div>
+        <div class="xs tgr" style="margin-bottom:6px;">Employee profiling · Team composition · Burnout prevention</div>
+        <div class="grid-2" style="margin-bottom:0;"><div class="bl"><span class="dot">·</span>Team vector mapping</div><div class="bl"><span class="dot">·</span>Leadership profiles</div><div class="bl"><span class="dot">·</span>Conflict prediction</div><div class="bl"><span class="dot">·</span>Risk map</div></div>
+      </div>
+      <div class="card" style="margin-bottom:10px;border:1px solid #374151;">
+        <div class="fl jb aic" style="margin-bottom:6px;"><span class="tag" style="background:#14532d;color:#bbf7d0;">B2B2C</span><span class="fk ty" style="font-size:18px;">$200–800/mo</span></div>
+        <div class="sm fb tw" style="margin-bottom:3px;">Clinicians & Coaches</div>
+        <div class="xs tgr" style="margin-bottom:6px;">Therapists · Integrative medicine · Coaches</div>
+        <div class="grid-2" style="margin-bottom:0;"><div class="bl"><span class="dot">·</span>Client neural baseline</div><div class="bl"><span class="dot">·</span>Session prep reports</div><div class="bl"><span class="dot">·</span>Progress tracking</div><div class="bl"><span class="dot">·</span>Protocol generation</div></div>
+      </div>
+      <div class="card" style="border:1px solid #374151;">
+        <div class="fl jb aic" style="margin-bottom:6px;"><span class="tag" style="background:#7c2d12;color:#fed7aa;">ENTERPRISE</span><span class="fk ty" style="font-size:18px;">Custom</span></div>
+        <div class="sm fb tw" style="margin-bottom:3px;">Enterprise AI Layer</div>
+        <div class="xs tgr" style="margin-bottom:6px;">AI integration · Advertising · Insurance · Education</div>
+        <div class="grid-2" style="margin-bottom:0;"><div class="bl"><span class="dot">·</span>Biochemical API</div><div class="bl"><span class="dot">·</span>Neuroprofile scoring</div><div class="bl"><span class="dot">·</span>Behavioral prediction</div><div class="bl"><span class="dot">·</span>White-label solution</div></div>
+      </div>
+    </div>
+
+    <!-- S18: ASK -->
+    <div class="slide" id="slide-17">
+      <h2>What We're Looking For</h2>
+      <p class="subtitle">Current stage · Needs · Vision</p>
+      <div class="card" style="margin-bottom:10px;">
+        <div class="xs fb tgr" style="letter-spacing:2px;margin-bottom:8px;">CURRENT STATE</div>
+        <div class="ck"><span class="ch">✓</span>416-page theoretical framework — documented IP · 21 years research</div>
+        <div class="ck"><span class="ch">✓</span>Live interactive prototype — fully tested · 6 modules operational</div>
+        <div class="ck"><span class="ch">✓</span>225 neurobiological configurations mapped</div>
+        <div class="ck"><span class="ch">✓</span>Triple Pharmacy (Art + Literature + Sound) — fully developed</div>
+        <div class="ck"><span class="ch">✓</span>Real-Time Module v2.0 — daily personal protocol live</div>
+        <div class="ck"><span class="ch">✓</span>Copyright registered: book + app · © Eva White 2025</div>
+      </div>
+      <div class="card" style="border:1px solid #3b82f6;margin-bottom:8px;">
+        <div style="font-size:22px;margin-bottom:6px;">💻</div>
+        <div class="xs fb tw" style="margin-bottom:5px;">Technical Partner / CTO</div>
+        <div class="grid-2" style="margin-bottom:0;">
+          <div class="bl"><span style="color:#eab308;">→</span>Production mobile app</div>
+          <div class="bl"><span style="color:#eab308;">→</span>3D brain visualization</div>
+          <div class="bl"><span style="color:#eab308;">→</span>API architecture</div>
+          <div class="bl"><span style="color:#eab308;">→</span>App Store deployment</div>
+        </div>
+      </div>
+      <div class="card" style="border:1px solid #ca8a04;margin-bottom:8px;">
+        <div style="font-size:22px;margin-bottom:6px;">💰</div>
+        <div class="xs fb tw" style="margin-bottom:5px;">Seed: $150K–500K</div>
+        <div class="grid-2" style="margin-bottom:0;">
+          <div class="bl"><span style="color:#eab308;">→</span>App development</div>
+          <div class="bl"><span style="color:#eab308;">→</span>Validation study</div>
+          <div class="bl"><span style="color:#eab308;">→</span>First 1,000 users</div>
+          <div class="bl"><span style="color:#eab308;">→</span>Clinical pilot EU</div>
+        </div>
+      </div>
+      <div class="card" style="border:1px solid #166534;margin-bottom:12px;">
+        <div style="font-size:22px;margin-bottom:6px;">🏥</div>
+        <div class="xs fb tw" style="margin-bottom:5px;">Pilot Partner</div>
+        <div class="grid-2" style="margin-bottom:0;">
+          <div class="bl"><span style="color:#eab308;">→</span>Clinic or HR team</div>
+          <div class="bl"><span style="color:#eab308;">→</span>Validate Vector model</div>
+          <div class="bl"><span style="color:#eab308;">→</span>Real data collection</div>
+          <div class="bl"><span style="color:#eab308;">→</span>Co-publication option</div>
+        </div>
+      </div>
+      <div class="box-p tc">
+        <p class="fk tw" style="font-size:15px;">Make neurobiological self-knowledge as accessible as a blood test.</p>
+        <p class="xs tp" style="margin-top:4px;">No hardware. No doctor. Enter a date. Understand your wiring.</p>
+        <p class="xs fb ty" style="margin-top:6px;">This system converts an abstract data timestamp into precise neurobiological protocols.</p>
+        <p class="xs tgr" style="margin-top:4px;">⚡ Biochemical Resonance · by Eva White · © 2025</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="deck-footer">
+    <span class="footer-copy">BIOCHEMICAL RESONANCE · PITCH DECK 2025</span>
+    <span class="footer-count" id="footer-count">1 / 18</span>
+  </div>
+  <div class="nav-buttons">
+    <button class="btn-prev" id="btn-prev" disabled>← Prev</button>
+    <button class="btn-next" id="btn-next">Next →</button>
+  </div>
+  <div class="slide-tabs" id="slide-tabs"></div>
+</div>
+
+<script>
+const LABELS = ['COVER','FOUNDATION','PROBLEM','BRAIN MAP','MECHANISM','ANALYTICS','SOLUTION','PRODUCT','RIGHT NOW','PHARMACY','ENGINE','VALIDATION','MARKET','SCALABILITY','UNIV. API','COMPETITION','BUSINESS','ASK'];
+let cur = 0;
+const total = LABELS.length;
+
+const tabs = document.getElementById('slide-tabs');
+LABELS.forEach((lbl, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab-btn' + (i === 0 ? ' active' : '');
+  b.textContent = lbl;
+  b.onclick = () => goTo(i);
+  tabs.appendChild(b);
+});
+
+function goTo(idx) {
+  if (idx < 0 || idx >= total) return;
+  document.getElementById('slide-' + cur).classList.remove('active');
+  document.querySelectorAll('.tab-btn')[cur].classList.remove('active');
+  cur = idx;
+  document.getElementById('slide-' + cur).classList.add('active');
+  document.querySelectorAll('.tab-btn')[cur].classList.add('active');
+  document.getElementById('slide-label').textContent = LABELS[cur];
+  document.getElementById('footer-count').textContent = (cur + 1) + ' / ' + total;
+  document.getElementById('progress-fill').style.width = ((cur + 1) / total * 100) + '%';
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === total - 1;
+  document.querySelector('.slide-area').scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('btn-prev').onclick = () => goTo(cur - 1);
+document.getElementById('btn-next').onclick = () => goTo(cur + 1);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(cur + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(cur - 1);
+});
+
+let tx = 0;
+const sa = document.querySelector('.slide-area');
+sa.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+sa.addEventListener('touchend', e => {
+  const diff = tx - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) goTo(cur + (diff > 0 ? 1 : -1));
+}, { passive: true });
+</script>
+</body>
+</html>
