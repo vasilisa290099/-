@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biochemical Resonance — Pitch Deck 2025 | Eva White</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05010d;color:white;font-family:system-ui,-apple-system,sans-serif;overflow-x:hidden}
+@keyframes starPulse{0%,100%{opacity:.05;transform:scale(1)}50%{opacity:.22;transform:scale(1.5)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes glowPulse{0%,100%{opacity:.75}50%{opacity:1}}
+@keyframes heroIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.slide-fwd{animation:slideIn .22s ease forwards}
+.slide-back{animation:slideBack .22s ease forwards}
+.glow{animation:glowPulse 3s ease infinite}
+.hero-in{animation:heroIn .8s ease forwards}
+button:focus{outline:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+const G = {
+  bg:'#05010d',card:'rgba(255,255,255,0.04)',bdr:'rgba(255,255,255,0.09)',
+  gold:'#fbbf24',purple:'#c084fc',cyan:'#67e8f9',green:'#4ade80',
+  red:'#f87171',blue:'#60a5fa',orange:'#fb923c',pink:'#f472b6',
+  muted:'#6b7280',sub:'#9ca3af',text:'#e5e7eb',
+};
+
+const SH = ({tag,title,sub,tc=G.purple}) => (
+  <div style={{marginBottom:16}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+      <span style={{color:G.gold,fontSize:9,fontWeight:800,letterSpacing:'2px'}}>⚡ BY EVA WHITE · 2025</span>
+      <span style={{background:tc+'25',border:`1px solid ${tc}55`,color:tc,fontSize:8,fontWeight:800,padding:'3px 10px',borderRadius:20,letterSpacing:'1.5px'}}>{tag}</span>
+    </div>
+    <h2 style={{color:'white',fontSize:'clamp(19px,3.8vw,27px)',fontWeight:900,margin:'0 0 5px',lineHeight:1.1}}>{title}</h2>
+    {sub && <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.6}}>{sub}</p>}
+  </div>
+);
+
+const Bl = ({text,color=G.purple,size=12}) => (
+  <div style={{display:'flex',gap:9,alignItems:'flex-start',marginBottom:7}}>
+    <div style={{width:3,minHeight:13,borderRadius:2,background:color,marginTop:2,flexShrink:0}}/>
+    <p style={{color:G.text,fontSize:size,lineHeight:1.6,margin:0}}>{text}</p>
+  </div>
+);
+
+const SF = ({n,t}) => (
+  <div style={{borderTop:`1px solid ${G.bdr}`,marginTop:14,paddingTop:9,display:'flex',justifyContent:'space-between'}}>
+    <span style={{color:G.muted,fontSize:9}}>BIOCHEMICAL RESONANCE ECOSYSTEM PITCH 2025</span>
+    <span style={{color:G.muted,fontSize:9}}>{n} / {t}</span>
+  </div>
+);
+
+const TOTAL = 18;
+
+function App() {
+  const [sl,setSl] = useState(0);
+  const [dir,setDir] = useState('fwd');
+  const [key,setKey] = useState(0);
+  const starsRef = useRef(null);
+
+  const go = (n) => {
+    setDir(n > sl ? 'fwd' : 'back');
+    setSl(n);
+    setKey(k=>k+1);
+  };
+  const prev = () => sl > 0 && go(sl-1);
+  const next = () => sl < TOTAL-1 && go(sl+1);
+
+  useEffect(()=>{
+    if(starsRef.current) {
+      starsRef.current.innerHTML='';
+      for(let i=0;i<16;i++){
+        const s=document.createElement('div');
+        s.style.cssText=`position:absolute;width:2px;height:2px;border-radius:50%;background:white;left:${(i*17+8)%100}%;top:${(i*23+9)%100}%;animation:starPulse ${(2.5+i%5).toFixed(1)}s ${(i*0.3).toFixed(1)}s infinite;pointer-events:none`;
+        starsRef.current.appendChild(s);
+      }
+    }
+  },[sl===0||sl===17]);
+
+  const slides = [
+
+    // 0 COVER
+    () => (
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'88vh',textAlign:'center',position:'relative',overflow:'hidden'}}>
+        <div ref={starsRef} style={{position:'absolute',inset:0,pointerEvents:'none'}}/>
+        <div className="hero-in" style={{position:'relative'}}>
+          <div style={{background:'rgba(251,191,36,0.1)',border:'1px solid rgba(251,191,36,0.3)',borderRadius:24,padding:'5px 20px',marginBottom:20,display:'inline-block'}}>
+            <span style={{fontSize:10,color:G.gold,fontWeight:800,letterSpacing:'3px'}}>EVA WHITE · UKRAINE · 2025</span>
+          </div>
+          <h1 style={{fontWeight:900,letterSpacing:'-2px',lineHeight:1,marginBottom:8,background:'linear-gradient(135deg,#fff 0%,#c084fc 45%,#67e8f9 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',fontSize:'clamp(34px,9vw,68px)'}}>BIOCHEMICAL<br/>RESONANCE</h1>
+          <p style={{fontSize:10,color:'#a78bfa',letterSpacing:'4px',fontWeight:700,marginBottom:10}}>ECOSYSTEM PITCH DECK 2025</p>
+          <div style={{background:'rgba(192,132,252,0.07)',border:'1px solid rgba(192,132,252,0.2)',borderRadius:14,padding:'13px 26px',marginBottom:26,display:'inline-block',maxWidth:440}}>
+            <p style={{fontSize:13,color:'#e9d5ff',fontStyle:'italic',lineHeight:1.85,margin:0}}>"Not astrology. Not psychology.<br/>The neurobiological bridge between them."</p>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,maxWidth:480,margin:'0 auto 22px',width:'100%'}}>
+            {[['📚 Book','Code of Reality',G.gold],['🧠 App 1','Biochemical Resonance',G.purple],['⚡ App 2','Neuro-Translator v6.8',G.cyan]].map(([t,d,c])=>(
+              <div key={t} style={{background:c+'12',border:`1px solid ${c}35`,borderRadius:14,padding:'14px 10px',textAlign:'center'}}>
+                <p style={{fontSize:11,color:c,fontWeight:800,margin:'0 0 3px'}}>{t}</p>
+                <p style={{fontSize:10,color:G.sub,margin:0,lineHeight:1.3}}>{d}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+            {[['21yr','Research'],['3','Products'],['30+','World Firsts'],['$8.4B+','TAM']].map(([v,l])=>(
+              <div key={l} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:12,padding:'10px 16px',textAlign:'center',minWidth:62}}>
+                <p style={{fontSize:18,fontWeight:900,color:'white',margin:0,lineHeight:1}}>{v}</p>
+                <p style={{fontSize:8,color:G.sub,margin:'4px 0 0'}}>{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+
+    // 1 PROBLEM
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="PROBLEM" title="The Missing Layer" sub="Why do people keep repeating the same patterns — despite years of therapy, self-help, and introspection?"/>
+        <div style={{display:'flex',flexDirection:'column',gap:9,marginBottom:14}}>
+          {[
+            {t:'Psychology describes behavior',d:'But cannot locate the biological source that generates it.',c:G.purple},
+            {t:'Medicine treats symptoms',d:'But misses the underlying neurobiological architecture producing them.',c:G.blue},
+            {t:'Personality tests describe traits',d:'Cannot predict when and how tension will discharge — and in which direction.',c:G.orange},
+            {t:'No one maps the discharge Vector',d:'Why does the same stress make one person explode outward, another collapse inward, and a third transform?',c:G.red},
+          ].map(({t,d,c})=>(
+            <div key={t} style={{background:G.card,border:`1px solid ${G.bdr}`,borderLeft:`3px solid ${c}`,borderRadius:12,padding:'11px 14px'}}>
+              <p style={{color:'white',fontWeight:700,fontSize:13,margin:'0 0 3px'}}>{t}</p>
+              <p style={{color:G.sub,fontSize:12,margin:0,lineHeight:1.55}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{background:G.red+'12',border:`1px solid ${G.red}40`,borderRadius:12,padding:'14px 18px',textAlign:'center'}}>
+          <p style={{color:G.red,fontWeight:800,fontSize:13,margin:'0 0 5px'}}>The Result</p>
+          <p style={{color:G.text,fontSize:12,margin:0,lineHeight:1.7}}>Years spent in therapy, coaching, and medicine without addressing the root:<br/><strong style={{color:'white'}}>the innate neurobiological wiring that shapes every behavior, every relationship, every life event.</strong></p>
+        </div>
+        <SF n={1} t={TOTAL}/>
+      </div>
+    ),
+
+    // 2 ECOSYSTEM OVERVIEW
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="SOLUTION OVERVIEW" title="What We Built" sub="Three interconnected products · One unified methodology · One complete ecosystem" tc={G.cyan}/>
+        <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:14}}>
+          {[
+            {e:'📚',prod:'BOOK — Code of Reality',role:'Theoretical Foundation & IP Core',desc:'416-page framework: how natal chart configurations map to neurobiological architecture. Introduces the Vector — the discharge direction of nervous system tension.',stats:['416 pp','21yr research','~1K charts'],c:G.gold},
+            {e:'🧠',prod:'APP 1 — Biochemical Resonance',role:'"Know Yourself" · Personal Profiler',desc:'Input: date of birth. Output: complete neurobiological profile + Triple Pharmacy (Art+Literature+Sound Rx) + daily real-time transit protocol + crisis support "Right Now" mode.',stats:['225+ configs','6 modules','3 Rx modes'],c:G.purple},
+            {e:'⚡',prod:'APP 2 — Neuro-Translator v6.8',role:'"Understand Others" · Relationship Decoder',desc:'Two birth dates → dual neurochemical profiles → neurobiological communication gap computed → exact translation protocol for any conflict situation.',stats:['80+ comm routes','50+ bio pairs','30+ original concepts'],c:G.cyan},
+          ].map(({e,prod,role,desc,stats,c})=>(
+            <div key={prod} style={{background:c+'09',border:`1px solid ${c}35`,borderRadius:14,padding:'15px 17px'}}>
+              <div style={{display:'flex',gap:13,alignItems:'flex-start'}}>
+                <span style={{fontSize:26,flexShrink:0,marginTop:2}}>{e}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:4}}>
+                    <p style={{fontSize:13,color:'white',fontWeight:900,margin:0}}>{prod}</p>
+                    <span style={{background:c+'22',border:`1px solid ${c}50`,color:c,fontSize:8,fontWeight:800,padding:'2px 9px',borderRadius:16,letterSpacing:'1.5px'}}>{role}</span>
+                  </div>
+                  <p style={{fontSize:11,color:G.sub,margin:'0 0 9px',lineHeight:1.65}}>{desc}</p>
+                  <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+                    {stats.map(s=><span key={s} style={{background:'rgba(0,0,0,0.45)',border:`1px solid ${c}25`,borderRadius:8,padding:'4px 10px',fontSize:9,color:c,fontWeight:700}}>{s}</span>)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${G.bdr}`,borderRadius:10,padding:'12px',textAlign:'center'}}>
+          <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.7}}>📚 Book = <strong style={{color:'white'}}>Theory & IP</strong> → 🧠 App 1 = <strong style={{color:G.purple}}>"Who am I neurochemically?"</strong> → ⚡ App 2 = <strong style={{color:G.cyan}}>"Why can't we understand each other?"</strong></p>
+        </div>
+        <SF n={2} t={TOTAL}/>
+      </div>
+    ),
+
+    // 3 BOOK
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="PRODUCT 1 · BOOK" title='"Code of Reality"' sub="The world's first framework connecting natal chart configurations to neurobiological architecture" tc={G.gold}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}>
+          <div>
+            <div style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:12,padding:'13px 15px',marginBottom:10}}>
+              <p style={{fontSize:9,color:G.gold,fontWeight:800,letterSpacing:'2px',margin:'0 0 8px'}}>WHAT IT IS</p>
+              {['21 years of personal observation (~1,000 natal charts)','First system linking planetary aspects to neurotransmitter activation','4-level biopsychic structure model','Predictive event mechanics — not fate, neurochemical inevitability','Theoretical backbone that makes both apps coherent'].map(t=><Bl key={t} text={t} color={G.gold}/>)}
+            </div>
+            <div style={{background:G.gold+'10',border:`1px solid ${G.gold}35`,borderRadius:12,padding:'12px 14px'}}>
+              <p style={{fontSize:9,color:G.gold,fontWeight:800,letterSpacing:'2px',margin:'0 0 6px'}}>STATUS</p>
+              <p style={{fontSize:11,color:G.text,margin:0,lineHeight:1.65}}>🛡 Copyright registered · Ukraine 2025<br/>📄 416 pages · documented IP<br/>🔬 Research base: ~1,000 natal charts</p>
+            </div>
+          </div>
+          <div>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 10px'}}>THE VECTOR — CORE DISCOVERY</p>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {[
+                {s:'♂ Mars Vector',d:'Tension discharges outward → action, conflict, accident',c:G.red},
+                {s:'♆ Neptune Vector',d:'Tension dissolves inward → illness, addiction, confusion',c:'#818cf8'},
+                {s:'♇ Pluto Vector',d:'Tension implodes → transformation or destruction',c:G.sub},
+                {s:'☽ Moon Vector',d:'Tension absorbs into body → psychosomatic, grief cycles',c:G.blue},
+              ].map(({s,d,c})=>(
+                <div key={s} style={{background:'rgba(0,0,0,0.45)',borderLeft:`3px solid ${c}`,borderRadius:9,padding:'9px 12px'}}>
+                  <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 2px'}}>{s}</p>
+                  <p style={{color:G.sub,fontSize:11,margin:0}}>{d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{background:G.gold+'10',border:`1px solid ${G.gold}35`,borderRadius:12,padding:'13px 18px',textAlign:'center'}}>
+          <p style={{color:G.gold,fontWeight:800,fontSize:13,margin:'0 0 4px'}}>★ World First</p>
+          <p style={{color:G.text,fontSize:11,margin:0,lineHeight:1.7}}>No existing discipline — astrology, psychology, neuroscience, or medicine — has explained why the same planetary configuration produces an accident in one person, disease in another, and a breakthrough in a third. The Vector is Eva White's original contribution.</p>
+        </div>
+        <SF n={3} t={TOTAL}/>
+      </div>
+    ),
+
+    // 4 APP 1
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="PRODUCT 2 · APP 1" title="Biochemical Resonance App" sub="Personal Neurochemical Profiler · Know Yourself · Live prototype v2.0" tc={G.purple}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+          <div style={{display:'flex',flexDirection:'column',gap:7}}>
+            {[
+              {n:'◆ NEURAL CONFIG',d:'225+ configurations mapped · brain structure visualization · aspect detection',c:G.purple},
+              {n:'◆ ART Rx',d:'Specific artists & works prescribed by neural activation state · wavelength protocols',c:G.pink},
+              {n:'◆ LITERATURE Rx',d:'Books by natal brain profile · with contraindications',c:G.blue},
+              {n:'◆ SOUND Rx',d:'Composers & works by therapeutic goal · prescribed listening mode',c:G.cyan},
+              {n:'◆ LIVE NEURAL UPDATE',d:'Real-time daily protocol based on current transit data',c:G.gold},
+              {n:'◆ RIGHT NOW MODE',d:'Crisis biochemical protocol in 3–6 minutes · natal-calibrated',c:G.red},
+            ].map(({n,d,c})=>(
+              <div key={n} style={{background:'rgba(0,0,0,0.4)',borderLeft:`2px solid ${c}`,borderRadius:9,padding:'8px 11px'}}>
+                <p style={{color:c,fontWeight:800,fontSize:10,margin:'0 0 2px'}}>{n}</p>
+                <p style={{color:G.sub,fontSize:10,margin:0,lineHeight:1.5}}>{d}</p>
+              </div>
+            ))}
+          </div>
+          <div>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 9px'}}>3 OPERATING MODES</p>
+            {[
+              {t:'⚡ Right Now',s:'Emergency · immediate biochemical support',c:G.red},
+              {t:'↻ My Pattern',s:'Daily awareness · discharge loop understanding',c:G.purple},
+              {t:'✦ Healing',s:'Long-term recalibration protocol',c:G.green},
+            ].map(({t,s,c})=>(
+              <div key={t} style={{background:c+'10',border:`1px solid ${c}35`,borderRadius:10,padding:'10px 12px',marginBottom:8}}>
+                <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 3px'}}>{t}</p>
+                <p style={{color:G.sub,fontSize:11,margin:0}}>{s}</p>
+              </div>
+            ))}
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'12px 0 8px'}}>DISCHARGE MODES</p>
+            {[
+              {t:'LOOP',d:"HPA axis won't deactivate · chronic stress",c:G.red},
+              {t:'DRAIN',d:'Energy dissipates without resolution',c:'#818cf8'},
+              {t:'REACT',d:'Gamma discharge · nonlinear behavioral spikes',c:G.gold},
+            ].map(({t,d,c})=>(
+              <div key={t} style={{display:'flex',gap:8,alignItems:'center',marginBottom:7}}>
+                <span style={{background:c+'20',border:`1px solid ${c}50`,color:c,fontSize:9,fontWeight:800,padding:'3px 10px',borderRadius:10,minWidth:52,textAlign:'center'}}>{t}</span>
+                <p style={{color:G.sub,fontSize:10,margin:0}}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:G.purple+'10',border:`1px solid ${G.purple}35`,borderRadius:12,padding:'12px 16px',textAlign:'center'}}>
+          <p style={{color:G.purple,fontWeight:800,fontSize:12,margin:'0 0 3px'}}>★ World First: Triple Pharmacy</p>
+          <p style={{color:G.text,fontSize:11,margin:0}}>No product simultaneously prescribes Art + Literature + Sound as biochemical protocols calibrated to natal neurochemistry</p>
+        </div>
+        <SF n={4} t={TOTAL}/>
+      </div>
+    ),
+
+    // 5 APP 2 OVERVIEW
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="PRODUCT 3 · APP 2" title="Neuro-Translator v6.8" sub="Relationship & Communication Decoder · Dual profile · Neurobiological gap analysis" tc={G.cyan}/>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:12}}>
+          {[
+            {e:'🔬',l:'LAYER 1',t:'Astronomical Engine',d:'Kepler equations · heliocentric coordinates · 10 bodies · 5 aspect types with individual orbs',c:G.cyan},
+            {e:'🧠',l:'LAYER 2',t:'Neurochemical Matrix',d:"Author's core IP: 10 planets × neurotransmitters × brain structures × behavioral mode",c:G.purple},
+            {e:'⚡',l:'LAYER 3',t:'Communication Module',d:'Two profiles → computed neurochemical gap → situational translation for any real conflict',c:G.gold},
+          ].map(({e,l,t,d,c})=>(
+            <div key={t} style={{background:'rgba(0,0,0,0.45)',borderTop:`2px solid ${c}`,borderRadius:12,padding:'12px'}}>
+              <span style={{fontSize:22}}>{e}</span>
+              <p style={{fontSize:7,color:c,fontWeight:800,letterSpacing:'2px',margin:'7px 0 4px'}}>{l}</p>
+              <p style={{fontSize:11,color:'white',fontWeight:700,margin:'0 0 5px'}}>{t}</p>
+              <p style={{fontSize:10,color:G.sub,lineHeight:1.55,margin:0}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginBottom:10}}>
+          {[
+            {e:'🌊',t:'Affective Flickering Axis',d:'World first: dynamic bipolar sensitivity spectrum. Pole A: Dissolution (Moon×Neptune) ↔ Pole B: Hyper-Sharpness (Moon×Uranus). A living axis — not a label.',c:G.cyan},
+            {e:'🔇',t:'Channel Dampening System',d:'Quantified suppression of serotonin/oxytocin. Saturn×Pluto = "GABA Sarcophagus" coeff 0.3 (irreversible). Saturn×Uranus (0.6). Neptune×Saturn (0.8).',c:G.red},
+            {e:'📡',t:'FMOD Communication Matrix',d:"80+ pairs: Frequency · Neural circuit · Delivery · Filter (what they hear) · Trigger · Vector · Win/Agree strategies.",c:G.purple},
+            {e:'🗣',t:'Situational Translator',d:'4 archetypal conflicts decoded biochemically: "also buy bread" / support request / "why silent?" / "rethink everything." A→gap→B filter→translation.',c:G.gold},
+          ].map(({e,t,d,c})=>(
+            <div key={t} style={{background:c+'08',borderLeft:`3px solid ${c}`,borderRadius:11,padding:'12px 14px'}}>
+              <span style={{fontSize:18}}>{e}</span>
+              <p style={{color:'white',fontWeight:700,fontSize:11,margin:'6px 0 4px'}}>{t}</p>
+              <p style={{color:G.sub,fontSize:10,lineHeight:1.6,margin:0}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {[
+            {e:'✦',t:'T-Square Activation v6.7',d:'Personal planets activated by outer planet oppositions. Orb factors + tightness + generational multipliers.',c:'#818cf8'},
+            {e:'🧭',t:'Life Sphere Navigator',d:'"Where it thrives" and "where it struggles" — mapped to neurochemical profile. Original domain recommendations.',c:G.green},
+          ].map(({e,t,d,c})=>(
+            <div key={t} style={{background:'rgba(0,0,0,0.35)',borderLeft:`3px solid ${c}`,borderRadius:10,padding:'11px 13px'}}>
+              <span style={{fontSize:16}}>{e}</span>
+              <p style={{color:'white',fontWeight:700,fontSize:11,margin:'5px 0 3px'}}>{t}</p>
+              <p style={{color:G.sub,fontSize:10,lineHeight:1.55,margin:0}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <SF n={5} t={TOTAL}/>
+      </div>
+    ),
+
+    // 6 NEUROCHEMICAL MATRIX
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="CORE IP · APP 2" title="The Neurochemical Matrix" sub="Author's original invention: 10 planets × neurotransmitters × brain structures × behavioral mode" tc={G.cyan}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:14}}>
+          {[
+            {p:'Mars',s:'♂',nt:'Noradrenaline · Adrenaline',b:'PAG · Basal Ganglia',m:'REACT',c:G.red},
+            {p:'Pluto',s:'♇',nt:'Cortisol · CRF · Vasopressin',b:'Amygdala · HPA Axis',m:'LOOP',c:'#94a3b8'},
+            {p:'Saturn',s:'♄',nt:'GABA · Cortisol (chronic)',b:'dlPFC · ACC · Caudate',m:'LOOP',c:G.sub},
+            {p:'Moon',s:'☽',nt:'Serotonin · Oxytocin',b:'Hippocampus · Insula',m:'Neutral',c:G.blue},
+            {p:'Sun',s:'☉',nt:'Dopamine D1 · Noradrenaline',b:'Thalamus · DMN active',m:'Neutral',c:G.gold},
+            {p:'Mercury',s:'☿',nt:'Acetylcholine · Dopamine',b:'Broca / Wernicke zones',m:'DRAIN',c:'#a78bfa'},
+            {p:'Uranus',s:'⛢',nt:'Glutamate · Dopamine (novelty)',b:'Gamma oscillations 30–100 Hz',m:'REACT',c:G.cyan},
+            {p:'Neptune',s:'♆',nt:'Serotonin 5HT2A · Endorphins',b:'DMN passive · Claustrum',m:'DRAIN',c:'#818cf8'},
+            {p:'Jupiter',s:'♃',nt:'Dopamine D2 · BDNF',b:'mPFC · Ventral Striatum',m:'Neutral',c:G.orange},
+            {p:'Venus',s:'♀',nt:'Oxytocin · Dopamine (reward)',b:'Nucleus Accumbens · VTA',m:'Neutral',c:G.pink},
+          ].map(({p,s,nt,b,m,c})=>{
+            const mc={LOOP:G.red,REACT:G.gold,DRAIN:'#818cf8',Neutral:G.green};
+            return (
+              <div key={p} style={{background:G.card,border:`1px solid ${G.bdr}`,borderLeft:`3px solid ${c}`,borderRadius:9,padding:'8px 11px',display:'flex',gap:9,alignItems:'flex-start'}}>
+                <div style={{textAlign:'center',minWidth:28,flexShrink:0}}>
+                  <span style={{fontSize:15,color:c}}>{s}</span>
+                  <p style={{fontSize:8,color:c,fontWeight:700,margin:'2px 0 0',lineHeight:1}}>{p}</p>
+                </div>
+                <div>
+                  <p style={{fontSize:10,color:'white',fontWeight:600,margin:'0 0 2px'}}>{nt}</p>
+                  <p style={{fontSize:9,color:G.sub,margin:'0 0 4px'}}>{b}</p>
+                  <span style={{fontSize:8,fontWeight:800,padding:'2px 6px',borderRadius:4,background:mc[m]+'22',color:mc[m]}}>{m}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{background:G.cyan+'09',border:`1px solid ${G.cyan}35`,borderRadius:12,padding:'12px 16px'}}>
+          <p style={{color:G.cyan,fontWeight:800,fontSize:11,margin:'0 0 4px'}}>★ Author's Original Invention — No equivalent exists in any field</p>
+          <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.65}}>Each planet represents not a symbol — but a specific biochemical signature in the nervous system. Planetary aspects compute the degree of activation or suppression of each neurochemical system in real time.</p>
+        </div>
+        <SF n={6} t={TOTAL}/>
+      </div>
+    ),
+
+    // 7 AFFECTIVE FLICKERING AXIS
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="WORLD FIRST CONCEPT" title="Affective Flickering Axis" sub="The most original concept in the system — has no known equivalent in any existing framework" tc={G.cyan}/>
+        <div style={{background:'rgba(103,232,249,0.07)',border:'1px solid rgba(103,232,249,0.25)',borderRadius:16,padding:'18px',marginBottom:14}}>
+          <p style={{color:G.text,fontSize:12,lineHeight:1.8,margin:'0 0 14px',textAlign:'center',fontStyle:'italic'}}>"A dynamic, bipolar sensitivity spectrum — not a fixed label, not a diagnosis.<br/>A <strong style={{color:'white'}}>living axis</strong> describing a unique way of being in contact with reality."</p>
+          <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:10,alignItems:'center'}}>
+            <div style={{background:'#818cf8'+'15',border:'1px solid #818cf840',borderRadius:12,padding:'14px',textAlign:'center'}}>
+              <p style={{color:'#818cf8',fontWeight:900,fontSize:14,margin:'0 0 5px'}}>POLE A</p>
+              <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 7px'}}>Dissolution</p>
+              <p style={{color:G.sub,fontSize:10,lineHeight:1.6,margin:'0 0 8px'}}>Boundary permeability · empathic merger · loss of self in closeness</p>
+              <p style={{color:'#818cf8',fontSize:9,fontWeight:700}}>Moon × Neptune<br/>Venus × Neptune</p>
+            </div>
+            <div style={{textAlign:'center'}}>
+              <span style={{color:G.muted,fontSize:22,display:'block'}}>↕</span>
+              <p style={{color:G.muted,fontSize:8,fontWeight:700,letterSpacing:'1px',margin:'4px 0 0'}}>LIVE<br/>AXIS</p>
+            </div>
+            <div style={{background:G.cyan+'15',border:`1px solid ${G.cyan}40`,borderRadius:12,padding:'14px',textAlign:'center'}}>
+              <p style={{color:G.cyan,fontWeight:900,fontSize:14,margin:'0 0 5px'}}>POLE B</p>
+              <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 7px'}}>Hyper-Sharpness</p>
+              <p style={{color:G.sub,fontSize:10,lineHeight:1.6,margin:'0 0 8px'}}>Everything more intense than necessary · impossible to switch off</p>
+              <p style={{color:G.cyan,fontSize:9,fontWeight:700}}>Moon × Uranus<br/>Venus × Uranus</p>
+            </div>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:12,padding:'13px 15px'}}>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 8px'}}>REAL-TIME COMPUTATION</p>
+            {['Weighted aspect scores determine current axis position','Position shifts with transits — a live variable, not a trait','Maps interactions with Channel Dampening and LOOP mode','Used for communication protocol selection in the Translator'].map(t=><Bl key={t} text={t} color={G.cyan} size={11}/>)}
+          </div>
+          <div style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:12,padding:'13px 15px'}}>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 8px'}}>DESIGN PHILOSOPHY</p>
+            <p style={{color:G.text,fontSize:11,lineHeight:1.7,margin:'0 0 10px'}}>Explicitly non-diagnostic. Does not pathologize sensitivity. Treats the spectrum as a resource — a unique mode of contact with reality, not a disorder to be fixed.</p>
+            <div style={{background:G.cyan+'12',border:`1px solid ${G.cyan}35`,borderRadius:10,padding:'10px 13px'}}>
+              <p style={{color:G.cyan,fontSize:11,fontStyle:'italic',fontWeight:700,margin:0}}>"Flickering is not a malfunction. It is a unique way of being alive."</p>
+            </div>
+          </div>
+        </div>
+        <SF n={7} t={TOTAL}/>
+      </div>
+    ),
+
+    // 8 TRIPLE PHARMACY
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="APP 1 KILLER FEATURE" title="Triple Pharmacy" sub="Art · Literature · Sound prescribed as neurochemical protocols calibrated to natal neurochemistry" tc={G.purple}/>
+        <div style={{background:G.purple+'08',border:`1px solid ${G.purple}30`,borderRadius:14,padding:'12px 16px',marginBottom:12,textAlign:'center'}}>
+          <p style={{color:G.text,fontSize:12,fontStyle:'italic',lineHeight:1.8,margin:0}}>"The brain cannot distinguish what happens to you and what you <em>witness</em>.<br/>The right painting is not décor — it is a <strong style={{color:'white'}}>permanent neural modulator</strong>."</p>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:12}}>
+          {[
+            {sym:'☉',t:'Sun — Core Dopamine Vector',art:'🎨 Turner · Monet · Rembrandt · 580–620nm',snd:'♪ Bach · Handel · Beethoven',lit:'📖 Frankl · Marcus Aurelius · Goethe',c:G.gold},
+            {sym:'♂',t:'Mars — Noradrenaline Vector',art:'🎨 Caravaggio · Delacroix · 620–700nm red-orange',snd:'♪ Beethoven Sym.5 · Vivaldi · Prokofiev',lit:'📖 Hemingway · Jack London · Dostoevsky',c:G.red},
+            {sym:'☽',t:'Moon — Parasympathetic Balance',art:'🎨 Monet · Whistler · Redon · 450–490nm blue-silver',snd:'♪ Chopin · Debussy · Arvo Pärt',lit:'📖 Woolf · Kawabata · Chekhov',c:G.blue},
+            {sym:'♄',t:'Saturn — Structure & Stability',art:'🎨 Shishkin · Dürer · Vermeer · fractal patterns',snd:'♪ Bach WTC · Goldberg Variations',lit:'📖 Stoics · Thomas Mann · Tolstoy',c:G.sub},
+          ].map(({sym,t,art,snd,lit,c})=>(
+            <div key={t} style={{background:'rgba(0,0,0,0.4)',borderLeft:`3px solid ${c}`,borderRadius:10,padding:'9px 13px'}}>
+              <p style={{color:'white',fontWeight:800,fontSize:12,margin:'0 0 5px'}}><span style={{color:c,marginRight:6}}>{sym}</span>{t}</p>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4}}>
+                {[art,snd,lit].map(item=><p key={item} style={{color:G.sub,fontSize:9,margin:0,lineHeight:1.5}}>{item}</p>)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
+          <div style={{background:G.purple+'09',border:`1px solid ${G.purple}35`,borderRadius:12,padding:'12px 15px'}}>
+            <p style={{color:G.purple,fontWeight:800,fontSize:11,margin:'0 0 5px'}}>★ World First</p>
+            <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.6}}>No product combines Art + Literature + Sound as simultaneous neurochemical prescription protocols personalized to natal neurochemistry</p>
+          </div>
+          <div style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:12,padding:'12px 15px'}}>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 7px'}}>THE MECHANISM</p>
+            <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.65}}>Each creator encodes their neurochemical signature into their work. The code in the painting matches the code in the viewer's neurology — creating resonance, not just aesthetic experience.</p>
+          </div>
+        </div>
+        <SF n={8} t={TOTAL}/>
+      </div>
+    ),
+
+    // 9 RIGHT NOW MODE
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="APP 1 · EMERGENCY FEATURE" title="Right Now Mode" sub="Biochemical crisis support personalized to natal neurochemistry — in 3 to 6 minutes" tc={G.red}/>
+        <div style={{background:G.red+'10',border:`1px solid ${G.red}35`,borderRadius:12,padding:'12px 16px',marginBottom:12,textAlign:'center'}}>
+          <p style={{color:G.red,fontWeight:700,fontSize:12,margin:'0 0 4px'}}>⚡ THE CONCEPT</p>
+          <p style={{color:G.text,fontSize:12,margin:0,lineHeight:1.65}}>User activates "Right Now" — system shows ONLY what helps immediately. No diagnosis. No explanation. Pure biochemical protocol tailored to natal profile. Precision in 3 minutes.</p>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:12}}>
+          {[
+            {n:'01',t:'Neural conflict identified',d:'System reads active tension pattern from natal configuration + current transit data',c:G.blue},
+            {n:'02',t:'Brain state computed',d:'Dominant stress NT confirmed: cortisol spike? adrenaline overflow? serotonin crash?',c:G.purple},
+            {n:'03',t:'Triple protocol activated',d:'Art Rx + Sound Rx + Body action prescribed simultaneously · Time: 3 minutes',c:G.orange},
+            {n:'04',t:'Biochemical reset',d:'VTA dopamine pulse triggered · cortisol loop interrupted · Vector redirected inward',c:G.green},
+          ].map(({n,t,d,c})=>(
+            <div key={n} style={{display:'flex',gap:10,background:G.card,border:`1px solid ${G.bdr}`,borderRadius:10,padding:'10px 12px'}}>
+              <span style={{background:c,color:'#000',fontSize:11,fontWeight:900,padding:'4px 8px',borderRadius:6,flexShrink:0,alignSelf:'flex-start'}}>{n}</span>
+              <div>
+                <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 3px'}}>{t}</p>
+                <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.5}}>{d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:10}}>
+          {[
+            {e:'🎨',t:'Art Rx',d:'Specific painting · 3 min · dopamine interrupt via visual cortex'},
+            {e:'🎵',t:'Sound Rx',d:'Specific composer · exact works · prescribed listening mode'},
+            {e:'🏃',t:'Body Action',d:'Movement · breathing · herbal protocol by neurotype'},
+          ].map(({e,t,d})=>(
+            <div key={t} style={{background:'rgba(0,0,0,0.45)',borderTop:`2px solid ${G.red}`,borderRadius:10,padding:'11px 12px',textAlign:'center'}}>
+              <span style={{fontSize:22}}>{e}</span>
+              <p style={{color:'white',fontWeight:700,fontSize:11,margin:'6px 0 4px'}}>{t}</p>
+              <p style={{color:G.sub,fontSize:10,margin:0,lineHeight:1.5}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{background:G.red+'08',border:`1px solid ${G.red}28`,borderRadius:10,padding:'10px',textAlign:'center'}}>
+          <p style={{color:G.text,fontSize:11,margin:0}}>No product in the world offers biochemical emergency support personalized to your natal neurochemistry. <strong style={{color:'white'}}>No hardware. No therapist. Enter date. Press button.</strong></p>
+        </div>
+        <SF n={9} t={TOTAL}/>
+      </div>
+    ),
+
+    // 10 WORLD FIRSTS
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="ORIGINALITY" title="What We Invented" sub="8 original concepts with no known equivalents in any existing discipline or product" tc={G.gold}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
+          {[
+            {n:'01',t:'The Vector',d:'Discharge direction of nervous system tension — why same stress → accident / disease / breakthrough.',src:'📚 Book',c:G.gold},
+            {n:'02',t:'Triple Pharmacy',d:'Art + Literature + Sound as simultaneous neurochemical prescription tailored to natal neurochemistry.',src:'🧠 App 1',c:G.purple},
+            {n:'03',t:'Affective Flickering Axis',d:'Living bipolar sensitivity spectrum — a dynamic real-time variable, not a diagnosis or label.',src:'⚡ App 2',c:G.cyan},
+            {n:'04',t:'Channel Dampening',d:'Quantified suppression of serotonin/oxytocin resources through specific planetary configurations.',src:'⚡ App 2',c:G.red},
+            {n:'05',t:'Neurochemical Comm. Gap',d:'Communication failure between two people is computable from their birth data — biochemical, not psychological.',src:'⚡ App 2',c:G.orange},
+            {n:'06',t:'GABA Sarcophagus',d:'Chronic GABA-mediated emotional burial via Saturn×Pluto configuration — coefficient 0.3, irreversible.',src:'⚡ App 2',c:'#94a3b8'},
+            {n:'07',t:'FMOD Matrix',d:'80+ pairs: how each neurochemical profile delivers messages, what it hears, what triggers it.',src:'⚡ App 2',c:G.pink},
+            {n:'08',t:"Ukhtomsky Dominant (applied)",d:"First known application of the Dominant principle to astrological profile analysis.",src:'📚 + Apps',c:G.blue},
+          ].map(({n,t,d,src,c})=>(
+            <div key={n} style={{background:c+'08',border:`1px solid ${c}28`,borderRadius:11,padding:'11px 13px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:4}}>
+                <span style={{background:c+'25',color:c,fontSize:9,fontWeight:900,padding:'2px 8px',borderRadius:6}}>★ #{n}</span>
+                <span style={{color:G.muted,fontSize:9}}>{src}</span>
+              </div>
+              <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 4px'}}>{t}</p>
+              <p style={{color:G.sub,fontSize:10,lineHeight:1.55,margin:0}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${G.bdr}`,borderRadius:12,padding:'12px',textAlign:'center'}}>
+          <p style={{color:G.gold,fontWeight:800,fontSize:12,margin:'0 0 3px'}}>30+ original coined terms · ~2,000 lines original code · 21 years research base</p>
+          <p style={{color:G.sub,fontSize:11,margin:0}}>Drawing from: astrology · neuroscience · neurochemistry · behavioral psychology · somatic therapy · systems theory</p>
+        </div>
+        <SF n={10} t={TOTAL}/>
+      </div>
+    ),
+
+    // 11 MARKET
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="MARKET" title="Market Opportunity" sub="Intersection of three converging high-growth markets — no existing product occupies this space" tc={G.blue}/>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:9,marginBottom:14}}>
+          {[
+            {v:'$2.2B',l:'Astrology Apps',s:'300M+ users · 8.6% CAGR',c:G.gold},
+            {v:'$500B+',l:'Mental Health Tech',s:'18% CAGR · fastest segment',c:G.purple},
+            {v:'$8.4B+',l:'Combined TAM',s:'Unique intersection position',c:G.cyan},
+          ].map(({v,l,s,c})=>(
+            <div key={l} style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:14,padding:'16px 12px',textAlign:'center'}}>
+              <p style={{fontSize:24,fontWeight:900,color:c,lineHeight:1,margin:0}}>{v}</p>
+              <p style={{fontSize:11,color:'white',fontWeight:700,margin:'6px 0 3px'}}>{l}</p>
+              <p style={{fontSize:9,color:G.muted,margin:0}}>{s}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:14,padding:'16px',marginBottom:12}}>
+          <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 12px'}}>B2C TARGET SEGMENTS</p>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+            {[
+              {s:'🔮',t:'Astrology users',n:'300M+',d:'Want depth beyond sun signs · already believe in pattern-based self-knowledge'},
+              {s:'🧠',t:'Self-development',n:'500M+',d:'Therapy, coaching, biohacking · looking for root cause tools'},
+              {s:'💑',t:'Relationship seekers',n:'100M+',d:'Couples · HR professionals · dating app users who want to understand conflict'},
+            ].map(({s,t,n,d})=>(
+              <div key={t} style={{textAlign:'center'}}>
+                <p style={{fontSize:22,margin:'0 0 2px'}}>{s}</p>
+                <p style={{fontSize:11,color:'white',fontWeight:700,margin:'0 0 3px'}}>{t}</p>
+                <p style={{fontSize:16,fontWeight:900,color:G.blue,margin:'0 0 5px'}}>{n}</p>
+                <p style={{fontSize:10,color:G.sub,lineHeight:1.5,margin:0}}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:G.purple+'08',border:`1px solid ${G.purple}28`,borderRadius:12,padding:'12px 16px'}}>
+          <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 8px'}}>EXPANSION HORIZONS</p>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}>
+            {['Corporate HR · team composition · burnout prevention','Insurance: psychosomatic risk profiling','AI companions calibrated to user neurology','Smart home environment synchronization'].map(t=>(
+              <p key={t} style={{color:G.sub,fontSize:11,margin:'0 0 3px'}}>⚡ {t}</p>
+            ))}
+          </div>
+        </div>
+        <SF n={11} t={TOTAL}/>
+      </div>
+    ),
+
+    // 12 COMPETITION
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="COMPETITION" title="Competitive Landscape" sub="Why every existing solution is missing the core neurobiological layer"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+          {[
+            {name:'Co-Star / The Pattern',pro:'✓ Cosmic personalization · large user base',con:'✗ No neuroscience · no discharge vector · no protocol',c:G.purple},
+            {name:'Headspace / Calm',pro:'✓ Wellness brand · meditation leader',con:'✗ No natal personalization · completely generic content',c:G.blue},
+            {name:'Myers-Briggs / Big Five',pro:'✓ Widely accepted personality framework',con:'✗ No neurobiological source · static · no event prediction',c:G.orange},
+            {name:'Neurofeedback devices',pro:'✓ Direct brain state monitoring',con:'✗ Hardware $1000+ · no Rx integration · no natal layer',c:G.green},
+            {name:'23andMe / DNA testing',pro:'✓ Biological, measurable predispositions',con:'✗ No behavioral prediction · no real-time protocol',c:G.pink},
+            {name:'Spotify AI / mood apps',pro:'✓ Personalized music delivery',con:'✗ Not biochemical · not natal-calibrated · no therapeutic goal',c:G.gold},
+          ].map(({name,pro,con})=>(
+            <div key={name} style={{background:'rgba(0,0,0,0.45)',borderRadius:10,padding:'10px 13px'}}>
+              <p style={{color:'white',fontWeight:700,fontSize:12,margin:'0 0 5px'}}>{name}</p>
+              <p style={{color:G.green,fontSize:10,margin:'0 0 3px',lineHeight:1.4}}>{pro}</p>
+              <p style={{color:G.red,fontSize:10,margin:0,lineHeight:1.4}}>{con}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{background:G.purple+'10',border:`1px solid ${G.purple}35`,borderRadius:14,padding:'16px 20px',textAlign:'center'}}>
+          <p style={{color:G.purple,fontWeight:900,fontSize:13,margin:'0 0 8px'}}>Biochemical Resonance is the ONLY system that does ALL of this:</p>
+          <p style={{color:G.text,fontSize:12,lineHeight:1.85,margin:'0 0 8px'}}>Maps natal neurochemistry from a timestamp → identifies discharge Vector → computes two-profile communication gap →<br/>prescribes Art + Literature + Sound → decodes any conflict biochemically → updates daily in real time</p>
+          <p style={{color:'white',fontWeight:900,fontSize:14,margin:0}}>No hardware. No lab. No specialist. Enter a date.</p>
+        </div>
+        <SF n={12} t={TOTAL}/>
+      </div>
+    ),
+
+    // 13 BUSINESS MODEL
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="BUSINESS MODEL" title="Revenue Architecture" sub="Four streams · B2C + B2B + Licensing · scalable from day one" tc={G.green}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+          {[
+            {t:'B2C Individual',price:'$9–29/mo',tag:'SUBSCRIPTION',items:['Full ecosystem access (Book + both Apps)','Triple Pharmacy Rx · personalized','Daily real-time transit protocol','Crisis Right Now mode · 24/7'],c:G.blue},
+            {t:'B2B Wellness & HR',price:'$500–5K/org/mo',tag:'ENTERPRISE',items:['Team neurotype mapping + compatibility','Conflict prediction dashboard','Burnout prevention system','Leadership Vector profiling'],c:G.purple},
+            {t:'B2B2C Clinicians',price:'$200–800/mo',tag:'PROFESSIONAL',items:['Client neurobiological baseline report','Session preparation protocols','Progress tracking over time','App co-branded for practitioner'],c:G.green},
+            {t:'IP Licensing',price:'Custom deal',tag:'LICENSING',items:['White-label methodology + content API','Algorithm embed into partner app','Strategic co-development or acquisition','Author as Chief Methodology Officer'],c:G.gold},
+          ].map(({t,price,tag,items,c})=>(
+            <div key={t} style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:12,padding:'14px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                <span style={{background:c+'22',border:`1px solid ${c}45`,color:c,fontSize:8,fontWeight:800,padding:'3px 9px',borderRadius:12}}>{tag}</span>
+                <span style={{color:c,fontWeight:900,fontSize:13}}>{price}</span>
+              </div>
+              <p style={{color:'white',fontWeight:700,fontSize:13,margin:'0 0 8px'}}>{t}</p>
+              {items.map(i=><p key={i} style={{color:G.sub,fontSize:10,margin:'0 0 3px'}}>· {i}</p>)}
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:9}}>
+          {[['Year 1','$50K–$200K','B2C early · pilots · first licensing'],['Year 2','$500K–$2M','B2B launch · EU licensing deals'],['Year 3+','$5M+','Enterprise API · clinical study · scale']].map(([y,v,d])=>(
+            <div key={y} style={{background:G.card,border:`1px solid ${G.bdr}`,borderRadius:10,padding:'12px',textAlign:'center'}}>
+              <p style={{color:G.muted,fontSize:9,fontWeight:700,letterSpacing:'1px',margin:'0 0 4px'}}>{y}</p>
+              <p style={{color:G.green,fontSize:18,fontWeight:900,margin:'0 0 4px'}}>{v}</p>
+              <p style={{color:G.sub,fontSize:9,margin:0,lineHeight:1.4}}>{d}</p>
+            </div>
+          ))}
+        </div>
+        <SF n={13} t={TOTAL}/>
+      </div>
+    ),
+
+    // 14 ROADMAP
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="ROADMAP" title="Development Roadmap" sub="From working prototype to global API infrastructure — 4 phases" tc={G.orange}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {[
+            {ph:'MVP · NOW ✅',c:G.green,items:['Working web prototype · v6.8 deployed','Both Apps operational · mobile-ready','Triple Pharmacy fully developed','Copyright registered (Book + App 1)','Registered business entity (Ukraine FOP)','Temporary protection · Luxembourg']},
+            {ph:'PHASE 2 · Months 1–12',c:G.blue,items:['Production mobile app (iOS + Android)','3D brain visualization module','App Store deployment','10K user validation study','First B2B pilot partnership','Clinical consultation (EU)']},
+            {ph:'PHASE 3 · Months 12–24',c:G.purple,items:['Enterprise B2B2C API launch','Smart home environment sync','Corporate HR dashboard product','Clinical study publication','First licensing deal closed','EU digital health certification']},
+            {ph:'VISION · Year 3+',c:G.gold,items:['Universal Biochemical API','IoT + wearables integration','AI companion calibration engine','Insurance risk model integration','Global licensing network','Potential acqui-hire / acquisition']},
+          ].map(({ph,c,items})=>(
+            <div key={ph} style={{background:G.card,border:`1px solid ${c}40`,borderRadius:12,padding:'14px'}}>
+              <span style={{background:c+'22',color:c,fontSize:9,fontWeight:900,padding:'3px 10px',borderRadius:10,letterSpacing:'1px'}}>{ph}</span>
+              <div style={{marginTop:10}}>
+                {items.map(i=><p key={i} style={{color:G.sub,fontSize:10,margin:'0 0 4px',lineHeight:1.45}}>{i}</p>)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <SF n={14} t={TOTAL}/>
+      </div>
+    ),
+
+    // 15 STATUS & IP
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="TRACTION & IP" title="Current Status" sub="What exists, what is protected, what is ready to license or co-develop" tc={G.green}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+          <div>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 10px'}}>WHAT EXISTS TODAY</p>
+            {[
+              ['✅','Working web prototype · v6.8 live'],
+              ['✅','Both apps operational · mobile-ready'],
+              ['✅','416-page IP framework documented'],
+              ['✅','Copyright registered · Book + App 1 · UA 2025'],
+              ['🔄','App 2 copyright · registration in progress'],
+              ['✅','Registered business entity · Ukraine FOP'],
+              ['✅','Temporary protection · Luxembourg'],
+              ['✅','~2,000 lines original authored code'],
+            ].map(([ic,t])=>(
+              <div key={t} style={{display:'flex',gap:8,alignItems:'flex-start',marginBottom:7}}>
+                <span style={{fontSize:13,flexShrink:0}}>{ic}</span>
+                <p style={{color:G.text,fontSize:11,margin:0,lineHeight:1.5}}>{t}</p>
+              </div>
+            ))}
+          </div>
+          <div>
+            <p style={{fontSize:9,color:G.muted,letterSpacing:'2px',fontWeight:700,margin:'0 0 10px'}}>IP PROTECTION STATUS</p>
+            <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:14}}>
+              {[
+                {t:'"Code of Reality" · 416 pp',s:'© 2025 · Ukraine · Registered',c:G.gold},
+                {t:'App 1: Biochemical Resonance',s:'© 2025 · Ukraine · Registered',c:G.purple},
+                {t:'Algorithm & Methodology',s:'Original authored system · documented',c:G.blue},
+                {t:'App 2: Neuro-Translator v6.8',s:'© 2025 · Registration in progress',c:G.cyan},
+                {t:'FMOD Database · 80+ entries',s:'Original authored content · protected',c:G.orange},
+              ].map(({t,s,c})=>(
+                <div key={t} style={{background:c+'08',border:`1px solid ${c}25`,borderRadius:9,padding:'9px 12px'}}>
+                  <p style={{color:'white',fontWeight:700,fontSize:11,margin:'0 0 2px'}}>{t}</p>
+                  <p style={{color:G.sub,fontSize:10,margin:0}}>{s}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{background:G.green+'09',border:`1px solid ${G.green}35`,borderRadius:12,padding:'11px 13px'}}>
+              <p style={{color:G.green,fontWeight:800,fontSize:11,margin:'0 0 4px'}}>Research Foundation</p>
+              <p style={{color:G.sub,fontSize:11,margin:0,lineHeight:1.6}}>21 years personal observation · ~1,000 natal charts · 30+ original coined concepts · 3 interconnected original products</p>
+            </div>
+          </div>
+        </div>
+        <SF n={15} t={TOTAL}/>
+      </div>
+    ),
+
+    // 16 ASK
+    () => (
+      <div style={{padding:'8px 0'}}>
+        <SH tag="THE ASK" title="What We're Looking For" sub="Four parallel pathways — all open simultaneously" tc={G.gold}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+          {[
+            {e:'🔵',t:'Licensing Partner',d:'Wellness / astrology app company ready to embed neurochemical profiling into existing product. Target: Co-Star, The Pattern, Insight Timer, Calm, Headspace.',sub:'Revenue share · white-label · content API',c:G.blue},
+            {e:'🟣',t:'EU Grants',d:'Programs for displaced Ukrainian digital entrepreneurs. Exploring: House of Startups (Luxembourg), Creative Europe, EIC Accelerator, Horizon Europe.',sub:'Grant funding · incubation · EU residency path',c:G.purple},
+            {e:'🟢',t:'Technical Co-Founder / CTO',d:'Engineer to build production mobile app. Compensation: equity stake + participation in licensing revenue from day one.',sub:'Equity partnership · iOS + Android + API',c:G.green},
+            {e:'🟡',t:'Pilot Partner',d:'Clinic, HR team, coaching org, or university willing to test with real users and co-author validation results.',sub:'Real data · co-publication · social proof',c:G.gold},
+          ].map(({e,t,d,sub,c})=>(
+            <div key={t} style={{background:c+'08',border:`1px solid ${c}28`,borderRadius:14,padding:'15px 14px'}}>
+              <div style={{display:'flex',gap:10,alignItems:'flex-start',marginBottom:8}}>
+                <span style={{fontSize:22}}>{e}</span>
+                <p style={{color:'white',fontWeight:800,fontSize:13,margin:0}}>{t}</p>
+              </div>
+              <p style={{color:G.sub,fontSize:11,margin:'0 0 9px',lineHeight:1.65}}>{d}</p>
+              <span style={{background:c+'20',border:`1px solid ${c}40`,color:c,fontSize:9,fontWeight:700,padding:'3px 10px',borderRadius:12}}>{sub}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${G.bdr}`,borderRadius:12,padding:'13px',textAlign:'center'}}>
+          <p style={{color:G.sub,fontSize:12,lineHeight:1.75,margin:0}}>
+            ⚡ Full technical description · demo access · IP documentation available on request<br/>
+            <span style={{color:G.purple}}>Registered business entity (Ukraine FOP) · Temporary protection status, Luxembourg 🇱🇺</span>
+          </p>
+        </div>
+        <SF n={16} t={TOTAL}/>
+      </div>
+    ),
+
+    // 17 CONTACT
+    () => (
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'80vh',textAlign:'center',padding:'8px 0'}}>
+        <div style={{background:'linear-gradient(135deg,rgba(192,132,252,0.12),rgba(103,232,249,0.08))',border:'1px solid rgba(192,132,252,0.3)',borderRadius:24,padding:'36px 32px',maxWidth:500,width:'100%'}}>
+          <p className="glow" style={{fontSize:28,fontWeight:900,color:'white',margin:'0 0 6px'}}>Eva White</p>
+          <p style={{fontSize:12,color:'#c4b5fd',margin:'0 0 4px',letterSpacing:'1.5px'}}>Founder · Author · Independent Researcher</p>
+          <p style={{fontSize:10,color:G.sub,margin:'0 0 22px'}}>Ukraine 🇺🇦 · Luxembourg 🇱🇺 (temporary protection)</p>
+          <p style={{fontSize:14,color:'#e9d5ff',fontStyle:'italic',lineHeight:1.95,margin:'0 0 24px'}}>"Make neurobiological self-knowledge<br/>as accessible as a blood test.<br/><strong style={{color:'white'}}>No hardware. No lab. Enter a date.</strong>"</p>
+          <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'center',marginBottom:22}}>
+            {['📧 [your email]','💼 LinkedIn: Eva White','✈️ Telegram: @[your handle]'].map(c=>(
+              <span key={c} style={{background:'rgba(0,0,0,0.5)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:20,padding:'8px 22px',fontSize:12,color:'#d1d5db',display:'block'}}>{c}</span>
+            ))}
+          </div>
+          <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+            {[['📚','Book\nRegistered'],['🧠','App 1\nLive'],['⚡','App 2\nv6.8'],['🛡','Copyright\nUA 2025']].map(([ic,l])=>(
+              <div key={l} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,padding:'8px 12px',textAlign:'center',minWidth:60}}>
+                <span style={{fontSize:16}}>{ic}</span>
+                <p style={{fontSize:8,color:G.sub,margin:'4px 0 0',whiteSpace:'pre-line',lineHeight:1.4}}>{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p style={{color:G.muted,fontSize:9,marginTop:16,letterSpacing:'1px'}}>BIOCHEMICAL RESONANCE · © 2025 · ALL RIGHTS RESERVED</p>
+        <SF n={17} t={TOTAL}/>
+      </div>
+    ),
+  ];
+
+  return (
+    <div style={{background:G.bg,minHeight:'100vh',fontFamily:'system-ui,-apple-system,sans-serif',color:'white'}}>
+      <div style={{maxWidth:780,margin:'0 auto',padding:'24px 16px 100px'}}>
+        <div key={key} className={dir==='fwd'?'slide-fwd':'slide-back'}>
+          {slides[sl]()}
+        </div>
+      </div>
+
+      {/* NAV BAR */}
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:G.bg+'f0',borderTop:`1px solid ${G.bdr}`,backdropFilter:'blur(10px)',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',zIndex:100}}>
+        <button onClick={prev} disabled={sl===0}
+          style={{background:sl===0?G.card:'rgba(251,191,36,0.1)',border:`1px solid ${sl===0?G.bdr:G.gold}`,color:sl===0?G.muted:G.gold,borderRadius:8,padding:'7px 16px',cursor:sl===0?'not-allowed':'pointer',fontWeight:700,fontSize:12,opacity:sl===0?.5:1}}>
+          ← Prev
+        </button>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap',justifyContent:'center',maxWidth:380}}>
+          {Array.from({length:TOTAL},(_,i)=>(
+            <button key={i} onClick={()=>go(i)}
+              style={{width:i===sl?20:7,height:7,borderRadius:4,background:i===sl?G.gold:G.bdr,border:'none',cursor:'pointer',padding:0,transition:'all 0.2s'}}/>
+          ))}
+        </div>
+        <button onClick={next} disabled={sl===TOTAL-1}
+          style={{background:sl===TOTAL-1?G.card:'rgba(251,191,36,0.1)',border:`1px solid ${sl===TOTAL-1?G.bdr:G.gold}`,color:sl===TOTAL-1?G.muted:G.gold,borderRadius:8,padding:'7px 16px',cursor:sl===TOTAL-1?'not-allowed':'pointer',fontWeight:700,fontSize:12,opacity:sl===TOTAL-1?.5:1}}>
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
