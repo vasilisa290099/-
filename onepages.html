@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eva White · Biochemical Resonance · One-Pager 2025</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#07020f;
+    font-family:system-ui,-apple-system,sans-serif;
+    color:#e5e7eb;
+    padding:28px 16px;
+    min-height:100vh;
+  }
+  .wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+
+  /* ── TAGS ── */
+  .tag{
+    display:inline-block;
+    font-size:8px;font-weight:800;
+    letter-spacing:1.5px;text-transform:uppercase;
+    padding:3px 10px;border-radius:20px;
+  }
+
+  /* ── CARDS ── */
+  .card{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:14px;
+    padding:16px 18px;
+  }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+
+  /* ── HEADER ── */
+  .header{
+    background:linear-gradient(135deg,rgba(192,132,252,0.10),rgba(103,232,249,0.07));
+    border:1px solid rgba(192,132,252,0.25);
+    border-radius:20px;
+    padding:24px 28px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::before{
+    content:'';position:absolute;top:-40px;right:-40px;
+    width:180px;height:180px;
+    background:radial-gradient(circle,rgba(192,132,252,0.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .header-inner{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+  .h1{
+    font-size:clamp(28px,6vw,46px);
+    font-weight:900;letter-spacing:-2px;line-height:1.0;
+    margin:8px 0 6px;
+    background:linear-gradient(135deg,#fff 0%,#c084fc 50%,#67e8f9 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .h1-sub{color:#a78bfa;font-size:10px;letter-spacing:3px;font-weight:700;margin-bottom:12px}
+  .h1-quote{color:#e5e7eb;font-size:13px;line-height:1.75;font-style:italic;max-width:440px}
+
+  /* stat boxes */
+  .stats{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .stat-box{
+    background:rgba(0,0,0,0.45);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:10px;
+    padding:8px 16px;text-align:right;min-width:90px;
+  }
+  .stat-val{font-size:18px;font-weight:900;color:white;line-height:1}
+  .stat-lbl{font-size:8px;color:#9ca3af;margin-top:3px;letter-spacing:1px}
+
+  /* ── BULLET ── */
+  .bullet{display:flex;gap:7px;align-items:flex-start;margin-bottom:5px}
+  .bullet-bar{width:3px;min-height:12px;border-radius:2px;margin-top:4px;flex-shrink:0}
+  .bullet-txt{color:#6b7280;font-size:10px;line-height:1.55}
+
+  /* ── SOLUTION BOX ── */
+  .sol-box{
+    background:rgba(103,232,249,0.07);
+    border:1px solid rgba(103,232,249,0.2);
+    border-radius:10px;padding:10px 13px;margin-bottom:8px;
+    text-align:center;font-size:11px;color:#e5e7eb;line-height:1.65;
+  }
+
+  /* ── PRODUCT CARD ── */
+  .prod-card{border-radius:12px;padding:14px}
+  .prod-head{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .prod-emoji{font-size:22px}
+  .prod-name{color:white;font-weight:800;font-size:11px;line-height:1.2}
+  .prod-role{font-size:9px;font-weight:700;margin-top:2px}
+  .prod-desc{color:#9ca3af;font-size:10px;line-height:1.6;margin-bottom:9px}
+  .prod-tags{display:flex;gap:5px;flex-wrap:wrap}
+  .prod-tag{
+    background:rgba(0,0,0,0.5);
+    font-size:8px;font-weight:700;
+    padding:2px 7px;border-radius:6px;
+  }
+
+  /* ── CASE CARD ── */
+  .case-card{border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .case-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .case-title{color:white;font-weight:800;font-size:11px}
+  .case-ok{color:#4ade80;font-size:8px;font-weight:800;flex-shrink:0}
+  .case-sub{font-size:9px;font-weight:700;margin-bottom:4px}
+  .case-body{color:#6b7280;font-size:9px;line-height:1.5;margin-bottom:5px}
+  .case-result{border-radius:6px;padding:5px 8px}
+  .case-result-txt{font-size:9px;font-weight:700}
+
+  /* ── MOAT ITEM ── */
+  .moat-item{margin-bottom:8px}
+  .moat-item-hl{
+    background:rgba(103,232,249,0.05);
+    border:1px solid rgba(103,232,249,0.18);
+    border-radius:10px;padding:9px 11px;margin-bottom:8px;
+  }
+  .moat-row{display:flex;gap:6px;align-items:center;margin-bottom:2px}
+  .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .moat-title{color:white;font-weight:700;font-size:10px}
+  .moat-desc{color:#6b7280;font-size:9px;margin-left:12px;line-height:1.5}
+  .new-badge{
+    background:rgba(103,232,249,0.2);color:#67e8f9;
+    font-size:7px;font-weight:900;padding:1px 6px;border-radius:5px;margin-left:2px;
+  }
+
+  /* ── MARKET ── */
+  .market-box{border-radius:10px;padding:10px 8px;text-align:center}
+  .market-val{font-size:18px;font-weight:900;line-height:1;margin-bottom:4px}
+  .market-lbl{font-size:9px;color:#9ca3af;line-height:1.3}
+
+  /* ── ASK CARD ── */
+  .ask-wrap{
+    background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(192,132,252,0.06));
+    border:1px solid rgba(251,191,36,0.25);
+    border-radius:14px;padding:16px 18px;
+  }
+  .ask-box{border-radius:11px;padding:12px;text-align:center}
+  .ask-emoji{font-size:22px;display:block;margin-bottom:6px}
+  .ask-title{color:white;font-weight:800;font-size:11px;margin-bottom:4px}
+  .ask-desc{color:#9ca3af;font-size:9px;line-height:1.5}
+
+  /* ── FOOTER ── */
+  .footer-wrap{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:14px;padding:16px 20px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  }
+  .footer-name{color:white;font-weight:900;font-size:16px;margin-bottom:2px}
+  .footer-role{color:#c084fc;font-size:10px;letter-spacing:1px;margin-bottom:6px}
+  .footer-quote{color:#9ca3af;font-size:10px;font-style:italic;line-height:1.6}
+  .footer-links{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .footer-link{
+    background:rgba(0,0,0,0.5);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:20px;padding:5px 16px;
+    font-size:10px;color:#e5e7eb;text-decoration:none;
+    display:block;white-space:nowrap;
+    transition:border-color 0.2s,color 0.2s;
+  }
+  .footer-link:hover{border-color:rgba(192,132,252,0.5);color:#c084fc}
+
+  .copyright{
+    color:#6b7280;font-size:8px;text-align:center;
+    margin-top:6px;letter-spacing:1.5px;
+  }
+
+  /* ── STARS ── */
+  .star-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
+  .star-item{display:flex;gap:5px;align-items:center}
+  .star-txt{color:#9ca3af;font-size:9px}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    .grid-2{grid-template-columns:1fr}
+    .grid-3{grid-template-columns:1fr}
+    .grid-4{grid-template-columns:1fr 1fr}
+    .header-inner{flex-direction:column}
+    .stats{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start}
+    .footer-links{align-items:flex-start}
+    .footer-wrap{flex-direction:column}
+  }
+  @media(max-width:400px){
+    .grid-4{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <div class="header-inner">
+      <div>
+        <span class="tag" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.35);color:#fbbf24">
+          One-Pager · Eva White · 2025
+        </span>
+        <h1 class="h1">BIOCHEMICAL<br>RESONANCE</h1>
+        <p class="h1-sub">NEUROCHEMICAL PROFILING ECOSYSTEM</p>
+        <p class="h1-quote">
+          "Enter a birth date. Receive a complete neurochemical map.<br>
+          <strong style="color:white">No hardware. No lab. No specialist.</strong>"
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-val">21 yrs</div>
+          <div class="stat-lbl">RESEARCH</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">1,000+</div>
+          <div class="stat-lbl">PROFILES</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">$8.4B+</div>
+          <div class="stat-lbl">TAM</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">3</div>
+          <div class="stat-lbl">PRODUCTS LIVE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROBLEM + SOLUTION ═══ -->
+  <div class="grid-2">
+
+    <!-- PROBLEM -->
+    <div class="card" style="border-left:3px solid #f87171">
+      <span class="tag" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:#f87171">
+        The Problem
+      </span>
+      <p style="color:white;font-weight:900;font-size:14px;margin:10px 0 8px;line-height:1.2">
+        Every person has a neurobiological wiring.<br>
+        <span style="color:#f87171">No product maps it.</span>
+      </p>
+      <div class="bullet"><div class="bullet-bar" style="background:#f87171"></div><p class="bullet-txt">Psychology describes behaviour — not its biological source</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#f87171"></div><p class="bullet-txt">Medicine treats symptoms — not the architecture generating them</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#f87171"></div><p class="bullet-txt">Personality tests are static — no prediction, no protocol</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#f87171"></div><p class="bullet-txt">Two people in conflict speak different neurochemical languages</p></div>
+    </div>
+
+    <!-- SOLUTION -->
+    <div class="card" style="border-left:3px solid #67e8f9">
+      <span class="tag" style="background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.3);color:#67e8f9">
+        The Solution
+      </span>
+      <p style="color:white;font-weight:900;font-size:14px;margin:10px 0 8px;line-height:1.2">
+        Birth date → proprietary algorithm →<br>
+        <span style="color:#67e8f9">complete neurochemical profile.</span>
+      </p>
+      <div class="sol-box">
+        🔒 <strong style="color:white">The computation method is proprietary.</strong><br>
+        Like 23andMe — you don't need to understand PCR<br>to receive your DNA results.
+      </div>
+      <div class="bullet"><div class="bullet-bar" style="background:#c084fc"></div><p class="bullet-txt">Dominant neurotransmitter hierarchy</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#fb923c"></div><p class="bullet-txt">Stress architecture + discharge Vector</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#fbbf24"></div><p class="bullet-txt">Real-time load — what the NS needs today</p></div>
+      <div class="bullet"><div class="bullet-bar" style="background:#67e8f9"></div><p class="bullet-txt">Communication gap between two people</p></div>
+    </div>
+  </div>
+
+  <!-- ═══ 3 PRODUCTS ═══ -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+      <span class="tag" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24">
+        Three Products · One Ecosystem
+      </span>
+      <p style="color:#6b7280;font-size:9px">Prototype live · AI-integrated · all three operational</p>
+    </div>
+    <div class="grid-3">
+
+      <!-- Book -->
+      <div class="prod-card" style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2)">
+        <div class="prod-head">
+          <span class="prod-emoji">📚</span>
+          <div>
+            <div class="prod-name">Code of Reality</div>
+            <div class="prod-role" style="color:#fbbf24">Book · IP Core</div>
+          </div>
+        </div>
+        <p class="prod-desc">416-page theoretical framework. The Vector: why identical stress → explosion in one person, disease in another, transformation in a third.</p>
+        <div class="prod-tags">
+          <span class="prod-tag" style="border:1px solid rgba(251,191,36,0.2);color:#fbbf24">416 pp</span>
+          <span class="prod-tag" style="border:1px solid rgba(251,191,36,0.2);color:#fbbf24">21yr R&D</span>
+          <span class="prod-tag" style="border:1px solid rgba(251,191,36,0.2);color:#fbbf24">Registered ©</span>
+        </div>
+      </div>
+
+      <!-- App 1 -->
+      <div class="prod-card" style="background:rgba(192,132,252,0.06);border:1px solid rgba(192,132,252,0.2)">
+        <div class="prod-head">
+          <span class="prod-emoji">🧠</span>
+          <div>
+            <div class="prod-name">App 1 · Biochemical Resonance</div>
+            <div class="prod-role" style="color:#c084fc">"Know Yourself"</div>
+          </div>
+        </div>
+        <p class="prod-desc">Individual neurochemical profile · Triple Pharmacy (Art + Literature + Sound as Rx) · Daily protocol · Crisis Right Now mode. AI generates response on-demand.</p>
+        <div class="prod-tags">
+          <span class="prod-tag" style="border:1px solid rgba(192,132,252,0.2);color:#c084fc">225+ configs</span>
+          <span class="prod-tag" style="border:1px solid rgba(192,132,252,0.2);color:#c084fc">6 modules</span>
+          <span class="prod-tag" style="border:1px solid rgba(192,132,252,0.2);color:#c084fc">AI-Ready ✅</span>
+        </div>
+      </div>
+
+      <!-- App 2 -->
+      <div class="prod-card" style="background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.2)">
+        <div class="prod-head">
+          <span class="prod-emoji">⚡</span>
+          <div>
+            <div class="prod-name">App 2 · Neuro-Translator</div>
+            <div class="prod-role" style="color:#67e8f9">"Understand Each Other"</div>
+          </div>
+        </div>
+        <p class="prod-desc">Two birth dates → dual profiles → computed neurochemical gap → exact communication protocol. AI generates the script. Fully autonomous.</p>
+        <div class="prod-tags">
+          <span class="prod-tag" style="border:1px solid rgba(103,232,249,0.2);color:#67e8f9">80+ comm routes</span>
+          <span class="prod-tag" style="border:1px solid rgba(103,232,249,0.2);color:#67e8f9">6 conflicts</span>
+          <span class="prod-tag" style="border:1px solid rgba(103,232,249,0.2);color:#67e8f9">AI-Ready ✅</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ CASES + MOAT ═══ -->
+  <div class="grid-2">
+
+    <!-- CASE STUDIES -->
+    <div class="card">
+      <span class="tag" style="background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.3);color:#f472b6">
+        Predictive Accuracy &amp; Case Studies
+      </span>
+      <p style="color:#9ca3af;font-size:9px;margin:6px 0 10px;font-style:italic">
+        System operates autonomously via birth dates
+      </p>
+
+      <!-- Case 1 — Purple -->
+      <div class="case-card" style="background:rgba(192,132,252,0.06);border:1px solid rgba(192,132,252,0.2)">
+        <div class="case-head">
+          <span class="case-title">🎨 B2C: Executive Burnout Prevention</span>
+          <span class="case-ok">✅ RESOLVED</span>
+        </div>
+        <p class="case-sub" style="color:#c084fc">Tech CEO (Male, 38) · D1-Sympathetic Storm</p>
+        <p class="case-body">
+          Algorithm output: Severe risk of chronic insomnia + decision fatigue.<br>
+          Generated Rx: Fractal visual therapy (Shishkin protocol) + Bach audio structuring + Vagus nerve kinetic reset.
+        </p>
+        <div class="case-result" style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2)">
+          <p class="case-result-txt" style="color:#4ade80">Cortisol normalized in 15 mins. No medication required.</p>
+        </div>
+      </div>
+
+      <!-- Case 2 — Blue -->
+      <div class="case-card" style="background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.2)">
+        <div class="case-head">
+          <span class="case-title">⚡ B2B: Co-Founder Conflict Resolution</span>
+          <span class="case-ok">✅ RESOLVED</span>
+        </div>
+        <p class="case-sub" style="color:#60a5fa">Two key business partners · stalled negotiations</p>
+        <p class="case-body">
+          Algorithm output: "Defensive Aggression" vs "Truth Filter" — communication gap identified.<br>
+          Neuro-Translator generated 1-line exact script bypassing neurochemical triggers.
+        </p>
+        <div class="case-result" style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2)">
+          <p class="case-result-txt" style="color:#4ade80">Conflict resolved instantly. Team workflow restored.</p>
+        </div>
+      </div>
+
+      <!-- Bottom note -->
+      <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:8px 10px;text-align:center">
+        <p style="color:#fbbf24;font-size:10px;line-height:1.6">
+          <strong>Zero manual expert input required.</strong><br>
+          <span style="color:#9ca3af;font-size:9px">AI generates output directly from birth data via proprietary algorithm.</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- MOAT -->
+    <div class="card">
+      <span class="tag" style="background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:#4ade80">
+        Why Us · Moat
+      </span>
+      <p style="color:white;font-weight:800;font-size:12px;margin:10px 0 8px">
+        What cannot be replicated quickly
+      </p>
+
+      <!-- Item 1 -->
+      <div class="moat-item">
+        <div class="moat-row">
+          <div class="dot" style="background:#fbbf24"></div>
+          <span class="moat-title">21-year data corpus</span>
+        </div>
+        <p class="moat-desc">1,000+ profiles · historical validation · proprietary prescription library</p>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="moat-item">
+        <div class="moat-row">
+          <div class="dot" style="background:#4ade80"></div>
+          <span class="moat-title">IP registered</span>
+        </div>
+        <p class="moat-desc">Book + App 1 © UA 2025 · App 2 in progress · Temporary Protection EU</p>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="moat-item">
+        <div class="moat-row">
+          <div class="dot" style="background:#c084fc"></div>
+          <span class="moat-title">Methodology depth</span>
+        </div>
+        <p class="moat-desc">~2,000 lines original code · 30+ original terms · 8 invented concepts</p>
+      </div>
+
+      <!-- Item 4 — HIGHLIGHT (Autonomous AI-Ready Core) -->
+      <div class="moat-item-hl">
+        <div class="moat-row">
+          <div class="dot" style="background:#67e8f9"></div>
+          <span class="moat-title">Autonomous AI-Ready Core</span>
+          <span class="new-badge">NEW</span>
+        </div>
+        <p class="moat-desc">
+          100% digitized proprietary methodology. LLM-integrated architecture (GPT-4o / Claude ready).
+          The system operates independently via API without manual expert input. Highly scalable.
+        </p>
+      </div>
+
+      <!-- 8 Inventions -->
+      <span class="tag" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24">
+        8 Original Inventions
+      </span>
+      <div class="star-grid">
+        <div class="star-item"><span style="color:#fbbf24;font-size:9px">★</span><span class="star-txt">The Vector</span></div>
+        <div class="star-item"><span style="color:#c084fc;font-size:9px">★</span><span class="star-txt">Triple Pharmacy</span></div>
+        <div class="star-item"><span style="color:#67e8f9;font-size:9px">★</span><span class="star-txt">Affective Flickering Axis</span></div>
+        <div class="star-item"><span style="color:#fb923c;font-size:9px">★</span><span class="star-txt">Neuro Comm. Gap</span></div>
+        <div class="star-item"><span style="color:#f472b6;font-size:9px">★</span><span class="star-txt">FMOD Matrix</span></div>
+        <div class="star-item"><span style="color:#f87171;font-size:9px">★</span><span class="star-txt">Channel Dampening</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MARKET ═══ -->
+  <div class="card">
+    <span class="tag" style="background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);color:#60a5fa">
+      Market
+    </span>
+    <div class="grid-4" style="margin:10px 0">
+      <div class="market-box" style="background:rgba(192,132,252,0.08);border:1px solid rgba(192,132,252,0.2)">
+        <div class="market-val" style="color:#c084fc">$500B+</div>
+        <div class="market-lbl">Mental Health Tech</div>
+      </div>
+      <div class="market-box" style="background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.2)">
+        <div class="market-val" style="color:#f472b6">$4.3B</div>
+        <div class="market-lbl">Relationship Apps</div>
+      </div>
+      <div class="market-box" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)">
+        <div class="market-val" style="color:#fbbf24">$2.2B</div>
+        <div class="market-lbl">Self-Knowledge Apps</div>
+      </div>
+      <div class="market-box" style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2)">
+        <div class="market-val" style="color:#4ade80">$8.4B+</div>
+        <div class="market-lbl">Our TAM</div>
+      </div>
+    </div>
+    <p style="color:#9ca3af;font-size:10px;line-height:1.6">
+      Target partners:
+      <strong style="color:white">BetterHelp · Wysa · Calm · Lasting · Paired · Oura</strong>
+      — neurochemical profiling layer ready to embed via API. No equivalent exists.
+    </p>
+  </div>
+
+  <!-- ═══ THE ASK ═══ -->
+  <div class="ask-wrap">
+    <span class="tag" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24">
+      What We're Looking For
+    </span>
+    <div class="grid-4" style="margin-top:12px">
+      <div class="ask-box" style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2)">
+        <span class="ask-emoji">🇪🇺</span>
+        <div class="ask-title">EU Ecosystem</div>
+        <div class="ask-desc">Mentorship · accelerator · House of Startups · EIC · Horizon</div>
+      </div>
+      <div class="ask-box" style="background:rgba(192,132,252,0.07);border:1px solid rgba(192,132,252,0.2)">
+        <span class="ask-emoji">🔵</span>
+        <div class="ask-title">Licensing Partner</div>
+        <div class="ask-desc">Wellness or MH app to embed neurochemical profiling. System ready today.</div>
+      </div>
+      <div class="ask-box" style="background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.2)">
+        <span class="ask-emoji">🟢</span>
+        <div class="ask-title">Technical Co-founder</div>
+        <div class="ask-desc">CTO / engineer for production mobile app. Equity + revenue from day 1.</div>
+      </div>
+      <div class="ask-box" style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2)">
+        <span class="ask-emoji">🟡</span>
+        <div class="ask-title">Pilot Partner</div>
+        <div class="ask-desc">Clinic · HR · coaching org · university. Real users + co-authored validation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer-wrap">
+    <div>
+      <div class="footer-name">Eva White</div>
+      <div class="footer-role">Founder · Author · Independent Researcher · Ukraine 🇺🇦 · EU 🇪🇺</div>
+      <div class="footer-quote">"Make neurobiological self-knowledge as accessible as a blood test."</div>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="mailto:vasilisa290@gmail.com">
+        📧 vasilisa290@gmail.com
+      </a>
+      <a class="footer-link" href="https://www.linkedin.com/in/eva-white-tech" target="_blank" rel="noreferrer">
+        💼 linkedin.com/in/eva-white-tech
+      </a>
+    </div>
+  </div>
+
+  <p class="copyright">
+    BIOCHEMICAL RESONANCE · © 2025 EVA WHITE · ALL RIGHTS RESERVED · NDA REQUIRED FOR TECHNICAL DISCLOSURE
+  </p>
+
+</div>
+</body>
+</html>
