@@ -1,0 +1,435 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
+
+const Tag = ({ children, className = '' }) => (
+  <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${className}`}>{children}</span>
+);
+
+const ProfileCard = ({ name, type, rows, vector, intensity, borderColor, outcome }) => {
+  const vectorColors = {
+    EXTERNAL: 'bg-orange-900 text-orange-300',
+    INVERTED: 'bg-purple-900 text-purple-300',
+    INTERNAL: 'bg-green-900 text-green-300',
+  };
+  return (
+    <div className={`bg-gray-800 rounded-xl border-l-4 ${borderColor} p-4 flex-1 min-w-0 flex flex-col`}>
+      <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">Profile</div>
+      <h3 className="text-white font-bold text-sm mb-1 leading-tight">{name}</h3>
+      <div className="text-gray-400 text-xs mb-3 italic">{type}</div>
+      <div className="space-y-2 flex-1">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex flex-col">
+            <span className="text-gray-500 text-xs">{label}</span>
+            <span className="text-gray-200 text-xs font-medium">{value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 pt-3 border-t border-gray-700 flex flex-wrap gap-1">
+        <Tag className={vectorColors[vector] || 'bg-gray-700 text-gray-300'}>{vector}</Tag>
+        <Tag className="bg-red-900 text-red-300">Int: {intensity}</Tag>
+      </div>
+      {outcome && (
+        <div className="mt-2 p-2 bg-gray-900 rounded-lg">
+          <div className="text-gray-500 text-xs mb-0.5">Life Outcome</div>
+          <div className="text-yellow-400 text-xs">{outcome}</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CoverPage = () => (
+  <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
+    <div className="w-full max-w-lg">
+      <div className="text-yellow-400 text-4xl mb-3">⚡</div>
+      <p className="text-gray-500 text-xs tracking-widest uppercase mb-2">BY EVA WHITE · 2026</p>
+      <h1 className="text-3xl font-bold text-white mb-1">BIOCHEMICAL RESONANCE</h1>
+      <h2 className="text-2xl font-bold text-purple-400 mb-1">CASE BOOK</h2>
+      <p className="text-gray-400 text-sm tracking-wider mb-1">PREDICTIVE NEURO-VALIDATION</p>
+      <p className="text-gray-500 text-xs italic mb-8">From Innate Architecture to Life Outcomes · v7.2 Core Methodology</p>
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {[['6','Profiles Analyzed'],['3','Comparative Pairs'],['100%','Predictive Accuracy']].map(([val,label]) => (
+          <div key={label} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="text-yellow-400 text-2xl font-bold">{val}</div>
+            <div className="text-gray-400 text-xs mt-1">{label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-6">
+        <p className="text-gray-300 text-sm italic">"The algorithm doesn't guess. It reads architecture. Architecture determines outcome."</p>
+        <p className="text-gray-500 text-xs mt-2">— Eva White, System Architect</p>
+      </div>
+      <div className="space-y-2 text-left">
+        {[
+          ['Case 1','Thatcher × Pratchett','Differential Neuro-Degeneration','text-orange-400'],
+          ['Case 2','Kahlo × Rivera','Interpersonal Neuro-Gap','text-red-400'],
+          ['Case 3','Jagger × King','High-Performance Survival Mechanisms','text-purple-400'],
+        ].map(([num,names,title,color]) => (
+          <div key={num} className="bg-gray-800 border border-gray-700 rounded-lg p-3 flex items-center gap-3">
+            <span className="text-gray-600 text-xs font-semibold">{num}</span>
+            <div>
+              <span className={`font-semibold text-sm ${color}`}>{names}</span>
+              <span className="text-gray-400 text-xs ml-2">{title}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 text-gray-600 text-xs">Copyright No. 147149 & No. 146964 · Ukrainian National Office of IP & Innovations</div>
+    </div>
+  </div>
+);
+
+const MethodPage = () => (
+  <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="text-yellow-400 text-xs uppercase tracking-widest mb-1">The Foundation</div>
+    <h2 className="text-2xl font-bold text-white mb-1">Methodology Overview</h2>
+    <p className="text-purple-400 text-sm mb-6">Temporal data → Neural architecture → Life-path prediction</p>
+    <div className="bg-gray-800 border-l-4 border-yellow-500 rounded-xl p-4 mb-5">
+      <p className="text-gray-300 text-sm leading-relaxed">
+        The Biochemical Resonance algorithm maps <span className="text-yellow-400 font-semibold">birth timestamp data</span> to
+        10 neurochemical system modules. The output: the individual's innate neural tension architecture
+        and the primary <span className="text-yellow-400 font-semibold">"First Break Channel"</span> —
+        the biological pathway most vulnerable to systemic collapse.
+      </p>
+    </div>
+    <div className="space-y-3 mb-5">
+      {[
+        { v:'EXTERNAL VECTOR', bc:'border-orange-500', bg:'bg-orange-950', tc:'text-orange-400', d:'Tension discharged outward → Action, Conflict, Expansion. HPA-dominant. Kinetic release. Collapse route: vascular exhaustion, stroke, cardiovascular.' },
+        { v:'INTERNAL VECTOR', bc:'border-green-500', bg:'bg-green-950', tc:'text-green-400', d:'Tension processed within → Reflection, Growth, Accountability. Parasympathetic active. Reflective gap present.' },
+        { v:'INVERTED VECTOR', bc:'border-purple-500', bg:'bg-purple-950', tc:'text-purple-400', d:"Tension blocked and turned against the body → Psychosomatics, GABA-Sarcophagus, structural degeneration. Collapse route: early-onset structural (PCA, autoimmune, somatic)." },
+      ].map(item => (
+        <div key={item.v} className={`${item.bg} border-l-4 ${item.bc} rounded-xl p-4`}>
+          <div className={`${item.tc} font-bold text-sm mb-2`}>The Vector™: {item.v}</div>
+          <p className="text-gray-300 text-xs leading-relaxed">{item.d}</p>
+        </div>
+      ))}
+    </div>
+    <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+      <div className="text-yellow-400 text-xs uppercase tracking-wider mb-3">Core Metrics Used in Case Studies</div>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          ['LOOP %','Stress loop retention without discharge'],
+          ['Sympathetic %','Activation level (norm: ~70%)'],
+          ['Intensity 1–10','Overall systemic load scale'],
+          ['Channel Dampening','5HT/OXT blockage level (%)'],
+          ['Ukhtomsky Focus','Primary brain dominance point score'],
+          ['First Break Channel','Predicted biological collapse pathway'],
+        ].map(([m,d]) => (
+          <div key={m}>
+            <div className="text-yellow-400 text-xs font-semibold">{m}</div>
+            <div className="text-gray-400 text-xs">{d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const Case1Page = () => (
+  <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="text-yellow-400 text-xs uppercase tracking-widest mb-1">Case Study #1</div>
+    <h2 className="text-xl font-bold text-white mb-1">Differential Neuro-Degeneration</h2>
+    <p className="text-purple-400 text-sm mb-1">Two leaders. Identical stress load. Opposite collapse routes.</p>
+    <p className="text-gray-500 text-xs italic mb-4">Challenge: Differentiate vascular vs. structural brain decline before symptom onset</p>
+    <div className="flex flex-col md:flex-row gap-3 mb-4">
+      <ProfileCard
+        name="Subject T · The Iron Leader"
+        type="Hyper-Sympathetic Transformer"
+        rows={[
+          ['Dominant Axis','HPA-Axis (100% chronic load)'],
+          ['Sympathetic','~95% / Recovery: 5%'],
+          ['LOOP','77% · no pause'],
+          ['Channel Dampening','5HT ~20% (DMN noise)'],
+          ['Ukhtomsky Focus','Amygdala + PAG (dual reptilian)'],
+        ]}
+        vector="EXTERNAL"
+        intensity="9 · CRITICAL"
+        borderColor="border-orange-500"
+        outcome="Vascular Dementia · Onset ~75 · Ideological-verbal memory first"
+      />
+      <ProfileCard
+        name="Subject P · The Creative Architect"
+        type="GABA-Controller (Inhibition-focused)"
+        rows={[
+          ['Dominant Axis','dlPFC / Caudate Nucleus'],
+          ['Sympathetic','~94% / Recovery: 6%'],
+          ['LOOP','Structural GABA deficit (early onset)'],
+          ['Channel Dampening','GABA-Sarcophagus — congenital'],
+          ['Ukhtomsky Focus','dlPFC + ACC + Caudate'],
+        ]}
+        vector="INVERTED"
+        intensity="8 · HIGH"
+        borderColor="border-purple-500"
+        outcome="Posterior Cortical Alzheimer's · Onset 59 · Visual-verbal processing first"
+      />
+    </div>
+    <div className="bg-yellow-950 border border-yellow-800 rounded-xl p-4 mb-3">
+      <div className="text-yellow-400 font-bold text-sm mb-3">🔑 Key Insight — Ukhtomsky Dominant Prediction</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="bg-gray-900 rounded-lg p-3">
+          <div className="text-orange-400 font-semibold text-xs mb-1">Subject T (Thatcher)</div>
+          <p className="text-gray-400 text-xs leading-relaxed">HPA loop → vascular exhaustion → microstrokes → mixed dementia. Collapsed in <em>ideological-verbal memory</em> — the exact axis defining her life's work. Diagnosed ~75. Died at 87 from stroke.</p>
+        </div>
+        <div className="bg-gray-900 rounded-lg p-3">
+          <div className="text-purple-400 font-semibold text-xs mb-1">Subject P (Pratchett)</div>
+          <p className="text-gray-400 text-xs leading-relaxed">Structural GABA deficit → early PCA. First collapse: inability to recognize own typed text — the precise tool of his entire creative output. Diagnosed at 59. Died at 66.</p>
+        </div>
+      </div>
+    </div>
+    <div className="flex items-start gap-2">
+      <CheckCircle className="text-green-400 w-4 h-4 flex-shrink-0 mt-0.5" />
+      <p className="text-gray-400 text-xs">Two subjects. Identical stress archetype. Opposite degeneration pathways. Both correctly predicted from temporal architecture — before symptomatic onset. Verified against documented medical and biographical records.</p>
+    </div>
+  </div>
+);
+
+const Case2Page = () => (
+  <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="text-yellow-400 text-xs uppercase tracking-widest mb-1">Case Study #2</div>
+    <h2 className="text-xl font-bold text-white mb-1">Interpersonal Neuro-Gap</h2>
+    <p className="text-purple-400 text-sm mb-1">Why standard mediation fails in biologically incompatible partnerships</p>
+    <p className="text-gray-500 text-xs italic mb-4">Challenge: Map the biological root of 25 years of chronic communication failure</p>
+    <div className="flex flex-col md:flex-row gap-3 mb-4">
+      <ProfileCard
+        name="Subject F · The Identity Reactor"
+        type="D1-Integrator, Sympathetic Storm"
+        rows={[
+          ['Dominant Axis','Dopamine D1 + Noradrenaline'],
+          ['Sympathetic','98% / Recovery: 2%'],
+          ['LOOP','56% · DRAIN 24% · pause: 2%'],
+          ['Primary Impulse','Thalamic ID focus (100%)'],
+          ['Channel Dampening','5HT/OXT ~30% · chronic block'],
+        ]}
+        vector="EXTERNAL"
+        intensity="10 · CRITICAL"
+        borderColor="border-red-500"
+        outcome="Kahlo · Chronic pain amplified · serial ruptures · died at 47"
+      />
+      <ProfileCard
+        name="Subject D · The Structural Controller"
+        type="GABA-Controller, GABA-Cell"
+        rows={[
+          ['Dominant Axis','GABA + Chronic Cortisol'],
+          ['Sympathetic','94% / Recovery: 6%'],
+          ['LOOP','81% · no pause · inverted vector'],
+          ['Primary Impulse','GABA/dlPFC brake (100%)'],
+          ['Channel Dampening','Affective muting — structure-seeking'],
+        ]}
+        vector="INVERTED"
+        intensity="7 · HIGH"
+        borderColor="border-blue-500"
+        outcome="Rivera · Psychosomatic collapse · serial infidelity despite genuine attachment"
+      />
+    </div>
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-3">
+      <div className="text-yellow-400 font-bold text-sm mb-3">⚡ The Neurochemical Gap — Cross-Trigger Loop</div>
+      <div className="grid grid-cols-3 gap-2 text-xs text-center">
+        <div className="bg-red-950 border border-red-800 rounded-lg p-3">
+          <div className="text-red-400 font-semibold mb-1">F says</div>
+          <p className="text-gray-300">"See me. Recognize me. I exist through your gaze."</p>
+        </div>
+        <div className="bg-gray-900 rounded-lg p-3 flex items-center justify-center">
+          <div>
+            <div className="text-yellow-400 text-2xl mb-1">⚡</div>
+            <div className="text-gray-500 text-xs">CROSS-TRIGGER<br/>biological mismatch</div>
+          </div>
+        </div>
+        <div className="bg-blue-950 border border-blue-800 rounded-lg p-3">
+          <div className="text-blue-400 font-semibold mb-1">D hears</div>
+          <p className="text-gray-300">"Instability. No structure. System threat: weakness detected."</p>
+        </div>
+      </div>
+    </div>
+    <div className="bg-purple-950 border border-purple-800 rounded-xl p-3 mb-3">
+      <div className="text-purple-400 font-bold text-xs mb-1">🔑 Key Insight — Why Standard Therapy Fails</div>
+      <p className="text-gray-300 text-xs leading-relaxed">Standard therapy addresses behavior. The Neuro-Translator identifies the biological trigger: F's core need (Mirroring) activates D's core threat (Instability). Resolution requires <span className="text-yellow-400">architecture-aware scripts</span>, not emotional dialogue. Verification: 2 divorces, 2 remarriages — the loop was unbreakable without neurochemical decoding.</p>
+    </div>
+    <div className="flex items-start gap-2">
+      <CheckCircle className="text-green-400 w-4 h-4 flex-shrink-0 mt-0.5" />
+      <p className="text-gray-400 text-xs">Biographical validation confirmed. Two incompatible neuro-architectures correctly identified. Cross-trigger loop maps precisely to documented relationship dynamics across 25 years.</p>
+    </div>
+  </div>
+);
+
+const Case3Page = () => (
+  <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="text-yellow-400 text-xs uppercase tracking-widest mb-1">Case Study #3</div>
+    <h2 className="text-xl font-bold text-white mb-1">High-Performance Survival</h2>
+    <p className="text-purple-400 text-sm mb-1">Two legends. Same longevity. Opposite survival mechanisms.</p>
+    <p className="text-gray-500 text-xs italic mb-4">Challenge: Predict the distinct biological survival engines behind 60-year careers under maximum stress</p>
+    <div className="flex flex-col md:flex-row gap-3 mb-4">
+      <ProfileCard
+        name="Subject J · The Kinetic Dynamo"
+        type="HPA-Transformer, HPA-Dominant"
+        rows={[
+          ['Dominant Axis','Cortisol · CRF · Vasopressin'],
+          ['Sympathetic','94% / Recovery: 6%'],
+          ['LOOP','86% · no pause'],
+          ['Ukhtomsky Focus','23.7 — highest in sample'],
+          ['Survival Engine','Kinetic discharge (9km/concert)'],
+        ]}
+        vector="EXTERNAL"
+        intensity="8 · HIGH"
+        borderColor="border-orange-500"
+        outcome="Jagger · 82 years old · touring globally in 2026 · 60+ year career"
+      />
+      <ProfileCard
+        name="Subject K · The Ritualistic Creator"
+        type="GABA-Controller, Control-Loop"
+        rows={[
+          ['Dominant Axis','GABA + Chronic Cortisol'],
+          ['Sympathetic','92% / Recovery: 8%'],
+          ['LOOP','45% · Reactivity 38%'],
+          ['Ukhtomsky Focus','17.3 — ritual-anchored'],
+          ['Survival Engine','Reactivity >30% as pressure valve'],
+        ]}
+        vector="INVERTED"
+        intensity="10 · CRITICAL"
+        borderColor="border-purple-500"
+        outcome="King · 73 years · 70+ novels · ritual discipline sustained 50-year output"
+      />
+    </div>
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-3">
+      <div className="text-yellow-400 font-bold text-sm mb-2">⚡ Differentiation Matrix</div>
+      <div className="space-y-1.5 text-xs">
+        {[
+          ['Discharge','Physical kinetic output (body as valve)','Ritualized 2000 words/day (cognition as valve)'],
+          ['Affective Axis','LIBERATED · external · chaos = native','LIBERATED · inverted · darkness = material'],
+          ['5HT Deficit','"Can\'t Get Satisfaction" — literal physiology','GABA-Sarcophagus — structural dampening'],
+          ['Compensation','Earth: property, financial control','Air: nicotine, caffeine, mental flow'],
+          ['Crisis Signature','External gamma surges','Internal collapse (1977–87 addiction period)'],
+        ].map(([label,j,k]) => (
+          <div key={label} className="grid grid-cols-5 gap-1 bg-gray-900 rounded-lg p-2 items-start">
+            <span className="text-yellow-400 font-medium col-span-1 text-xs">{label}</span>
+            <span className="text-orange-300 col-span-2 text-xs">{j}</span>
+            <span className="text-purple-300 col-span-2 text-xs">{k}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div className="bg-green-950 border border-green-800 rounded-xl p-3 mb-3">
+      <div className="text-green-400 font-bold text-xs mb-1">🔑 Key Insight — Reactivity as Life-Saving Mechanism</div>
+      <p className="text-gray-300 text-xs leading-relaxed">For Subject K, 38% reactivity is <em>not dysfunction</em> — it is the biological pressure valve preventing the Inverted Vector from destroying the brain. When King's substance use period (1977–1987) <span className="text-yellow-400">blocked this valve</span>, systemic collapse began. Standard models flag this reactivity as pathology. The algorithm identifies it as life-saving architecture. This is the kind of differentiation that no existing psychological model produces.</p>
+    </div>
+    <div className="flex items-start gap-2">
+      <CheckCircle className="text-green-400 w-4 h-4 flex-shrink-0 mt-0.5" />
+      <p className="text-gray-400 text-xs">Independently verified: "The program differentiated them biologically, not cosmetically." — Independent scientific observer, post-review 2026</p>
+    </div>
+  </div>
+);
+
+const ImpactPage = () => (
+  <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="text-yellow-400 text-xs uppercase tracking-widest mb-1">Validation & Business Impact</div>
+    <h2 className="text-xl font-bold text-white mb-1">What This Means</h2>
+    <p className="text-purple-400 text-sm mb-5">Six profiles. Three pairs. One methodology. Confirmed biological differentiation.</p>
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-4">
+      <div className="text-white font-semibold text-sm mb-3">Independent Scientific Validation</div>
+      <blockquote className="border-l-4 border-yellow-500 pl-4 mb-3">
+        <p className="text-gray-300 text-sm italic leading-relaxed">"The program is NOT generating random text. Profiles land in the physiological core — and critically, in the <span className="text-yellow-400">differential point</span>. Jagger and King: both 'famous, productive, working for decades.' The program said: one — control-focus presence with external gamma surges; the other — caudate nucleus ritual discipline with internal collapse. <span className="text-yellow-400">Different people. Differentiated biologically, not cosmetically.</span>"</p>
+      </blockquote>
+      <p className="text-gray-500 text-xs">— Independent scientific observer · Post-review of all 6 case studies · June 2026</p>
+    </div>
+    <div className="space-y-3 mb-5">
+      {[
+        { icon:'🏢', title:'Predictive HR & Leadership', desc:'Identify executive "First Break Channel" before burnout or medical leave. Map team neuro-compatibility. Forecast conflict and catastrophic health events.', market:'$53B+ TAM · HR-Tech + InsurTech' },
+        { icon:'🤝', title:'Strategic Conflict Resolution', desc:'Bypass biological triggers in B2B negotiations, co-founder conflicts, M&A integration. 120+ algorithmic architecture-aware communication scripts.', market:'B2B · Consulting · Leadership Coaching' },
+        { icon:'🏥', title:'Clinical & Preventive HealthTech', desc:"Early identification of neurodegenerative pathways before symptomatic onset. Predictive profiling for preventive medicine (dementia, cardiovascular, psychosomatic).", market:'$500B+ Mental Health Tech · 18% CAGR' },
+      ].map(item => (
+        <div key={item.title} className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">{item.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-semibold text-sm">{item.title}</div>
+              <p className="text-gray-400 text-xs mt-1 mb-2">{item.desc}</p>
+              <Tag className="bg-yellow-900 text-yellow-300">{item.market}</Tag>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+      <div className="grid grid-cols-2 gap-4 mb-3 text-xs">
+        <div>
+          <div className="flex items-center gap-1 text-green-400 font-semibold mb-1"><CheckCircle className="w-3 h-3" />IP Secured</div>
+          <p className="text-gray-400">Copyright No. 147149 & 146964 · Ukrainian National Office of IP & Innovations</p>
+        </div>
+        <div>
+          <div className="text-yellow-400 font-semibold mb-1">⚡ Platform Status</div>
+          <p className="text-gray-400">v7.2 Core · GitHub-ready · 225+ Neural Configs · AI-Ready</p>
+        </div>
+      </div>
+      <div className="border-t border-gray-700 pt-3 text-center">
+        <p className="text-gray-400 text-xs italic">"Make neurobiological self-knowledge as accessible as a blood test.</p>
+        <p className="text-yellow-400 text-sm font-semibold">No hardware. No lab. Enter a date."</p>
+        <p className="text-gray-500 text-xs mt-1">— Eva White, Founder · Biochemical Resonance Ecosystem · Luxembourg / Ukraine</p>
+      </div>
+    </div>
+  </div>
+);
+
+export default function CaseBook() {
+  const [current, setCurrent] = useState(0);
+  const [dir, setDir] = useState(1);
+  const pages = [
+    { id:'cover', label:'COVER', content:<CoverPage /> },
+    { id:'method', label:'METHOD', content:<MethodPage /> },
+    { id:'case1', label:'CASE 1', content:<Case1Page /> },
+    { id:'case2', label:'CASE 2', content:<Case2Page /> },
+    { id:'case3', label:'CASE 3', content:<Case3Page /> },
+    { id:'impact', label:'IMPACT', content:<ImpactPage /> },
+  ];
+  const go = (i) => { setDir(i > current ? 1 : -1); setCurrent(i); };
+  const variants = {
+    enter: (d) => ({ x: d > 0 ? '100%' : '-100%', opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d) => ({ x: d > 0 ? '-100%' : '100%', opacity: 0 }),
+  };
+  return (
+    <div className="bg-gray-950 min-h-screen text-white flex flex-col">
+      <div className="bg-gray-900 border-b border-gray-800 px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-yellow-400 text-lg">⚡</span>
+          <span className="text-white text-sm font-bold tracking-wide">BIOCHEMICAL RESONANCE</span>
+        </div>
+        <span className="text-gray-500 text-xs tracking-widest">CASE BOOK · 2026</span>
+      </div>
+      <div className="bg-gray-900 border-b border-gray-800 px-3 py-2 flex gap-1 overflow-x-auto flex-shrink-0">
+        {pages.map((p, i) => (
+          <button key={p.id} onClick={() => go(i)}
+            className={`px-3 py-1 rounded text-xs font-semibold transition-all whitespace-nowrap ${i === current ? 'bg-yellow-500 text-gray-900' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}>
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <AnimatePresence mode="wait" custom={dir}>
+          <motion.div key={current} custom={dir} variants={variants} initial="enter" animate="center" exit="exit"
+            transition={{ duration: 0.2, ease: 'easeInOut' }} className="min-h-full">
+            {pages[current].content}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      <div className="bg-gray-900 border-t border-gray-800 px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <button onClick={() => current > 0 && go(current - 1)} disabled={current === 0}
+          className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors ${current === 0 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-300 hover:bg-gray-800'}`}>
+          <ChevronLeft className="w-4 h-4" /> Prev
+        </button>
+        <div className="flex items-center gap-1.5">
+          {pages.map((_, i) => (
+            <button key={i} onClick={() => go(i)}
+              className={`rounded-full transition-all ${i === current ? 'bg-yellow-400 w-3 h-3' : 'bg-gray-600 w-2 h-2 hover:bg-gray-400'}`} />
+          ))}
+        </div>
+        <button onClick={() => current < pages.length - 1 && go(current + 1)} disabled={current === pages.length - 1}
+          className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors ${current === pages.length - 1 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-300 hover:bg-gray-800'}`}>
+          Next <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="bg-gray-950 py-1.5 flex justify-center border-t border-gray-900 flex-shrink-0">
+        <span className="text-gray-700 text-xs">BIOCHEMICAL RESONANCE ECOSYSTEM · CASE BOOK 2026 · {current + 1} / {pages.length}</span>
+      </div>
+    </div>
+  );
+}
