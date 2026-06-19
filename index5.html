@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Архитектура нервной системы · Biochemical Resonance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030712;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:white}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;display:inline-block;animation:spin 1s linear infinite}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══ STATE ═══
+const S={
+  tab:0,
+  p:[
+    {date:{d:'',m:'',y:''},profile:null,sections:null,exp:{}},
+    {date:{d:'',m:'',y:''},profile:null,sections:null,exp:{}}
+  ],
+  tr:[
+    {date:{d:String(new Date().getDate()),m:String(new Date().getMonth()+1),y:String(new Date().getFullYear())},res:null,open:false,err:''},
+    {date:{d:String(new Date().getDate()),m:String(new Date().getMonth()+1),y:String(new Date().getFullYear())},res:null,open:false,err:''}
+  ],
+  compat:{sit:null,goal:'win',rev:false,aiOpen:false,aiText:null}
+};
+
+// ═══ ASTRONOMY ═══
+const D2R=Math.PI/180;
+const n360=x=>((x%360)+360)%360;
+function jd(Y,M,D){if(M<=2){Y--;M+=12;}const A=Math.floor(Y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+D+B-1524.5+0.5;}
+function kepE(Md,e){let M=n360(Md)*D2R,E=M;for(let k=0;k<50;k++){const dE=(M-E+e*Math.sin(E))/(1-e*Math.cos(E));E+=dE;if(Math.abs(dE)<1e-8)break;}return E;}
+function gL(N,i,w,a,e,Md,eX,eY){const E=kepE(Md,e),xv=Math.cos(E)-e,yv=Math.sqrt(1-e*e)*Math.sin(E),v=Math.atan2(yv,xv),r=a*(1-e*Math.cos(E)),Nr=N*D2R,ir=i*D2R,wvr=w*D2R+v,xh=r*(Math.cos(Nr)*Math.cos(wvr)-Math.sin(Nr)*Math.sin(wvr)*Math.cos(ir)),yh=r*(Math.sin(Nr)*Math.cos(wvr)+Math.cos(Nr)*Math.sin(wvr)*Math.cos(ir));return n360(Math.atan2(yh-eY,xh-eX)*180/Math.PI);}
+function calcPlanets(y,m,d){
+  const dd=jd(y,m,d)-2451545,T=dd/36525;
+  const sW=n360(282.9404+4.70935e-5*dd),sE=0.016708634-4.2037e-5*T,sM=n360(357.52911+0.9856003*dd);
+  const sEc=kepE(sM,sE),sV=Math.atan2(Math.sqrt(1-sE*sE)*Math.sin(sEc),Math.cos(sEc)-sE);
+  const sunL=n360(sV*180/Math.PI+sW),sR=1-sE*Math.cos(sEc),sLR=sV+sW*D2R;
+  const eX=sR*Math.cos(sLR+Math.PI),eY=sR*Math.sin(sLR+Math.PI);
+  const Lm=n360(218.316+13.176396*dd),Mm=n360(134.963+13.064993*dd)*D2R,De=n360(297.850+12.190749*dd)*D2R,Ms=n360(357.529+0.985600*dd)*D2R,Ee=1-0.002516*T;
+  const moonL=n360(Lm+6.289*Math.sin(Mm)-1.274*Math.sin(2*De-Mm)+0.658*Math.sin(2*De)-0.214*Math.sin(2*Mm)-0.186*Math.sin(Ms)*Ee);
+  const pos={Sun:sunL,Moon:moonL,Mercury:gL(n360(48.33-3.4e-6*dd),7.005,n360(29.12+7.8e-6*dd),0.3871,0.2056,n360(174.79+4.0923*dd),eX,eY),Venus:gL(n360(76.68+1.7e-6*dd),3.395,n360(54.88),0.7233,0.0068,n360(50.42+1.6021*dd),eX,eY),Mars:gL(n360(49.56-8e-6*dd),1.850,n360(286.5+2e-5*dd),1.5237,0.0934,n360(19.37+0.524*dd),eX,eY),Jupiter:gL(n360(100.45+2.8e-5*dd),1.303,n360(273.88+1.6e-5*dd),5.2026,0.0485,n360(19.9+0.0831*dd),eX,eY),Saturn:gL(n360(113.66+2.4e-5*dd),2.489,n360(339.39+3e-5*dd),9.5548,0.0556,n360(316.97+0.0334*dd),eX,eY),Uranus:gL(n360(74.0+1.4e-5*dd),0.773,n360(96.66+3.1e-5*dd),19.182,0.0473,n360(142.6+0.0117*dd),eX,eY),Neptune:gL(n360(131.78+3e-5*dd),1.770,n360(272.85),30.058,0.0086,n360(260.25+0.006*dd),eX,eY),Pluto:gL(n360(110.3+3.9e-5*dd),17.14,n360(113.76),39.48,0.2488,n360(14.82+0.004*dd),eX,eY)};
+  const SN=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const signs={};Object.entries(pos).forEach(([p,lon])=>{signs[p]=SN[Math.floor(lon/30)%12];});
+  return{pos,signs};
+}
+
+// ═══ DATA TABLES ═══
+const PW={Pluto:10,Mars:10,Saturn:9,Moon:9,Sun:8,Uranus:7,Mercury:7,Neptune:6,Jupiter:6,Venus:5};
+const EL={Aries:'Fire',Leo:'Fire',Sagittarius:'Fire',Taurus:'Earth',Virgo:'Earth',Capricorn:'Earth',Gemini:'Air',Libra:'Air',Aquarius:'Air',Cancer:'Water',Scorpio:'Water',Pisces:'Water'};
+const CD={Mars:{Fire:1.3,Earth:0.85,Air:0.95,Water:0.7},Pluto:{Fire:1.2,Earth:1.1,Air:0.85,Water:1.15},Saturn:{Fire:0.8,Earth:1.3,Air:0.9,Water:1.0},Moon:{Fire:0.8,Earth:1.0,Air:0.9,Water:1.3},Sun:{Fire:1.2,Earth:0.95,Air:1.0,Water:0.9},Mercury:{Fire:0.95,Earth:0.95,Air:1.3,Water:0.85},Uranus:{Fire:1.1,Earth:0.8,Air:1.25,Water:0.9},Neptune:{Fire:0.9,Earth:0.85,Air:1.0,Water:1.25},Venus:{Fire:1.0,Earth:1.0,Air:1.0,Water:1.15},Jupiter:{Fire:1.15,Earth:0.95,Air:1.0,Water:0.9}};
+const AC={0:0.81,60:0.362,120:0.328,90:0.929,180:0.991};
+const AD=[{a:0,tense:true,orb:10},{a:60,tense:false,orb:6},{a:120,tense:false,orb:8},{a:90,tense:true,orb:9},{a:180,tense:true,orb:10}];
+const CC={'Moon_Pluto':4,'Pluto_Saturn':4,'Mars_Moon':3,'Mars_Sun':3,'Mars_Uranus':3,'Mercury_Pluto':3,'Moon_Uranus':3,'Pluto_Sun':3,'Mars_Pluto':3,'Mars_Saturn':2,'Mars_Neptune':2,'Mars_Mercury':2,'Mercury_Uranus':2,'Moon_Neptune':2,'Moon_Saturn':2,'Neptune_Sun':2,'Saturn_Sun':2,'Saturn_Uranus':2,'Pluto_Uranus':2,'Moon_Sun':2,'Jupiter_Mars':2,'Mercury_Moon':2,'Pluto_Venus':2,'Mercury_Neptune':2,'Jupiter_Saturn':1,'Mercury_Saturn':1,'Neptune_Saturn':1,'Saturn_Venus':1,'Jupiter_Sun':0,'Jupiter_Venus':0,'Moon_Venus':0,'Jupiter_Moon':0,'Sun_Venus':0,'Mercury_Venus':0,'Jupiter_Mercury':0,'Jupiter_Neptune':0};
+const BP={'Mars_Pluto':{bw:21,md:'LOOP'},'Mars_Moon':{bw:20,md:'LOOP'},'Moon_Pluto':{bw:20,md:'LOOP'},'Mars_Saturn':{bw:20,md:'LOOP'},'Pluto_Saturn':{bw:20,md:'LOOP'},'Moon_Saturn':{bw:19,md:'LOOP'},'Mars_Sun':{bw:18,md:'LOOP'},'Pluto_Sun':{bw:18,md:'LOOP'},'Mars_Uranus':{bw:18,md:'REACT'},'Mars_Mercury':{bw:17,md:'LOOP'},'Mercury_Pluto':{bw:17,md:'LOOP'},'Moon_Sun':{bw:17,md:'LOOP'},'Saturn_Sun':{bw:17,md:'LOOP'},'Pluto_Uranus':{bw:17,md:'REACT',gen:true},'Mercury_Moon':{bw:16,md:'LOOP'},'Moon_Uranus':{bw:16,md:'REACT'},'Mars_Neptune':{bw:16,md:'DRAIN'},'Jupiter_Mars':{bw:16,md:'LOOP'},'Mercury_Saturn':{bw:16,md:'LOOP'},'Neptune_Pluto':{bw:16,md:'MIX',gen:true},'Saturn_Uranus':{bw:16,md:'REACT'},'Jupiter_Pluto':{bw:16,md:'LOOP'},'Mars_Venus':{bw:15,md:'LOOP'},'Pluto_Venus':{bw:15,md:'LOOP'},'Moon_Neptune':{bw:15,md:'MIX'},'Jupiter_Moon':{bw:15,md:'LOOP'},'Neptune_Saturn':{bw:15,md:'MIX'},'Mercury_Sun':{bw:15,md:'NEUT'},'Sun_Uranus':{bw:15,md:'REACT'},'Jupiter_Saturn':{bw:15,md:'LOOP'},'Saturn_Venus':{bw:14,md:'LOOP'},'Moon_Venus':{bw:14,md:'LOOP'},'Mercury_Uranus':{bw:14,md:'REACT'},'Neptune_Sun':{bw:14,md:'DRAIN'},'Jupiter_Sun':{bw:14,md:'NEUT'},'Mercury_Neptune':{bw:13,md:'DRAIN'},'Jupiter_Mercury':{bw:13,md:'NEUT'},'Sun_Venus':{bw:13,md:'NEUT'},'Neptune_Uranus':{bw:13,md:'REACT',gen:true},'Jupiter_Uranus':{bw:13,md:'NEUT'},'Uranus_Venus':{bw:12,md:'REACT'},'Mercury_Venus':{bw:12,md:'NEUT'},'Jupiter_Neptune':{bw:12,md:'DRAIN'},'Neptune_Venus':{bw:11,md:'DRAIN'},'Jupiter_Venus':{bw:11,md:'NEUT'}};
+const ET={'Pluto_Saturn':{coeff:0.3,shortType:'ЗАТМЕНИЕ',color:'#ef4444',bio:'ГАМК-саркофаг · атрофия серотонина/OXT'},'Saturn_Uranus':{coeff:0.6,shortType:'ПОМЕХИ⚡',color:'#f97316',bio:'Глутамат прерывает ГАМК-стабилизацию · срыв после накопления'},'Neptune_Saturn':{coeff:0.8,shortType:'ПОМЕХИ~',color:'#a78bfa',bio:'DMN-шум обесценивает серотониновый ресурс'}};
+const AAP={'Moon_Neptune':{w:3.5,pole:'A'},'Neptune_Venus':{w:2.5,pole:'A'},'Moon_Uranus':{w:2.5,pole:'B'},'Neptune_Uranus':{w:1.5,pole:'mixed',gen:true},'Uranus_Venus':{w:1.5,pole:'B'}};
+const CHANNEL_MAP={'Fire_Fire':{ch:'Соматический',clr:'#ef4444'},'Fire_Earth':{ch:'Соматический',clr:'#ef4444'},'Fire_Air':{ch:'Ментальный',clr:'#22d3ee'},'Fire_Water':{ch:'Висцеральный',clr:'#3b82f6'},'Earth_Earth':{ch:'Телесно-фиксирующий',clr:'#94a3b8'},'Earth_Air':{ch:'Ментальный',clr:'#22d3ee'},'Earth_Water':{ch:'Висцеральный',clr:'#3b82f6'},'Air_Air':{ch:'Ментальный',clr:'#22d3ee'},'Air_Water':{ch:'Диссоциативный',clr:'#a78bfa'},'Water_Water':{ch:'Висцеральный',clr:'#3b82f6'}};
+const ELEM_ORD=['Fire','Earth','Air','Water'];
+function getChannelKey(e1,e2){const i=ELEM_ORD.indexOf(e1),j=ELEM_ORD.indexOf(e2);return i<=j?e1+'_'+e2:e2+'_'+e1;}
+const COMPENSATION_MAP={Water:{type:'Водный путь',em:'💧',substance:'Алкоголь · опиоиды · эскапизм · переедание',seek:'Слияние · доступ к подавленной чувствительности',clr:'#3b82f6'},Fire:{type:'Огненный путь',em:'🔥',substance:'Стимуляторы · экстрим · азарт · агрессия',seek:'Драйв и экспансия — задавленные страхом',clr:'#ef4444'},Air:{type:'Воздушный путь',em:'💨',substance:'Никотин · кофеин · соцсети · переработки',seek:'Лёгкость связей · интеллектуальное возбуждение',clr:'#22d3ee'},Earth:{type:'Земной путь',em:'🌱',substance:'Еда · шопинг · накопительство · гиперконтроль',seek:'Стабильность тела · заземление',clr:'#94a3b8'}};
+const NCN={Mars:'Импульс',Sun:'Идентичность',Uranus:'Нестандартность',Pluto:'Трансформация',Moon:'Эмоциональный приёмник',Mercury:'Аналитический процессор',Neptune:'Эстетический канал',Venus:'Канал связи',Jupiter:'Канал экспансии',Saturn:'Структурный модуль'};
+const ST={Mars:{name:'Норадреналиновый реактор',nt:'Норадреналин · Адреналин',clr:'#ef4444',em:'⚡'},Sun:{name:'D1-интегратор',nt:'Дофамин D1 · Норадреналин',clr:'#fbbf24',em:'☀'},Pluto:{name:'HPA-трансформатор',nt:'Кортизол · Вазопрессин',clr:'#c084fc',em:'🔥'},Moon:{name:'Нейрохимический радар',nt:'Серотонин · Окситоцин',clr:'#93c5fd',em:'🌙'},Mercury:{name:'АЦХ-процессор',nt:'Ацетилхолин · Дофамин',clr:'#4ade80',em:'🔬'},Uranus:{name:'Гамма-инноватор',nt:'Глутамат · Дофамин новизны',clr:'#67e8f9',em:'🌩'},Neptune:{name:'DMN-навигатор',nt:'Серотонин 5HT2A · Эндорфины',clr:'#c4b5fd',em:'🌊'},Venus:{name:'OXT-буфер',nt:'Окситоцин · Дофамин',clr:'#f9a8d4',em:'🌸'},Jupiter:{name:'D2-экспансор',nt:'Дофамин D2 · BDNF',clr:'#fdba74',em:'🌟'},Saturn:{name:'Строитель структуры',nt:'ГАМК · Кортизол',clr:'#94a3b8',em:'🏛'}};
+const SDESC={Mars:['Основной нейромедиатор — норадреналин. Базовое рабочее состояние — готовность к действию. Симпатический отдел работает как основной режим.','Вектор причины — вовне. Когда система реагирует, первая гипотеза: «что-то происходит снаружи».'],Sun:['Основной нейромедиатор — дофамин D1-пути. Таламус постоянно проверяет: «вижу ли я себя в отражении другого?» Когда ответ «да» — система работает в полную силу.','Система активируется через внешнее признание. Нейрохимическая потребность в подтверждении факта существования как значимого.'],Pluto:['Основной нейромедиатор — кортизол и вазопрессин. Нервная система постоянно сканирует реальность в поиске истинного, скрытого, предельного.','Вы чувствуете правду там, где другие видят слова. HPA-ось с повышенной бдительностью даёт нечеловеческую точность и требует осознанного отдыха.'],Moon:['Основной нейромедиатор — серотонин и окситоцин. Лимбическая система — один из самых чувствительных инструментов восприятия.','Когда что-то происходит, система сначала обращается к внутреннему состоянию — «что я чувствую?»'],Mercury:['Основной нейромедиатор — ацетилхолин и дофамин. Мозг думает быстрее чем чувствует.','Вербализация — первичный способ обработки реальности. Вы понимаете что-то только когда это назвали.'],Uranus:['Основной нейромедиатор — глутамат и дофамин новизны. Система функционирует нелинейно.','Главный дискомфорт — предсказуемость. Когда всё слишком понятно, система начинает генерировать изменения сама.'],Neptune:['Основной нейромедиатор — серотонин 5HT2A и эндорфины. Сеть пассивного режима мозга активна постоянно.','Граница между вами и другим проницаема. Вы ощущаете чужие состояния как свои. Редкий дар — и одновременно вызов.'],Venus:['Основной нейромедиатор — окситоцин и дофамин вознаграждения. Нервная система ориентирована на связь и ценность.','Гармония в отношениях — базовая нейрохимическая потребность.'],Jupiter:['Основной нейромедиатор — дофамин D2 и BDNF. Естественный оптимизм — это нейробиология, не наивность.','Рядом с вами другие начинают видеть дальше. BDNF поддерживает экспансивность на биохимическом уровне.'],Saturn:['Основной нейромедиатор — ГАМК. Тормозная система постоянно фильтрует и удерживает под контролем то, что у других вырывается наружу.','Вам важна чёткая архитектура — не ради формализма, а потому что без неё мир кажется физически некомфортным.']};
+const MDESC={Mars:['Первичный двигатель. Всё что вы делаете — идёт через моторно-импульсный канал. Движение всегда впереди размышления.'],Sun:['D1-дофаминовый путь — система идентичности. Таламус проверяет: «вижу ли я себя в отражении другого?»'],Uranus:['Встроенная тяга к разрывам: не любите предсказуемое. Любая жёсткая структура вызывает желание её взорвать.'],Pluto:['Экзистенциальная интенсивность, способность работать с тёмным, тяжёлым, предельным.'],Moon:['Эмоциональный модуль не в первой тройке: реакция через действие. Эмоция приходит позже, как последствие.'],Mercury:['АЦХ-процессор — аналитический канал. Первичный способ понять реальность — назвать её.'],Neptune:['DMN активна постоянно. Особая чувствительность к образам, смыслам, невысказанному.'],Venus:['OXT-буфер — канал связи и ценностей. Гармония в отношениях — базовая нейрохимическая потребность.'],Jupiter:['D2-экспансор. Дофамин D2 и BDNF создают естественный оптимизм как режим по умолчанию.'],Saturn:['ГАМК-контур — структурный тормоз. Способность удерживать, ждать, строить — нейрохимическое преимущество.']};
+const ENV={Mars:{good:'кризис-менеджмент · оперативная медицина · силовые структуры · профессиональный спорт · переговоры',hard:'длительная рутина без событий · медленные процессы · статичные роли'},Sun:{good:'преподавание · дипломатия · коучинг · публичные выступления · управление командами',hard:'анонимная работа без признания · бюрократические роли без автономии'},Pluto:{good:'финансы и аудит · хирургия · юриспруденция · стратегическое планирование · безопасность',hard:'хаотичные непредсказуемые среды · холодные продажи'},Moon:{good:'психотерапия · уход за людьми · музыка и поэзия · работа с детьми',hard:'жёсткая корпоративная среда · агрессивная аудитория'},Mercury:{good:'IT и программирование · лингвистика · медицинская диагностика · журналистика',hard:'монотонный физический труд · эмоциональный уход без информационного потока'},Uranus:{good:'стартапы · изобретательство · системный дизайн · технологические инновации',hard:'строгая иерархия без автономии · одинаковая рутина'},Neptune:{good:'музыка · живопись · поэзия · медиа · паттерн-аналитика',hard:'жёсткие дедлайны · числовая ответственность в реальном времени'},Venus:{good:'дизайн · HR · медиация · клиентский сервис · арт-терапия',hard:'жёсткие конфронтации · изоляция'},Jupiter:{good:'предпринимательство · инвестиции · образование · международная деятельность',hard:'детальная рутинная работа · аудит'},Saturn:{good:'аналитика данных · научные исследования · управление рисками · бухгалтерия',hard:'постоянная импровизация · хаотичные клиенты'}};
+const TNC={'Pluto_Sun':{lbl:'Давление трансформации на канал идентичности',txt:'Внешняя среда создаёт интенсивное давление на самость. Старые способы быть собой перестают работать.',dur:'годы',load:9,clr:'#ef4444'},'Pluto_Moon':{lbl:'Трансформация эмоционального ядра',txt:'Старые лимбические паттерны поднимаются на поверхность. Это не сигнал что что-то сломалось — это то, что наконец готово к изменению.',dur:'годы',load:10,clr:'#ef4444'},'Pluto_Mars':{lbl:'Трансформация моторного канала',txt:'Воля и энергия действия проходят через горнило. Период требует переопределения источника силы.',dur:'годы',load:9,clr:'#c084fc'},'Pluto_Venus':{lbl:'Трансформация канала связи',txt:'Отношения и ценности проходят серьёзную проверку.',dur:'годы',load:8,clr:'#c084fc'},'Pluto_Mercury':{lbl:'Трансформация аналитического процессора',txt:'Мышление становится глубже и интенсивнее. Желание докопаться до сути.',dur:'годы',load:8,clr:'#c084fc'},'Neptune_Sun':{lbl:'Размытие канала идентичности',txt:'Период размытой самости. Важно не принимать ключевых решений в тумане.',dur:'годы',load:6,clr:'#a78bfa'},'Neptune_Moon':{lbl:'Растворение эмоциональных границ',txt:'Границы между собой и другими размываются. Важен якорь в повседневном ритме.',dur:'годы',load:7,clr:'#a78bfa'},'Neptune_Mars':{lbl:'Рассеивание моторного импульса',txt:'Импульс к действию есть — но без вектора. Найдите один главный смысловой якорь.',dur:'годы',load:6,clr:'#a78bfa'},'Neptune_Venus':{lbl:'Идеализация канала связи',txt:'Окситоциновый канал открыт шире обычного. Прекрасно — и требует проверки реальностью.',dur:'годы',load:5,clr:'#a78bfa'},'Neptune_Mercury':{lbl:'Интуиция замещает логику',txt:'Хорошее время для творчества, хуже — для точных расчётов.',dur:'годы',load:6,clr:'#a78bfa'},'Uranus_Sun':{lbl:'Гамма-разряды в канале идентичности',txt:'Период неожиданных изменений в структуре жизни. Важно быть гибким.',dur:'1-2 года',load:7,clr:'#67e8f9'},'Uranus_Moon':{lbl:'Нестандартность в эмоциональном канале',txt:'Эмоциональные реакции становятся непредсказуемыми.',dur:'1-2 года',load:8,clr:'#67e8f9'},'Uranus_Mars':{lbl:'Взрывная активация моторного канала',txt:'Высок риск импульсивных действий без анализа.',dur:'1-2 года',load:8,clr:'#67e8f9'},'Uranus_Venus':{lbl:'Нестандартность в канале связи',txt:'Неожиданные изменения в отношениях.',dur:'1-2 года',load:6,clr:'#67e8f9'},'Uranus_Mercury':{lbl:'Гамма-разряды в аналитическом канале',txt:'Мысли-молнии, прорывные идеи. Записывайте всё.',dur:'1-2 года',load:7,clr:'#67e8f9'},'Saturn_Sun':{lbl:'Структурное давление на идентичность',txt:'То что строится сейчас строится надолго.',dur:'~1 год',load:7,clr:'#94a3b8'},'Saturn_Moon':{lbl:'Торможение эмоционального канала',txt:'ГАМК-тормоз блокирует лимбическую систему. Период для честного разговора с собой.',dur:'~1 год',load:8,clr:'#94a3b8'},'Saturn_Mars':{lbl:'Торможение моторного канала',txt:'Всё идёт медленнее. Проверка на последовательность.',dur:'~1 год',load:7,clr:'#94a3b8'},'Saturn_Venus':{lbl:'Структура в канале связи',txt:'Отношения проходят проверку зрелостью.',dur:'~1 год',load:6,clr:'#94a3b8'},'Saturn_Mercury':{lbl:'Структурирование аналитического канала',txt:'АЦХ-процессор замедляется — зато становится глубже.',dur:'~1 год',load:6,clr:'#94a3b8'},'Jupiter_Sun':{lbl:'Расширение канала идентичности',txt:'D2-дофамин усиливает D1-путь. Используйте это окно.',dur:'6 мес',load:-4,clr:'#fdba74'},'Jupiter_Moon':{lbl:'Расширение эмоционального канала',txt:'D2-экспансия в лимбическую систему. Хорошее время для сближения.',dur:'6 мес',load:-4,clr:'#fdba74'},'Jupiter_Mars':{lbl:'Усиление моторного канала',txt:'Энергия и возможности совпадают. Действуйте пока окно открыто.',dur:'6 мес',load:-3,clr:'#fdba74'},'Jupiter_Venus':{lbl:'Расширение канала связи',txt:'Изобилие в отношениях.',dur:'6 мес',load:-4,clr:'#fdba74'},'Jupiter_Mercury':{lbl:'Расширение аналитического канала',txt:'Новые идеи, обучение как удовольствие.',dur:'6 мес',load:-3,clr:'#fdba74'},'Mars_Sun':{lbl:'НА-импульс в канал идентичности',txt:'Короткая вспышка энергии и уверенности.',dur:'2-3 дня',load:5,clr:'#fb923c'},'Mars_Moon':{lbl:'НА-импульс в эмоциональный канал',txt:'Лимбическая система реагирует острее.',dur:'2-3 дня',load:6,clr:'#fb923c'},'Mars_Mars':{lbl:'Двойная НА-активация',txt:'Максимальная готовность к действию.',dur:'2-3 дня',load:6,clr:'#fb923c'},'Mars_Venus':{lbl:'НА-импульс в канал связи',txt:'Краткая вспышка страсти.',dur:'1-2 дня',load:4,clr:'#fb923c'},'Mars_Mercury':{lbl:'НА-импульс в аналитический канал',txt:'Думайте быстро — говорите медленно.',dur:'1-2 дня',load:5,clr:'#fb923c'}};
+
+const FMOD={
+  Mars:{Pluto:{freq:'HPA-Каскад',clr:'#7c3aed',circuit:'PAG→Амигдала→HPA петля',speaks:'через давление и контроль',hears:'силу без манипуляции',trigger:'слабость и непоследовательность',vector:'external',winHint:'Прямота без обёртки',agreeHint:'Настоящая правда уровня «что реально хочу»'},Saturn:{freq:'ГАМК-Клетка',clr:'#64748b',circuit:'PAG↔dlPFC: действие-торможение петля',speaks:'после сдерживания — взрыв',hears:'факты, структуру, порядок',trigger:'хаос и нарушение системы',vector:'inverted',winHint:'Факт + конкретный план',agreeHint:'Только конкретика'},Moon:{freq:'Лимбическая Рана',clr:'#818cf8',circuit:'PAG + Гиппокамп: PTSD-топология',speaks:'из боли и защитной агрессии',hears:'безопасность и принятие',trigger:'ощущение уязвимости',vector:'external',winHint:'Задача без давления на лимбику',agreeHint:'Сначала безопасный контакт'},Sun:{freq:'Симпатический Шторм',clr:'#fb923c',circuit:'Таламус + PAG: тройной конфликт',speaks:'через самоутверждение',hears:'уважение и равный статус',trigger:'игнорирование',vector:'external',winHint:'«Ты важен в этом решении»',agreeHint:'Признание + конкретный запрос'},Neptune:{freq:'Адреналиновый Дрейф',clr:'#a78bfa',circuit:'PAG→DMN: слив импульса',speaks:'через вдохновение без завершения',hears:'смысловой контекст',trigger:'жёсткое давление без смысла',vector:'inverted',winHint:'Дай смысловой контекст',agreeHint:'Смысл задачи важнее давления'},Mercury:{freq:'Вербальный Удар',clr:'#4ade80',circuit:'PAG + Зоны Брока: импульс→речь',speaks:'точно, остро, без фильтра',hears:'логику и конкретность',trigger:'расплывчатость',vector:'external',winHint:'Факт → аргумент → решение',agreeHint:'Структурный запрос'},Uranus:{freq:'Гамма-Разряд',clr:'#67e8f9',circuit:'PAG + Гамма-вспышка 30-100Гц',speaks:'через внезапные вспышки',hears:'свободу и нарушение ограничений',trigger:'принуждение и предсказуемость',vector:'external',winHint:'Предложи нарушить правило вместе',agreeHint:'Дай пространство'},Jupiter:{freq:'Дофаминовый Штурм',clr:'#f59e0b',circuit:'PAG + mPFC: импульс + экспансия',speaks:'масштабно и рискованно',hears:'возможности и рост',trigger:'пессимизм',vector:'external',winHint:'Покажи масштаб',agreeHint:'Большая картина открывает слух'},Venus:{freq:'Страстная Кинетика',clr:'#f9a8d4',circuit:'PAG + NA: действие через ценность',speaks:'через страсть и ценность',hears:'желание и гармонию',trigger:'агрессия без тепла',vector:'external',winHint:'Тёплый фон + конкретика',agreeHint:'Гармония в подаче'},Mars:{freq:'НА-Реактор',clr:'#ef4444',circuit:'PAG · Базальные ганглии: прямое действие',speaks:'напрямую через действие',hears:'результат и скорость',trigger:'медлительность и уклончивость',vector:'external',winHint:'Прямая задача без обёртки',agreeHint:'Действие + конкретный шаг'}},
+  Pluto:{Mars:{freq:'HPA-Доминант',clr:'#ef4444',circuit:'Амигдала + PAG: двойная рептильная схема',speaks:'через давление и ультиматумы',hears:'силу без манипуляции',trigger:'слабость',vector:'external',winHint:'Прямая задача без обёртки',agreeHint:'Честность'},Saturn:{freq:'Контроль-Петля',clr:'#64748b',circuit:'HPA + dlPFC: страх→контроль→страх',speaks:'через ультиматумы и контроль',hears:'стабильность власти в системе',trigger:'потеря контроля',vector:'inverted',winHint:'Апеллируй к долгосрочной структуре',agreeHint:'Признай их позицию прежде всего'},Moon:{freq:'Лимбическая Петля',clr:'#818cf8',circuit:'Амигдала + Гиппокамп: PTSD-Loop',speaks:'через интенсивную потребность',hears:'глубину и безопасность',trigger:'угроза потери',vector:'inverted',winHint:'Не угрожай разрывом',agreeHint:'Глубокий контакт до любого содержания'},Sun:{freq:'Экзистенциальный Контур',clr:'#fbbf24',circuit:'Амигдала + Таламус: угроза идентичности',speaks:'через экзистенциальные вызовы',hears:'настоящую правду',trigger:'ложь и поверхностность',vector:'external',winHint:'Настоящая правда сразу',agreeHint:'Честность без обёртки'},Uranus:{freq:'Системный Разрыв',clr:'#67e8f9',circuit:'HPA + Гамма: трансформация через разрыв',speaks:'через разрыв паттернов',hears:'трансформацию и прорыв',trigger:'застой',vector:'external',winHint:'Покажи что старая система не работает',agreeHint:'Трансформация — не восстановление'},Neptune:{freq:'Архетипический Контур',clr:'#c4b5fd',circuit:'HPA + DMN: коллективная тень',speaks:'через архетипическое',hears:'трансформацию через растворение',trigger:'поверхностность',vector:'internal',winHint:'Говори о глубинном',agreeHint:'Позволь трансформацию'},Mercury:{freq:'Детектор Истины',clr:'#4ade80',circuit:'Амигдала + Зоны Брока',speaks:'через проникновение в суть',hears:'настоящую правду',trigger:'поверхностность',vector:'external',winHint:'Настоящая правда сразу',agreeHint:'Без дипломатии'},Venus:{freq:'Обсессивный Аттрактор',clr:'#f9a8d4',circuit:'NA + Амигдала + HPA',speaks:'через интенсивность',hears:'глубину',trigger:'поверхностность',vector:'external',winHint:'Глубоко без манипуляции',agreeHint:'Честность + тепло'},Jupiter:{freq:'Экспансивная Трансформация',clr:'#fdba74',circuit:'mPFC + Амигдала',speaks:'через трансформацию',hears:'власть и рост',trigger:'поверхностность',vector:'external',winHint:'Масштаб + глубина',agreeHint:'Трансформация системы'},Pluto:{freq:'HPA-Трансформатор',clr:'#c084fc',circuit:'HPA ось · Центр. Амигдала: глубокое сканирование',speaks:'через интенсивность и глубину',hears:'настоящую правду',trigger:'поверхностность и ложь',vector:'external',winHint:'Прямая честность',agreeHint:'Настоящая правда открывает'}},
+  Saturn:{Pluto:{freq:'Контроль-Петля',clr:'#7c3aed',circuit:'dlPFC + Амигдала + HPA',speaks:'через структуру и ультиматумы',hears:'власть внутри системы',trigger:'потеря контроля',vector:'inverted',winHint:'Апеллируй к системе',agreeHint:'Признай позицию прежде всего'},Uranus:{freq:'Контролируемый Прорыв',clr:'#67e8f9',circuit:'dlPFC + Гамма',speaks:'через нестандартные решения в рамках',hears:'надёжность + уникальность',trigger:'полный хаос',vector:'internal',winHint:'Реформа — не революция',agreeHint:'«Изменим внутри системы»'},Mars:{freq:'ГАМК-Клетка',clr:'#ef4444',circuit:'dlPFC↔PAG: действие-торможение',speaks:'после сдерживания — взрыв',hears:'факты и результат',trigger:'слабость и хаос',vector:'inverted',winHint:'Факт + конкретное действие',agreeHint:'Структурный запрос'},Moon:{freq:'Нейрохимическая Заморозка',clr:'#93c5fd',circuit:'dlPFC → Гиппокамп',speaks:'через факты, скрывая эмоции',hears:'структуру и надёжность',trigger:'эмоциональный шторм',vector:'inverted',winHint:'Конкретный план = безопасность',agreeHint:'Не требуй эмоций — только план'},Sun:{freq:'D1-ГАМК Конфликт',clr:'#fbbf24',circuit:'Таламус ↔ dlPFC',speaks:'через договорённость',hears:'надёжность и договор',trigger:'нарушение договорённости',vector:'external',winHint:'Назови конкретный пункт договора',agreeHint:'«Наш договор — основа»'},Neptune:{freq:'Структурированный Поиск',clr:'#c4b5fd',circuit:'dlPFC + DMN',speaks:'через систему в потоке',hears:'структуру и пространство',trigger:'хаос без структуры',vector:'inverted',winHint:'Структура + пространство',agreeHint:'Конкретный план снижает тревогу'},Mercury:{freq:'Систематический Анализ',clr:'#4ade80',circuit:'dlPFC + Зоны Брока',speaks:'через систему и анализ',hears:'факты и систему',trigger:'хаотичная информация',vector:'inverted',winHint:'Структурированный аргумент',agreeHint:'Факты + план'},Venus:{freq:'Зрелая Привязанность',clr:'#f9a8d4',circuit:'dlPFC + NA',speaks:'через надёжность',hears:'стабильность',trigger:'нестабильность',vector:'inverted',winHint:'Апеллируй к долгосрочному',agreeHint:'Надёжность — их ценность'},Jupiter:{freq:'Структурный Рост',clr:'#fdba74',circuit:'dlPFC + mPFC',speaks:'через структурное расширение',hears:'рост в системе',trigger:'хаотичный рост',vector:'internal',winHint:'Рост через план',agreeHint:'Расширение в рамках'},Saturn:{freq:'ГАМК-Контроллер',clr:'#94a3b8',circuit:'dlPFC · ACC · Caudate',speaks:'через структуру и факты',hears:'надёжность и порядок',trigger:'хаос и ненадёжность',vector:'inverted',winHint:'Факты + конкретная система',agreeHint:'Структурный запрос'}},
+  Sun:{Saturn:{freq:'D1-ГАМК Конфликт',clr:'#94a3b8',circuit:'Таламус ↔ dlPFC',speaks:'через договорённости',hears:'надёжность',trigger:'нарушение договорённости',vector:'external',winHint:'Конкретный пункт договора',agreeHint:'«Наш договор — основа»'},Pluto:{freq:'Экзистенциальный Контур',clr:'#c084fc',circuit:'Таламус + Амигдала + HPA',speaks:'через интенсивность',hears:'настоящую правду',trigger:'ложь',vector:'external',winHint:'Настоящая правда — сразу',agreeHint:'Честность без обёртки'},Uranus:{freq:'Идентичный Прорыв',clr:'#67e8f9',circuit:'Таламус + Гамма',speaks:'через уникальность',hears:'свободу',trigger:'требование соответствовать',vector:'external',winHint:'Предложи нестандартный путь',agreeHint:'Дай выбрать форму'},Moon:{freq:'Таламо-Лимбический Поток',clr:'#818cf8',circuit:'Таламус + Гиппокамп: FLOW',speaks:'через нейрохимический контакт',hears:'связь и принятие',trigger:'нейрохимическая холодность',vector:'internal',winHint:'Сначала контакт — потом задача',agreeHint:'«Ты важен мне»'},Mars:{freq:'Симпатический Шторм',clr:'#ef4444',circuit:'Таламус + PAG',speaks:'через требование признания',hears:'уважение и действие',trigger:'игнорирование',vector:'external',winHint:'Конкретная задача',agreeHint:'Признание + конкретный шаг'},Neptune:{freq:'Таламический Фильтр',clr:'#c4b5fd',circuit:'Таламус ↔ DMN',speaks:'через образы',hears:'смысловое вдохновение',trigger:'жёсткая логика',vector:'inverted',winHint:'Смысл → потом конкретика',agreeHint:'Говори образами'},Mercury:{freq:'Идентичность через Слово',clr:'#4ade80',circuit:'Таламус + Зоны Брока',speaks:'через чёткие формулировки',hears:'точность и ясность',trigger:'расплывчатость',vector:'external',winHint:'Чёткая формулировка + признание',agreeHint:'Назови прямо что нужно'},Venus:{freq:'Гармоничная Идентичность',clr:'#f9a8d4',circuit:'Таламус + NA',speaks:'через красоту и связь',hears:'гармонию и ценность',trigger:'грубость',vector:'external',winHint:'Тепло + конкретика',agreeHint:'Гармония в подаче'},Jupiter:{freq:'D2-D1 Синергия',clr:'#fdba74',circuit:'mPFC + Таламус + VTA: FLOW',speaks:'через масштаб и признание',hears:'рост и признание',trigger:'ограниченность',vector:'internal',winHint:'Покажи масштаб',agreeHint:'Признание + большая картина'},Sun:{freq:'D1-Интегратор',clr:'#fbbf24',circuit:'Таламус · DMN актив. · ACC',speaks:'через самоутверждение',hears:'уважение и признание',trigger:'игнорирование и обесценивание',vector:'external',winHint:'«Ты важен в этом решении»',agreeHint:'Признание открывает'}},
+  Moon:{Pluto:{freq:'Лимбическая Петля',clr:'#c084fc',circuit:'Гиппокамп + Амигдала + HPA: PTSD Loop',speaks:'через интенсивную эмоцию',hears:'безопасность и глубину',trigger:'угроза потери контроля',vector:'inverted',winHint:'Говори о будущем — не о травме',agreeHint:'Полная честность открывает контакт'},Uranus:{freq:'Нестабильная Лимбика',clr:'#67e8f9',circuit:'Гиппокамп + Гамма',speaks:'через неожиданные сдвиги',hears:'свободу в близости',trigger:'требование стабильности',vector:'external',winHint:'Не удерживай',agreeHint:'Пространство внутри контакта'},Saturn:{freq:'Нейрохимическая Заморозка',clr:'#64748b',circuit:'Гиппокамп → dlPFC',speaks:'через факты, скрывая чувства',hears:'структуру и надёжность',trigger:'эмоциональный шторм',vector:'inverted',winHint:'Только факты',agreeHint:'Конкретный план = безопасность'},Mars:{freq:'Лимбическая Рана',clr:'#ef4444',circuit:'Гиппокамп + PAG',speaks:'из боли и защитной агрессии',hears:'нейрохимическую безопасность',trigger:'угроза близости',vector:'external',winHint:'Сначала безопасный контакт',agreeHint:'Нейрохимический контакт до задачи'},Neptune:{freq:'Диффузная Лимбика',clr:'#a78bfa',circuit:'Гиппокамп → DMN',speaks:'через интероцептивные сигналы',hears:'нейрохимический фон',trigger:'жёсткость без тепла',vector:'inverted',winHint:'Нейрохимическое тепло + конкретность',agreeHint:'Фоновый сигнал — потом слова'},Sun:{freq:'Таламо-Лимбический Поток',clr:'#fbbf24',circuit:'Гиппокамп + Таламус',speaks:'через заботу и близость',hears:'связь и признание',trigger:'нейрохимическая холодность',vector:'internal',winHint:'Признание + конкретный запрос',agreeHint:'«Ты важен мне» первым'},Mercury:{freq:'Лимбическое Кодирование',clr:'#4ade80',circuit:'Гиппокамп + Зоны Брока',speaks:'через эмоционально насыщенные слова',hears:'тепло в словах',trigger:'холодная логика',vector:'inverted',winHint:'Слова с теплом + конкретность',agreeHint:'Сначала тепло — потом анализ'},Venus:{freq:'Серотонин-ОКТ Канал',clr:'#f9a8d4',circuit:'Гиппокамп + NA + OFC',speaks:'через заботу и близость',hears:'тепло и связь',trigger:'холодность',vector:'internal',winHint:'Тепло + конкретика',agreeHint:'«Для меня важно что ты здесь»'},Jupiter:{freq:'Расширение Лимбики',clr:'#fdba74',circuit:'Гиппокамп + mPFC',speaks:'через эмоциональный оптимизм',hears:'тепло и возможности',trigger:'пессимизм и холодность',vector:'internal',winHint:'Тепло + большая картина',agreeHint:'Возможность через заботу'},Moon:{freq:'5HT-Модулятор',clr:'#93c5fd',circuit:'Гиппокамп · Гипоталамус · Insula',speaks:'через чувство',hears:'интонацию и тепло',trigger:'эмоциональная холодность',vector:'internal',winHint:'«Как ты себя чувствуешь?»',agreeHint:'Присутствие важнее слов'}},
+  Mercury:{Mars:{freq:'Вербальный Удар',clr:'#ef4444',circuit:'Зоны Брока + PAG',speaks:'точно и остро',hears:'логику и конкретность',trigger:'расплывчатость',vector:'external',winHint:'Факт → аргумент → решение',agreeHint:'Структурный запрос'},Uranus:{freq:'Гамма-Когниция',clr:'#67e8f9',circuit:'Зоны Брока + Гамма',speaks:'через нестандартные связи',hears:'нестандарт',trigger:'банальность',vector:'external',winHint:'Удиви нестандартным ходом',agreeHint:'Нелинейный путь'},Saturn:{freq:'Систематический Анализ',clr:'#64748b',circuit:'Зоны Брока + dlPFC',speaks:'через систему и анализ',hears:'факты и систему',trigger:'хаотичная информация',vector:'inverted',winHint:'Структурированный аргумент',agreeHint:'Факты + план'},Pluto:{freq:'Детектор Истины',clr:'#c084fc',circuit:'Зоны Брока + Амигдала',speaks:'через проникновение в суть',hears:'настоящую правду',trigger:'поверхностность',vector:'external',winHint:'Настоящая правда сразу',agreeHint:'Без дипломатии'},Neptune:{freq:'Поэтическое Кодирование',clr:'#a78bfa',circuit:'Зоны Брока + DMN',speaks:'через образы',hears:'красоту языка',trigger:'сухая логика',vector:'internal',winHint:'Образ + конкретика',agreeHint:'Аналогия открывает слух'},Moon:{freq:'Аналитика Чувств',clr:'#93c5fd',circuit:'Зоны Брока + Гиппокамп',speaks:'через анализ эмоций',hears:'логику + тепло',trigger:'полная холодность',vector:'external',winHint:'Логика + тепло вместе',agreeHint:'Объясни и согрей'},Sun:{freq:'Идентичность через Слово',clr:'#fbbf24',circuit:'Зоны Брока + Таламус',speaks:'через чёткие формулировки',hears:'точность',trigger:'расплывчатость',vector:'external',winHint:'Назови прямо',agreeHint:'Точная формулировка'},Venus:{freq:'Вербализация Ценностей',clr:'#f9a8d4',circuit:'Зоны Брока + NA',speaks:'через язык ценностей',hears:'ценность в словах',trigger:'грубая прямота',vector:'external',winHint:'Слова о ценности',agreeHint:'Язык важности'},Jupiter:{freq:'Расширение через Мышление',clr:'#fdba74',circuit:'Зоны Брока + mPFC',speaks:'через большие идеи',hears:'масштаб',trigger:'узкое мышление',vector:'internal',winHint:'Большая идея',agreeHint:'Масштаб открывает'},Mercury:{freq:'АЦХ-Процессор',clr:'#4ade80',circuit:'Зоны Брока/Вернике · Мозолистое тело',speaks:'через анализ и вербализацию',hears:'точность и логику',trigger:'алогичность',vector:'external',winHint:'«Давай разберём по шагам»',agreeHint:'Точная структура'}},
+  Venus:{Mars:{freq:'Страстная Схема',clr:'#ef4444',circuit:'NA + PAG',speaks:'через страсть и ценность',hears:'желание и гармонию',trigger:'агрессия без тепла',vector:'external',winHint:'Тёплый фон + конкретика',agreeHint:'Гармония в подаче'},Pluto:{freq:'Обсессивный Аттрактор',clr:'#c084fc',circuit:'NA + Амигдала + HPA',speaks:'через интенсивность',hears:'глубину',trigger:'поверхностность',vector:'external',winHint:'Глубоко без манипуляции',agreeHint:'Честность + тепло'},Saturn:{freq:'Зрелая Привязанность',clr:'#94a3b8',circuit:'NA + dlPFC',speaks:'через надёжность',hears:'стабильность',trigger:'нестабильность',vector:'inverted',winHint:'Апеллируй к долгосрочному',agreeHint:'Надёжность — их ценность'},Uranus:{freq:'Нестандартная Связь',clr:'#67e8f9',circuit:'NA + Гамма',speaks:'через свободу',hears:'уникальность',trigger:'стандартная форма',vector:'external',winHint:'Нестандартная форма связи',agreeHint:'Свобода внутри контакта'},Neptune:{freq:'ОКТ-DMN Поток',clr:'#c4b5fd',circuit:'NA + DMN',speaks:'через идеализацию',hears:'идеальную форму',trigger:'жёсткая реальность',vector:'inverted',winHint:'Подай через ценность',agreeHint:'Идеальный угол'},Moon:{freq:'Серотонин-ОКТ Канал',clr:'#93c5fd',circuit:'NA + Гиппокамп + OFC',speaks:'через заботу и близость',hears:'тепло и близость',trigger:'холодность',vector:'internal',winHint:'Тепло + конкретика',agreeHint:'«Ты важен мне»'},Sun:{freq:'Гармоничная Идентичность',clr:'#fbbf24',circuit:'NA + Таламус',speaks:'через красоту и связь',hears:'гармонию',trigger:'грубость',vector:'external',winHint:'Тепло + ясность',agreeHint:'Гармония в подаче'},Mercury:{freq:'Вербализация Ценностей',clr:'#4ade80',circuit:'NA + Зоны Брока',speaks:'через язык ценностей',hears:'ценность в словах',trigger:'грубая прямота',vector:'external',winHint:'Слова о ценности',agreeHint:'Язык ценностей'},Jupiter:{freq:'Изобилие в Связи',clr:'#fdba74',circuit:'NA + mPFC + VTA',speaks:'через изобилие',hears:'возможности через связь',trigger:'ограниченность',vector:'internal',winHint:'Изобилие + тепло',agreeHint:'Возможность через близость'},Venus:{freq:'OXT-Буфер',clr:'#f9a8d4',circuit:'Nucleus Accumbens · OFC · VTA',speaks:'через гармонию и ценность',hears:'тепло и связь',trigger:'конфликт и враждебность',vector:'external',winHint:'«Ты для меня важен»',agreeHint:'Тепло открывает'}},
+  Neptune:{Moon:{freq:'Диффузная Лимбика',clr:'#93c5fd',circuit:'DMN + Гиппокамп',speaks:'через интероцептивные сигналы',hears:'нейрохимический фон',trigger:'жёсткость без тепла',vector:'inverted',winHint:'Нейрохимическое тепло + конкретность',agreeHint:'Фоновый сигнал важнее слов'},Mars:{freq:'Адреналиновый Дрейф',clr:'#ef4444',circuit:'DMN + PAG',speaks:'через вдохновение без вектора',hears:'смысловой контекст',trigger:'давление без контекста',vector:'inverted',winHint:'Смысл действия',agreeHint:'Контекст + пространство'},Sun:{freq:'Таламический Фильтр',clr:'#fbbf24',circuit:'Таламус ↔ DMN',speaks:'через образы и идеалы',hears:'смысловое вдохновение',trigger:'жёсткость без контекста',vector:'inverted',winHint:'Смысл → потом конкретика',agreeHint:'Говори образами'},Saturn:{freq:'Структурированный Поиск',clr:'#64748b',circuit:'DMN + dlPFC',speaks:'через системный поиск',hears:'систему в потоке',trigger:'хаос без структуры',vector:'inverted',winHint:'Структура + пространство',agreeHint:'Конкретный план снижает тревогу'},Pluto:{freq:'Архетипический Контур',clr:'#c084fc',circuit:'DMN + HPA: коллективная тень',speaks:'через паттерн-распознавание',hears:'трансформацию',trigger:'поверхностность',vector:'internal',winHint:'Глубинное важнее поверхностного',agreeHint:'Позволь трансформацию'},Uranus:{freq:'Гамма-DMN Синтез',clr:'#67e8f9',circuit:'DMN ↔ Гамма',speaks:'через образы и нелинейные связи',hears:'синтез',trigger:'жёсткая логика',vector:'internal',winHint:'Образ + нестандартная связь',agreeHint:'Пространство важнее структуры'},Venus:{freq:'ОКТ-DMN Поток',clr:'#c4b5fd',circuit:'DMN + NA',speaks:'через идеализацию красоты',hears:'идеальную форму',trigger:'жёсткая реальность',vector:'inverted',winHint:'Подай через красоту',agreeHint:'Идеальный угол'},Mercury:{freq:'Поэтическое Кодирование',clr:'#a78bfa',circuit:'DMN + Зоны Брока',speaks:'через образы',hears:'красоту языка',trigger:'сухая логика',vector:'internal',winHint:'Образ + конкретика',agreeHint:'Аналогия открывает слух'},Jupiter:{freq:'Экспансивный Поток',clr:'#a78bfa',circuit:'mPFC + DMN',speaks:'через вдохновение',hears:'смысл и возможности',trigger:'пессимизм',vector:'internal',winHint:'Смысл + масштаб',agreeHint:'Вдохновение открывает'},Neptune:{freq:'DMN-Навигатор',clr:'#c4b5fd',circuit:'DMN пасс. · Клауструм · Таламус',speaks:'через образ и смысл',hears:'смысл за словами',trigger:'агрессивная конкретность',vector:'internal',winHint:'«Мне важен смысл»',agreeHint:'Смысл важнее формы'}},
+  Uranus:{Mars:{freq:'Гамма-Разряд',clr:'#ef4444',circuit:'Гамма + PAG',speaks:'через нарушения правил',hears:'свободу и нестандарт',trigger:'принуждение',vector:'external',winHint:'Нестандартное решение вместе',agreeHint:'Свобода в рамках'},Saturn:{freq:'Контролируемый Прорыв',clr:'#94a3b8',circuit:'Гамма + dlPFC',speaks:'через нестандартные шаги в рамках',hears:'надёжность + уникальность',trigger:'полный хаос',vector:'internal',winHint:'Реформа внутри системы',agreeHint:'«Изменим это вместе»'},Moon:{freq:'Нестабильная Лимбика',clr:'#93c5fd',circuit:'Гамма + Гиппокамп',speaks:'через неожиданные сдвиги',hears:'свободу в близости',trigger:'требование стабильности',vector:'external',winHint:'Не удерживай',agreeHint:'Пространство внутри контакта'},Sun:{freq:'Идентичный Прорыв',clr:'#fbbf24',circuit:'Гамма + Таламус',speaks:'через уникальность',hears:'свободу без нормы',trigger:'требование соответствовать',vector:'external',winHint:'Предложи нестандартный путь',agreeHint:'Дай выбрать форму'},Neptune:{freq:'Гамма-DMN Синтез',clr:'#a78bfa',circuit:'Гамма ↔ DMN',speaks:'через нестандартные связи',hears:'нелинейный синтез',trigger:'банальность',vector:'internal',winHint:'Покажи нестандартную связь',agreeHint:'Пространство важнее структуры'},Pluto:{freq:'Системный Разрыв',clr:'#c084fc',circuit:'Гамма + HPA',speaks:'через радикальные изменения',hears:'прорыв',trigger:'застой',vector:'external',winHint:'Радикальная честность',agreeHint:'Совместная трансформация'},Mercury:{freq:'Гамма-Когниция',clr:'#4ade80',circuit:'Гамма + Зоны Брока',speaks:'через нестандартные идеи',hears:'нестандарт',trigger:'банальность',vector:'external',winHint:'Нестандартная идея',agreeHint:'Нелинейный путь'},Venus:{freq:'Нестандартная Связь',clr:'#f9a8d4',circuit:'Гамма + NA',speaks:'через свободу',hears:'уникальность',trigger:'стандартная форма',vector:'external',winHint:'Нестандартная форма связи',agreeHint:'Свобода внутри контакта'},Jupiter:{freq:'Революционный Провидец',clr:'#fdba74',circuit:'mPFC + Гамма',speaks:'через нестандартное расширение',hears:'революционные возможности',trigger:'статус-кво',vector:'external',winHint:'Нестандартная большая картина',agreeHint:'Революция смысла'},Uranus:{freq:'Гамма-Инноватор',clr:'#67e8f9',circuit:'Гамма-осцилляции · Прав. полушарие',speaks:'через прорыв и нестандарт',hears:'новизну и свободу',trigger:'принуждение к шаблону',vector:'external',winHint:'Нарушение правила вместе',agreeHint:'Пространство для выбора'}},
+  Jupiter:{Sun:{freq:'D2-D1 Синергия',clr:'#fbbf24',circuit:'mPFC + Таламус + VTA: FLOW',speaks:'через масштаб и признание',hears:'рост и признание',trigger:'ограниченность',vector:'internal',winHint:'Покажи масштаб',agreeHint:'Признание + большая картина'},Saturn:{freq:'Структурный Рост',clr:'#94a3b8',circuit:'mPFC + dlPFC',speaks:'через структурное расширение',hears:'рост в системе',trigger:'хаотичный рост',vector:'internal',winHint:'Рост через план',agreeHint:'Расширение в рамках'},Pluto:{freq:'Экспансивная Трансформация',clr:'#c084fc',circuit:'mPFC + Амигдала',speaks:'через трансформацию',hears:'власть и рост',trigger:'поверхностность',vector:'external',winHint:'Масштаб + глубина',agreeHint:'Трансформация системы'},Uranus:{freq:'Революционный Провидец',clr:'#67e8f9',circuit:'mPFC + Гамма',speaks:'через нестандартное расширение',hears:'революционные возможности',trigger:'статус-кво',vector:'external',winHint:'Нестандартная большая картина',agreeHint:'Революция смысла'},Neptune:{freq:'Экспансивный Поток',clr:'#a78bfa',circuit:'mPFC + DMN',speaks:'через вдохновение',hears:'смысл и возможности',trigger:'пессимизм',vector:'internal',winHint:'Смысл + масштаб',agreeHint:'Вдохновение открывает'},Moon:{freq:'Расширение Лимбики',clr:'#93c5fd',circuit:'mPFC + Гиппокамп',speaks:'через эмоциональный оптимизм',hears:'тепло и возможности',trigger:'пессимизм',vector:'internal',winHint:'Тепло + большая картина',agreeHint:'Возможность через заботу'},Mars:{freq:'Дофаминовый Штурм',clr:'#ef4444',circuit:'mPFC + PAG',speaks:'масштабно и рискованно',hears:'возможности и рост',trigger:'пессимизм',vector:'external',winHint:'Покажи масштаб',agreeHint:'Большая картина'},Mercury:{freq:'Расширение через Мышление',clr:'#4ade80',circuit:'mPFC + Зоны Брока',speaks:'через большие идеи',hears:'масштаб',trigger:'узкое мышление',vector:'internal',winHint:'Большая идея',agreeHint:'Масштаб открывает'},Venus:{freq:'Изобилие в Связи',clr:'#fdba74',circuit:'mPFC + NA + VTA',speaks:'через изобилие',hears:'возможности через связь',trigger:'ограниченность',vector:'internal',winHint:'Изобилие + тепло',agreeHint:'Возможность через близость'},Jupiter:{freq:'D2-Экспансор',clr:'#fdba74',circuit:'mPFC · Вентральный стриатум',speaks:'через возможности и рост',hears:'горизонт',trigger:'пессимизм и ограничения',vector:'internal',winHint:'«Вижу здесь большую возможность»',agreeHint:'Горизонт открывает'}}
+};
+
+const SITS3=[{id:'conflict',em:'⚔️',lb:'Системный конфликт',sub:'«Договор нарушен»'},{id:'freeze',em:'🧊',lb:'Эмоциональное закрытие',sub:'«Стена молчания»'},{id:'help',em:'🆘',lb:'Запрос поддержки',sub:'Нейрохимический сигнал'}];
+const GOALS3=[{id:'win',lb:'Защита позиции',sub:'Граница · Позиция',clr:'#ef4444'},{id:'agree',lb:'Договориться',sub:'Связь · Протокол',clr:'#10b981'}];
+const NATURAL3={Mars:{conflict:'«Стоп. Договор нарушен. Что делаем прямо сейчас?»',freeze:'«Стена — это данные. Что конкретно закрылось?»',help:'«Нужна помощь. Конкретно: X. Можешь?»'},Pluto:{conflict:'«Скажи честно: что на самом деле происходит?»',freeze:'«Закрытие — сигнал. Что реально за ним стоит?»',help:'«Мне реально тяжело. Нужна настоящая поддержка.»'},Saturn:{conflict:'«По договорённости — нарушение пункта X.»',freeze:'«Конкретная причина — конкретное решение.»',help:'«Обозначь проблему чётко. Найдём решение.»'},Moon:{conflict:'«Дело не в этом... Что-то изменилось между нами.»',freeze:'«Твоё закрытие — тоже язык. Я слышу. Я здесь.»',help:'«Мне тяжело. Хочу чтобы кто-то просто был рядом.»'},Sun:{conflict:'«Мы договаривались! Ты снова нарушаешь!»',freeze:'«Ты закрылся — я ощущаю это как разрыв.»',help:'«Мне плохо, а ты не замечаешь!»'},Mercury:{conflict:'«Есть несоответствие с пунктом X. Нужно уточнить.»',freeze:'«Нет данных = нет алгоритма. Нужен хоть какой-то сигнал.»',help:'«Нужна помощь с конкретным пунктом.»'},Venus:{conflict:'«Слушай, был договор... Как нам найти решение?»',freeze:'«Мне важно чтобы всё было хорошо между нами.»',help:'«Мне немного плохо. Не хочу обременять, но...»'},Jupiter:{conflict:'«Смотри — если решим это, освободимся для большего!»',freeze:'«Это пройдёт. Вижу путь вперёд.»',help:'«Это временно! Ведёт к лучшей конфигурации!»'},Neptune:{conflict:'«Что-то изменилось в нашем пространстве...»',freeze:'«Чувствую тебя — не тороплю. Просто рядом.»',help:'«Я... не могу это структурировать. Просто тяжело.»'},Uranus:{conflict:'«А зачем вообще это правило? Создадим лучшее.»',freeze:'(ушёл — даёт пространство, система перестраивается)',help:'«А что если решение совсем не там где кажется?»'}};
+const SIT_HINTS3={Mars:{conflict:{win:'Называй нарушение фактом — без истории и эмоций. НА-реактор слышит задачу, не обиду.',agree:'Сформулируй как совместную задачу: «Договор нарушен. Что чиним конкретно?»'},freeze:{win:'«Что нужно чтобы двигаться дальше? Конкретно — один шаг.»',agree:'Предложи маленькое совместное действие — оно разморозит быстрее любых слов.'},help:{win:'«Нужна помощь: X. Конкретно.» НА слышит точный запрос — не страдание.',agree:'Дай точку приложения силы. Марс хочет помочь — нужно только знать куда.'}},Pluto:{conflict:{win:'Настоящая правда сразу — без дипломатии. HPA-контроллер видит сквозь обёртку.',agree:'Покажи что стоит за конфликтом на самом деле — не симптом, а корень.'},freeze:{win:'«Что за этим закрытием стоит на самом деле?» Плутон видит защиту.',agree:'Не взламывай — покажи что глубина безопасна. HPA оттает через доверие к честности.'},help:{win:'«Мне реально тяжело. Просто будь рядом в этом.» Глубина, не поверхность.',agree:'Честность о масштабе ситуации открывает HPA-контроллер.'}},Saturn:{conflict:{win:'Факт + нарушенный пункт договора + конкретное следствие.',agree:'«Что изменилось в алгоритме? Как восстановить систему?» Сатурн чинит через план.'},freeze:{win:'«Конкретная причина закрытия = конкретное решение. Жду данных без давления.»',agree:'«Конкретный план снижает тревогу. Давай составим прямо сейчас.»'},help:{win:'«Проблема X. Нужно решение Y.» Конкретно и структурно.',agree:'«Опиши точно что не работает — вместе найдём системное решение.»'}},Moon:{conflict:{win:'«Дело не в этом. Что-то изменилось между нами.» Лимбика слышит безопасность.',agree:'Сначала нейрохимический контакт — потом содержание.'},freeze:{win:'«Твоё молчание я чувствую. Я здесь — не ухожу и не давлю.»',agree:'«Не тороплю. Знаешь что я рядом — когда захочешь, я здесь.»'},help:{win:'«Мне тяжело. Хочу чтобы кто-то просто был рядом — не решал, а был.»',agree:'5HT-модулятор нуждается в нейрохимическом присутствии. «Я здесь».'}},Sun:{conflict:{win:'«Договор нарушен — конкретный пункт. Это важно для меня.»',agree:'«Нам обоим важно это решить. Ты важен в этом решении.»'},freeze:{win:'«Ты закрылся — я ощущаю разрыв. Мне нужен контакт.»',agree:'«Когда будешь готов — я здесь. Ты важен для меня.»'},help:{win:'«Мне плохо — и мне важно чтобы ты это видел.»',agree:'«Мне нужна твоя поддержка. Именно твоя.»'}},Mercury:{conflict:{win:'«Несоответствие с пунктом X. Уточни Y — конкретно.»',agree:'«Что именно не работает? Опиши по шагам.»'},freeze:{win:'«Нет данных = нет алгоритма. Нужен хоть один сигнал.»',agree:'«Когда сможешь — опиши что происходит. Один пункт.»'},help:{win:'«Нужна помощь с X. Конкретно, один пункт.»',agree:'«Опиши точно что происходит — найдём алгоритм выхода.»'}},Venus:{conflict:{win:'«Был договор — хочу чтобы между нами было хорошо.»',agree:'«Мне важна гармония между нами — это ценнее правоты.»'},freeze:{win:'«Мне важно чтобы всё было хорошо между нами. Ты в порядке?»',agree:'«Не давлю. Просто хочу чтобы было хорошо.»'},help:{win:'«Мне немного плохо. Не хочу обременять — но нужна поддержка.»',agree:'«Было бы хорошо если бы ты был рядом. Не для решения — просто рядом.»'}},Jupiter:{conflict:{win:'«Если решим это — оба освободимся для большего.»',agree:'«Это ведёт к лучшей конфигурации — я вижу как.»'},freeze:{win:'«Это пройдёт. Я вижу путь вперёд — и он хороший.»',agree:'«Когда будешь готов — покажу путь. Он есть.»'},help:{win:'«Это временный этап — я вижу путь вперёд.»',agree:'«Я вижу выход — и он лучше чем вход. Пройдём это вместе.»'}},Neptune:{conflict:{win:'«Что-то изменилось в нашем общем пространстве...»',agree:'«Давай найдём смысл в этом — не виновного.»'},freeze:{win:'(присутствие без давления и без слов — DMN чувствует фон)',agree:'«Я здесь — просто рядом. Не ухожу и не требую.»'},help:{win:'«Мне тяжело — я не могу это структурировать. Просто рядом, без слов.»',agree:'Фоновый нейрохимический контакт важнее слов.'}},Uranus:{conflict:{win:'«А зачем это правило существует вообще? Создадим лучшее.»',agree:'«Что если решение совсем не там где кажется?»'},freeze:{win:'(уйти, дать пространство — Уран оттаивает через свободу)',agree:'«Не удерживаю. Когда вернёшься — поговорим на новом уровне.»'},help:{win:'Покажи нестандартный угол или неожиданное решение.',agree:'«Что если попробовать совсем иначе?»'}}};
+
+// ═══ CALCULATION FUNCTIONS ═══
+function ck(a,b){return[a,b].sort().join('_');}
+function getBP(p1,p2){const k=ck(p1,p2);return BP[k]||{bw:(PW[p1]||5)+(PW[p2]||5),md:'NEUT',gen:false};}
+function getEclipse(aspects){
+  const active=[];
+  for(const[k,d]of Object.entries(ET)){if(aspects.some(a=>a.tense&&ck(a.p1,a.p2)===k))active.push({...d,key:k});}
+  if(!active.length)return{coeff:1,active:[],hasAny:false};
+  active.sort((a,b)=>a.coeff-b.coeff);
+  return{coeff:active[0].coeff,active,dominant:active[0],hasAny:true};
+}
+function detectAA(aspects){
+  let dS=0,sS=0,facs=[];
+  aspects.forEach(asp=>{
+    const key=ck(asp.p1,asp.p2),pd=AAP[key];if(!pd)return;
+    const gm=pd.gen?0.35:1,tm=asp.tense?1.2:0.85,of=Math.max(0.25,1-asp.orb/12),w=pd.w*gm*tm*of;
+    if(pd.pole==='A')dS+=w;else if(pd.pole==='B')sS+=w;else{dS+=w*0.5;sS+=w*0.5;}
+    facs.push({key,w:+w.toFixed(2),pole:pd.pole,gen:!!pd.gen});
+  });
+  const total=dS+sS;if(total<1.2)return null;
+  const dr=dS/(total||1);
+  const dp=dr>0.62?'A':dr<0.38?'B':'mixed';
+  const axisPosition=Math.round((1-dr)*100);
+  let posLabel;
+  if(axisPosition<15)posLabel='растворение';
+  else if(axisPosition<30)posLabel='склонность к растворению';
+  else if(axisPosition<45)posLabel='ближе к растворению';
+  else if(axisPosition<=55)posLabel='центр';
+  else if(axisPosition<70)posLabel='ближе к чёткости';
+  else if(axisPosition<85)posLabel='склонность к чёткости';
+  else posLabel='сверхчёткость';
+  const hasMN=facs.some(f=>f.key==='Moon_Neptune'&&!f.gen),hasVN=facs.some(f=>f.key==='Neptune_Venus'&&!f.gen);
+  const hasMU=facs.some(f=>f.key==='Moon_Uranus'&&!f.gen),hasVU=facs.some(f=>f.key==='Uranus_Venus'&&!f.gen);
+  const isDouble=hasMU&&hasVU;
+  let pv='',dc='';
+  if(isDouble){pv='free';dc='both';}
+  else if(dp==='B'){pv='out';dc=hasVU?'Venus':(hasMU?'Moon':'generic');}
+  else if(dp==='A'){pv='in';dc=hasMN?'Moon':(hasVN?'Venus':'Moon');}
+  else{if(dS>sS){pv='in';dc=hasMN?'Moon':(hasVN?'Venus':'Moon');}else if(sS>dS){pv='out';dc=hasVU?'Venus':(hasMU?'Moon':'generic');}else{pv='balanced';dc=hasMN?'Moon':(hasMU?'Moon':'generic');}}
+  return{active:true,total:+total.toFixed(2),dS:+dS.toFixed(2),sS:+sS.toFixed(2),dp,pv,dc,isDouble,axisPosition,posLabel,hasMN,hasVN,hasMU,hasVU};
+}
+const OPAIRS=[{a:'Uranus',b:'Neptune',gen:true},{a:'Saturn',b:'Neptune',gen:true},{a:'Saturn',b:'Uranus',gen:true},{a:'Neptune',b:'Pluto',gen:true},{a:'Saturn',b:'Pluto',gen:false},{a:'Mars',b:'Pluto',gen:false},{a:'Uranus',b:'Pluto',gen:false}];
+const PERS2=['Sun','Moon','Mercury','Venus','Mars'];
+function detectTSq(pos){
+  if(!pos)return[];const res=[],seen=new Set();
+  for(const{a:pA,b:pB,gen}of OPAIRS){
+    if(!pos[pA]||!pos[pB])continue;
+    let od=Math.abs(pos[pA]-pos[pB]);if(od>180)od=360-od;
+    const dev=Math.abs(od-180),mx=gen?22:12;if(dev>mx)continue;
+    for(const pers of PERS2){
+      if(!pos[pers])continue;
+      const bo=['Sun','Moon'].includes(pers)?11:9;
+      let dA=Math.abs(pos[pers]-pos[pA]);if(dA>180)dA=360-dA;const sqA=Math.abs(dA-90);
+      let dB=Math.abs(pos[pers]-pos[pB]);if(dB>180)dB=360-dB;const sqB=Math.abs(dB-90);
+      if(sqA<=bo&&sqB<=bo){const k=[pA,pB,pers].sort().join('_');if(!seen.has(k)){seen.add(k);const t=Math.max(0.35,1-(sqA+sqB)/(2*bo));res.push({focal:pers,oA:pA,oB:pB,w:+(24*t).toFixed(1)});}}
+    }
+  }
+  return res.sort((a,b)=>b.w-a.w);
+}
+function findAspects(pos,signs){
+  const pl=Object.keys(pos),res=[];
+  for(let i=0;i<pl.length;i++){for(let j=i+1;j<pl.length;j++){
+    const p1=pl[i],p2=pl[j];
+    let diff=Math.abs(pos[p1]-pos[p2]);if(diff>180)diff=360-diff;
+    let best=null,bd=999;
+    for(const ad of AD){const mo=ad.orb+(['Sun','Moon'].includes(p1)?1:0)+(['Sun','Moon'].includes(p2)?1:0),dv=Math.abs(diff-ad.a);if(dv<=mo&&dv<bd){bd=dv;best={...ad,dv,mo};}}
+    if(!best)continue;
+    const bp=getBP(p1,p2),isGen=!!bp.gen,gm=isGen?0.1:1;
+    const ac=AC[best.a]||0.5,of=Math.max(0.05,1-best.dv/best.mo);
+    const el1=EL[signs[p1]]||'Fire',el2=EL[signs[p2]]||'Fire';
+    const c1=(CD[p1]&&CD[p1][el1])||1,c2=(CD[p2]&&CD[p2][el2])||1,cf=Math.sqrt(c1*c2);
+    let cm=1,tense=best.tense,cc=null;
+    if(best.a===0){const key=ck(p1,p2);if(key==='Mercury_Sun'){if(best.dv<3){tense=true;cc=2;cm=1.5;}else{tense=false;cc=-1;cm=0.4;}}else if(CC.hasOwnProperty(key)){const cat=CC[key];cc=cat;cm=cat===4?2.5:cat===3?2:cat===2?1.5:cat===1?0.8:0.35;if(cat<=0)tense=false;}}
+    const rw=bp.bw*ac*cm*of*cf*gm,w=tense?rw:rw*0.2;
+    res.push({p1,p2,a:best.a,orb:best.dv,tense,w:+w.toFixed(3),nw:+rw.toFixed(3),cc,md:bp.md,isGen,el1,el2});
+  }}
+  return res;
+}
+function calcProfile(aspects,signs,pos){
+  const sc={};Object.keys(PW).forEach(p=>{sc[p]=0;});
+  aspects.forEach(a=>{const w1=PW[a.p1]||5,w2=PW[a.p2]||5,t=w1+w2;sc[a.p1]+=a.w*(w1/t);sc[a.p2]+=a.w*(w2/t);});
+  Object.keys(sc).forEach(p=>{sc[p]*=(PW[p]||5)/10;});
+  const tsq=detectTSq(pos),seen=new Set();
+  tsq.forEach(t=>{const k=t.focal+'_'+t.oA+'_'+t.oB;if(!seen.has(k)){seen.add(k);sc[t.focal]=(sc[t.focal]||0)+t.w;}});
+  const ranked=Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([planet,score])=>({planet,score}));
+  const maxS=(ranked[0]&&ranked[0].score)||0.01,rp=ranked.map(r=>({...r,pct:Math.round(r.score/maxS*100)}));
+  const tense=aspects.filter(a=>a.tense).sort((a,b)=>b.w-a.w),arm=aspects.filter(a=>!a.tense);
+  const topW=tense.length?Math.max(...tense.map(a=>a.w)):0;
+  const topPW=tsq.length?Math.max(...tsq.map(t=>t.w)):0,captured=topW>12||topPW>=16;
+  const mc={};tense.forEach(a=>{mc[a.md]=(mc[a.md]||0)+a.w;});
+  const eclipseData=getEclipse(aspects),PPERS=new Set(['Sun','Moon','Venus','Mercury']);
+  const armorFull=arm.map(a=>{if((a.a===60||a.a===120)&&eclipseData.hasAny&&(PPERS.has(a.p1)||PPERS.has(a.p2)))return{...a,eclipsed:true};return{...a,eclipsed:false};});
+  const hasEcl=armorFull.some(a=>a.eclipsed);
+  const eclElSc={Fire:0,Earth:0,Air:0,Water:0};
+  armorFull.filter(a=>a.eclipsed).forEach(a=>{if(PPERS.has(a.p1)){const el=EL[signs[a.p1]]||'Fire';eclElSc[el]+=a.nw||1;}if(PPERS.has(a.p2)){const el=EL[signs[a.p2]]||'Fire';eclElSc[el]+=a.nw||1;}});
+  const eclDomEntry=Object.entries(eclElSc).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0)[0];
+  const eclDomEl=eclDomEntry?eclDomEntry[0]:null;
+  const compensationType=hasEcl&&eclDomEl?COMPENSATION_MAP[eclDomEl]:null;
+  const affAxis=detectAA(aspects);
+  const chSc={'Соматический':0,'Висцеральный':0,'Ментальный':0,'Телесно-фиксирующий':0,'Диссоциативный':0};
+  tense.forEach(a=>{const chk=getChannelKey(a.el1||'Fire',a.el2||'Fire'),chi=CHANNEL_MAP[chk];if(chi)chSc[chi.ch]=(chSc[chi.ch]||0)+a.w;});
+  const dcEntry=Object.entries(chSc).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0)[0];
+  const dominantChannel=dcEntry?dcEntry[0]:null;
+  const foundCh=dominantChannel?Object.values(CHANNEL_MAP).find(c=>c.ch===dominantChannel):null;
+  const channelClr=foundCh?foundCh.clr:'#6b7280';
+  return{ranked:rp,primary:rp[0].planet,modifier:(rp[1]&&rp[1].planet)||rp[0].planet,tense,armor:armorFull,topW,topPW,captured,mc,eclipseData,hasEcl,eclDomEl,compensationType,affAxis,tsq,signs,pos,dominantChannel,channelClr};
+}
+function getSubProfile(profile){
+  const{primary,modifier}=profile;
+  const base=ST[primary]||ST.Mars;
+  const mod=(FMOD[primary]&&FMOD[primary][modifier])||(FMOD[primary]&&FMOD[primary][primary])||{};
+  const vD={external:'Симпатический захват → причина вовне',inverted:'Инвертированный → психосоматика и ГАМК-блок',internal:'Парасимпатический → перерабатывает внутри'};
+  const vC={external:'#ef4444',inverted:'#f59e0b',internal:'#10b981'};
+  const vec=mod.vector||'external';
+  return{primary,modifier,em:base.em,name:base.name,nt:base.nt,clr:base.clr,freq:mod.freq||base.name,freqClr:mod.clr||base.clr,circuit:mod.circuit||base.name,speaks:mod.speaks||'напрямую',hears:mod.hears||'по нейронной схеме',trigger:mod.trigger||'нарушение ожиданий',vector:vec,vectorDesc:vD[vec],vectorClr:vC[vec],winHint:mod.winHint||'',agreeHint:mod.agreeHint||''};
+}
+const TASP2=[{a:0,orb:10},{a:60,orb:6},{a:120,orb:8},{a:90,orb:9},{a:180,orb:10}];
+function findTransitsNC(tPos,nPos){
+  const outer=['Pluto','Neptune','Uranus','Saturn','Jupiter','Mars'],pers=['Sun','Moon','Mercury','Venus','Mars'],res=[];
+  for(const tp of outer){for(const np of pers){
+    if(!tPos[tp]||!nPos[np])continue;
+    let diff=Math.abs(tPos[tp]-nPos[np]);if(diff>180)diff=360-diff;
+    const maxOrb=tp==='Mars'?2:(tp==='Jupiter'||tp==='Saturn')?4:3;
+    for(const ad of TASP2){const dev=Math.abs(diff-ad.a);if(dev<=maxOrb){const key=tp+'_'+np,d=TNC[key];if(!d)break;res.push({key,...d,orb:+dev.toFixed(1)});break;}}
+  }}
+  return res.sort((a,b)=>Math.abs(b.load)-Math.abs(a.load)).slice(0,6);
+}
+function generateNC(profile){
+  const{primary,ranked,mc,captured,hasEcl,affAxis,tense,tsq,armor,compensationType}=profile;
+  const sub=getSubProfile(profile);
+  const loopT=mc['LOOP']||0,drainT=mc['DRAIN']||0,reactT=mc['REACT']||0,neutT=mc['NEUT']||0,mixT=mc['MIX']||0;
+  const totalM=loopT+drainT+reactT+neutT+mixT||1;
+  const loopP=Math.round(loopT/totalM*100),drainP=Math.round(drainT/totalM*100),reactP=Math.round(reactT/totalM*100),neutP=Math.round(neutT/totalM*100);
+  const domMode=loopP>=reactP&&loopP>=drainP?'LOOP':reactP>=drainP?'REACT':'DRAIN';
+  const topTense=tense.length?tense[0]:null,topTsq=tsq.length?tsq[0]:null;
+  const tsqBonus=tsq.length>0?Math.min(2,Math.max(...tsq.map(t=>t.w))*0.08):0;
+  const captureBonus=captured?1.5:0;
+  const multiBonus=Math.min(2,tense.filter(a=>a.w>10).length*0.4);
+  const rawInt=topTense?topTense.w:0;
+  const normInt=Math.min(11,Math.max(1,Math.round((rawInt+tsqBonus+captureBonus+multiBonus)/2)));
+  const hasSP=tense.some(a=>ck(a.p1,a.p2)==='Pluto_Saturn'),hasMP=tense.some(a=>ck(a.p1,a.p2)==='Moon_Pluto');
+  const hasSU=tense.some(a=>ck(a.p1,a.p2)==='Saturn_Uranus'),hasMS=tense.some(a=>ck(a.p1,a.p2)==='Moon_Saturn');
+  const hasMPl=tense.some(a=>ck(a.p1,a.p2)==='Mars_Pluto'),hasMNep=tense.some(a=>ck(a.p1,a.p2)==='Mars_Neptune');
+  const sections=[],st=ST[primary]||ST.Mars,sd=SDESC[primary]||SDESC.Mars;
+  sections.push({num:'01',title:'Тип системы',sub:st.name+' · '+sub.freq,clr:st.clr,pars:[st.name+' · '+st.nt,'Частота: '+sub.freq,'Цепь: '+sub.circuit,'Вектор: '+sub.vectorDesc,...sd]});
+  const modPars=[],ord=['1-е место','2-е место','3-е место','4-е место','5-е место'];
+  ranked.slice(0,5).forEach((r,i)=>{const nm=NCN[r.planet]||r.planet,desc=(MDESC[r.planet]||['Активный модуль системы.'])[0];modPars.push(ord[i]+': '+nm+' — '+r.pct+' единиц. '+desc);});
+  sections.push({num:'02',title:'Иерархия нейромодулей',sub:'Кто главный в системе',clr:'#818cf8',pars:modPars,viz:'hierarchy'});
+  const modeLabel=domMode==='LOOP'?'петлю (внутренний цикл)':domMode==='REACT'?'острые реактивные разряды':'тихий слив в деятельность';
+  sections.push({num:'03',title:'Нагрузочный профиль',sub:'Как система разряжается',clr:'#f97316',viz:'loadbadges',loopP,reactP,drainP,neutP,pars:['Петля — '+loopP+'%. '+(loopP>45?'Значительная часть напряжения идёт во внутренний цикл.':loopP>20?'Умеренный внутренний цикл.':'Низкий уровень.'),'Реактивность — '+reactP+'%. '+(reactP>40?'Система разряжается через острые эпизоды.':reactP>20?'Умеренная реактивность.':'Низкая реактивность.'),'Слив — '+drainP+'%. '+(drainP>35?'Хороший канал спокойной разрядки в работу.':drainP>15?'Умеренный слив.':'Слабый канал слива.'),'Пауза — '+neutP+'%. '+(neutP>20?'Заметный ресурс пауз.':neutP>8?'Небольшие окна выхода из активного режима.':'Практически нет пауз.'),'Итог: ваша система разряжается в основном через '+modeLabel+'.']});
+  let domChan='моторный очаг ПАГ · '+sub.circuit,domVal=0,domExpl='';
+  if(topTsq&&topTsq.w>=16){domChan='фокальный модуль: '+(NCN[topTsq.focal]||topTsq.focal);domVal=Math.round(topTsq.w);domExpl='При перегрузке вся энергия захватывается этим модулем резко, без предупреждения.';}
+  else if(topTense){domChan='ось '+(NCN[topTense.p1]||topTense.p1)+' ↔ '+(NCN[topTense.p2]||topTense.p2)+' · '+sub.circuit;domVal=Math.round(topTense.w);domExpl='При серьёзной нагрузке система первой включает реакцию через эту ось.';}
+  const captureText=captured?'Система находится в состоянии захвата доминанты — один паттерн перетягивает всё внимание. Выход возможен, но требует осознанности.':'Уровень силы — умеренный. Доминанта активна, но не захватила всю систему целиком.';
+  sections.push({num:'04',title:'Доминанта Ухтомского',sub:'Главный канал реакции',clr:'#ef4444',pars:['Доминанта Ухтомского — нейрофизиологический принцип: в системе всегда есть один главный очаг возбуждения, который притягивает к себе любые новые раздражители.','Ваша доминанта — '+domChan+'. Сила — '+domVal+' единиц. '+domExpl,captureText]});
+  let cPars=[];
+  if(hasSP)cPars=['Основная стрессовая ось: Трансформация ↔ Структурный модуль. Система работает в цикле «контроль → страх → контроль».','Внутри — тишина, в которой почти нет лёгкости. Каналы восстановления закрыты этим же механизмом контроля.','Это не навсегда. Структура, которую важно знать — чтобы начать с ней работать осознанно.'];
+  else if(hasMP)cPars=['Основная стрессовая ось: Эмоциональный приёмник ↔ Трансформация. Лимбическая система и HPA-ось работают в замкнутой петле.','Глубина привязанности — это и сила, и уязвимость. То что выглядит как эмпатия часто работает как радар угроз.','Первая задача в контакте — безопасность. Только потом — всё остальное.'];
+  else if(hasSU)cPars=['Основная стрессовая ось: Структурный модуль ↔ Нестандартность. Внутри постоянная война: одна часть хочет порядка — другая всё взрывает.','Цикл: накопление → напряжение → взрыв → стыд → снова контроль. Понимание цикла — первый шаг к выходу.'];
+  else if(hasMS)cPars=['Основная стрессовая ось: Эмоциональный приёмник ↔ Структурный модуль. ГАМК-тормоз блокирует эмоциональный сигнал раньше, чем он доходит до сознания.','Вы чувствуете через факты, через действие. Поверхностные знакомые часто принимают это за холодность.'];
+  else if(hasMPl)cPars=['Основная стрессовая ось: Импульс ↔ Трансформация. ПАГ и амигдала работают в двойном режиме.','В вас живёт огромная жизненная сила. Важно направлять её осознанно.'];
+  else if(hasMNep)cPars=['Основная стрессовая ось: Импульс ↔ Эстетический канал. Норадреналиновый импульс проходит через слой интуиции и образа.','Много прекрасных идей ждут воплощения. Система работает лучше когда есть смысл и конкретный следующий шаг.'];
+  else if(topTense){const n1=NCN[topTense.p1]||topTense.p1,n2=NCN[topTense.p2]||topTense.p2;cPars=['Основная стрессовая ось: '+n1+' ↔ '+n2+'. Конфликт этих модулей создаёт фоновое напряжение.','Часть импульсивных эпизодов — не из-за конкретной ситуации, а из-за того что эта ось требует разрядки.'];}
+  else cPars=['Выраженной стрессовой оси в текущей конфигурации нет. Базовая устойчивость системы — выше среднего.'];
+  sections.push({num:'05',title:'Внутренний конфликт системы',sub:'Что создаёт фоновое напряжение',clr:'#6366f1',pars:cPars});
+  if(affAxis&&affAxis.active){
+    const{pv,dc,axisPosition:ap,posLabel,dS,sS}=affAxis;
+    let axPars=['Мерцающая ось — маркер того, как вы распределены между внутренним и внешним. Не фиксированное состояние, а живой спектр.'];
+    if(ap>=45&&ap<=55)axPars.push('Позиция оси: '+ap+'% — центр. Оба полюса примерно равны (А '+dS.toFixed(1)+' · Б '+sS.toFixed(1)+'). Переключение определяется контекстом.');
+    else if(ap<35)axPars.push('Позиция оси: '+ap+'% — '+posLabel+'. Граница между собой и другим проницаема. Чужие состояния входят как свои.');
+    else if(ap>65)axPars.push('Позиция оси: '+ap+'% — '+posLabel+'. Восприятие обострено. Сенсорная среда воспринимается непосредственно.');
+    else axPars.push('Позиция оси: '+ap+'% — '+posLabel+'. Граница удерживается, но в нагрузочные моменты — смещается.');
+    if(dc==='Moon'&&pv==='in'){axPars.push('Носитель — лимбическая система. Чувствительность направлена не на контакт, а на постоянное сканирование угрозы.');axPars.push('Практически: сначала безопасность → потом контакт.');}
+    else if(dc==='Venus'&&pv==='in'){axPars.push('Носитель — окситоциновый канал. Система ценностей поглощает входящее.');axPars.push('Практически: в близких отношениях можно незаметно терять себя.');}
+    else if(pv==='out')axPars.push('Силовой вектор — наружу. В кризисе система раскрывается. Протянуть руку когда другие закрываются — редкое качество.');
+    else if(pv==='free')axPars.push('Двойной захват свободы: оба якоря активны. Редкая конфигурация — система работает независимо от контекста.');
+    else if(pv==='balanced')axPars.push('Ось в динамическом равновесии. Это гибкость, не неопределённость.');
+    else if(pv==='in')axPars.push('Силовой вектор — внутрь. В кризисе система разворачивается внутрь. Снаружи вы выглядите собранным.');
+    sections.push({num:'06',title:'Мерцающая ось',sub:'Особый параметр системы',clr:'#818cf8',pars:axPars,viz:'axis',affAxis});
+  }
+  sections.push({num:'07',title:'Поведенческий синтез',sub:sub.freq+' · цепь: '+sub.circuit,clr:'#22d3ee',pars:['Частота: '+sub.freq,'Как говорит система: '+sub.speaks,'Что слышит: '+sub.hears,'Триггер закрытия: '+sub.trigger,'Вектор: '+sub.vectorDesc,'Цепь активации: '+sub.circuit]});
+  const chanMap={'Jupiter_Sun':'канал экспансии и идеалистического вдохновения','Jupiter_Moon':'мягкое эмоциональное тепло','Moon_Neptune':'эстетико-эмоциональная чувствительность','Neptune_Venus':'творческое растворение и красота','Jupiter_Venus':'изобилие в канале связи','Sun_Venus':'гармоничная идентичность через связь','Mercury_Venus':'вербализация ценностей','Jupiter_Mercury':'расширение через мышление','Moon_Venus':'эмоциональная близость','Moon_Sun':'идентичность через чувство','Neptune_Sun':'растворение в смысле','Jupiter_Saturn':'рост через структуру'};
+  const resPars=['Доступные каналы разрядки — конфигурации, работающие как клапаны давления:'];
+  armor.filter(a=>!a.eclipsed&&a.w>0).sort((a,b)=>b.w-a.w).slice(0,4).forEach(a=>{const k=ck(a.p1,a.p2),lbl=chanMap[k]||(NCN[a.p1]||a.p1)+' + '+(NCN[a.p2]||a.p2);resPars.push('• '+lbl[0].toUpperCase()+lbl.slice(1));});
+  if(resPars.length===1)resPars.push('• Рабочие каналы рассредоточены — используйте любую деятельность дающую ощущение завершённости.');
+  if(compensationType){resPars.push('');resPars.push(compensationType.em+' Уязвимый ресурс · '+compensationType.type);resPars.push('Система ищет: «'+compensationType.seek+'».');resPars.push('Компенсация: '+compensationType.substance+'.');resPars.push('Нейрохимический поиск заблокированного состояния — не слабоволие.');}
+  sections.push({num:'08',title:'Уязвимый ресурс',sub:'Каналы сброса давления + компенсация',clr:'#34d399',pars:resPars});
+  if(hasEcl){
+    const ed=profile.eclipseData&&profile.eclipseData.dominant;
+    const eclPars=['Часть гармонических каналов работает в ослабленном режиме:'];
+    if(profile.eclipseData&&profile.eclipseData.active)profile.eclipseData.active.forEach(d=>{eclPars.push('• '+d.shortType+': '+d.bio+' · эффективность '+Math.round(d.coeff*100)+'%');});
+    eclPars.push('Важно: работающие каналы есть. Нужна целенаправленная работа с ресурсом.');
+    sections.push({num:'08b',title:'Канал сброса · Слой 2',sub:'Глушение гармонических каналов',clr:(ed&&ed.color)||'#f97316',pars:eclPars});
+  }
+  const n1t=topTense?NCN[topTense.p1]||topTense.p1:'',n2t=topTense?NCN[topTense.p2]||topTense.p2:'';
+  sections.push({num:'09',title:'Геометрия стресса',sub:'Интенсивность архитектурной нагрузки',clr:'#fb7185',pars:['Главная стрессовая ось: '+(topTense?n1t+' ↔ '+n2t:'нет выраженной оси')+'. Интенсивность '+normInt+' из 11.','Шкала: 1-3 — лёгкая. 4-6 — умеренная. 7-9 — высокая, нужны регулярные практики. 10-11 — максимальная.','Ваш уровень — '+normInt+'. '+(normInt<=3?'Архитектурная нагрузка в пределах лёгкой рабочей нормы.':normInt<=6?'Умеренная нагрузка. Работоспособна при осознанном управлении ресурсами.':normInt<=9?'Высокая нагрузка. Регулярные практики восстановления — необходимость, не опция.':'Максимальная нагрузка. Важно иметь профессиональную поддержку.')]});
+  let zPars=[];
+  if(domMode==='LOOP')zPars=['Ваша система держит кортизол высоким. Тело нужно провести в расслабление через физику.','• Дыхание 4-7-8: вдох 4 счёта, задержка 7, выдох 8. Пять циклов — блуждающий нерв переключает систему.','• Холодная вода на лицо в момент острого стресса — рефлекс ныряльщика сбрасывает ЧСС за секунды.','• Прогулка без телефона и цели, 20 минут — нормализует HPA-ось.','• Физическая нагрузка через день — сжигает кортизол мышцами.'];
+  else if(domMode==='REACT')zPars=['Ваша система делает глутаматные разряды — непредсказуемые вспышки. Ключ — стабилизация фона.','• Магний: тыква, кешью, тёмная зелень — антагонист глутамата.','• Регулярные приёмы пищи каждые 3-4 часа — пропуск еды провоцирует разряды.','• Убрать синие экраны после 20:00.','• Монотонная работа: счёт, редактирование — предсказуемость снижает пики.'];
+  else zPars=['Вашей системе нужны маленькие победы — они накапливают дофамин завершения.','• Список из трёх маленьких задач прямо сейчас — и галочки рядом.','• Новизна в малых дозах: новый маршрут, новое блюдо.','• Холодный душ в конце обычного — резкая активация норадреналина.'];
+  zPars.push('Острые техники: считайте предметы (2 мин) · пейте воду маленькими глотками (2 мин) · зажмите холодный предмет в руке (1 мин) · напишите что произошло только фактами (5 мин).');
+  sections.push({num:'10',title:'Зоны внимания',sub:'Практики восстановления',clr:'#22c55e',pars:zPars});
+  const env=ENV[primary]||ENV.Mars;
+  sections.push({num:'11',title:'Среда как ресурс',sub:'Где архитектура работает в свою сторону',clr:'#67e8f9',pars:['Ваша нейросистема устроена так, что в одних условиях вы раскрываетесь полностью — в других тратите огромные ресурсы просто чтобы функционировать.','Где раскрываетесь: '+env.good+'.','Где системе тяжело: '+env.hard+'.']});
+  const st2=ST[ranked[0].planet]||ST.Mars,nc1=NCN[ranked[0].planet]||ranked[0].planet,nc2=ranked[1]?NCN[ranked[1].planet]||ranked[1].planet:'',nc3=ranked[2]?NCN[ranked[2].planet]||ranked[2].planet:'';
+  sections.push({num:'12',title:'Общая картина',sub:'Архитектурный синтез',clr:'#c084fc',pars:['Тип архитектуры: '+st2.name+' · '+sub.freq,'Доминирующий модуль — '+nc1+(nc2?', при поддержке '+nc2:'')+(nc3?' и '+nc3:'')+'.','Нагрузочный профиль: петля '+loopP+'%, реактивность '+reactP+'%, слив '+drainP+'%, пауза '+neutP+'%.','Вектор: '+sub.vectorDesc+'.','Каналы восстановления: '+(hasEcl?'частично ограничены. Важна целенаправленная работа с ресурсом.':'доступны.'),'Интенсивность '+normInt+' из 11 — '+(normInt<=3?'лёгкая нагрузка.':normInt<=6?'умеренная нагрузка.':normInt<=9?'высокая нагрузка.':'максимальная нагрузка.')]});
+  return sections;
+}
+
+// ═══ HTML BUILDERS ═══
+function h(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function buildHierarchy(ranked){
+  let html='<div style="padding:6px 0 2px">';
+  const ord=['1-е','2-е','3-е','4-е','5-е'];
+  ranked.slice(0,5).forEach((r,i)=>{
+    const st=ST[r.planet],clr=st?st.clr:'#818cf8';
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="min-width:22px;font-size:9px;color:#6b7280;font-weight:700">${ord[i]}</span>
+      <span style="font-size:18px;line-height:1;min-width:22px">${st?st.em:'·'}</span>
+      <span style="min-width:96px;font-size:11px;color:white;font-weight:700;line-height:1.3">${NCN[r.planet]||r.planet}</span>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:22px;overflow:hidden;position:relative;min-width:50px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${r.pct}%;background:linear-gradient(90deg,${clr}88,${clr});border-radius:6px"></div>
+        <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:white;font-weight:900">${r.pct}</span>
+      </div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+function buildLoadBadges(loopP,reactP,drainP,neutP){
+  const items=[{lb:'Петля',pct:loopP,clr:'#ef4444'},{lb:'Реактив',pct:reactP,clr:'#67e8f9'},{lb:'Слив',pct:drainP,clr:'#a78bfa'},{lb:'Пауза',pct:neutP,clr:'#22c55e'}].filter(x=>x.pct>0);
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+items.map(item=>`<div style="display:flex;flex-direction:column;align-items:center;padding:10px 14px;border-radius:14px;background:${item.clr}18;border:1px solid ${item.clr}44;min-width:58px"><span style="font-size:20px;font-weight:900;color:${item.clr};line-height:1">${item.pct}%</span><span style="font-size:11px;font-weight:800;color:white;margin-top:3px">${item.lb}</span></div>`).join('')+'</div>';
+}
+function buildAxisSlider(affAxis){
+  if(!affAxis)return'';
+  const{axisPosition:pos,posLabel,pv,dS,sS}=affAxis;
+  const aClr='#93c5fd',bClr='#67e8f9';
+  const pvClr=pv==='free'?'#67e8f9':pv==='out'?'#22c55e':pv==='balanced'?'#818cf8':'#f97316';
+  return`<div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:10px;color:${aClr};font-weight:700">← Растворение</span>
+      <span style="font-size:10px;color:#818cf8;font-weight:800">${posLabel}</span>
+      <span style="font-size:10px;color:${bClr};font-weight:700">Сверхчёткость →</span>
+    </div>
+    <div style="position:relative;height:18px;background:rgba(0,0,0,0.35);border-radius:9px">
+      <div style="position:absolute;inset:0;border-radius:9px;background:linear-gradient(90deg,${aClr}44,rgba(129,140,248,0.3),${bClr}44)"></div>
+      <div style="position:absolute;top:50%;left:${pos}%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:${pvClr};border:2px solid white;box-shadow:0 0 8px ${pvClr};z-index:2"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">
+      <span style="font-size:9px;color:#4b5563">А · ${dS.toFixed(1)}</span>
+      <span style="font-size:10px;font-weight:900;color:${pvClr}">${pos}% · ${pv==='free'?'∞ оба':pv==='balanced'?'≈ центр':pv==='out'?'↗ наружу':'↩ внутрь'}</span>
+      <span style="font-size:9px;color:#4b5563">Б · ${sS.toFixed(1)}</span>
+    </div>
+  </div>`;
+}
+function buildSectionPars(pars,c){
+  return pars.map(p=>{
+    if(p===''||p.startsWith('Носитель')||p.startsWith('Система ищет')||p.startsWith('Компенсация')||p.startsWith('Нейрохимический поиск'))return`<p style="margin:0 0 8px;font-size:13px;color:#9ca3af;line-height:1.8;font-style:italic">${p}</p>`;
+    if(p.startsWith('•'))return`<div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start"><span style="color:${c};flex-shrink:0;margin-top:3px;font-size:11px;font-weight:700">→</span><p style="margin:0;font-size:13px;color:#d1d5db;line-height:1.8">${p.slice(1).trim()}</p></div>`;
+    if(p.includes('🔥')||p.includes('💧')||p.includes('💨')||p.includes('🌱'))return`<p style="margin:0 0 10px;font-size:13px;color:white;font-weight:700;line-height:1.8;background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 10px">${p}</p>`;
+    return`<p style="margin:0 0 11px;font-size:13px;color:#cbd5e1;line-height:1.8">${p}</p>`;
+  }).join('');
+}
+function buildSCard(s,pi,si,exp,profile){
+  const c=s.clr||'#818cf8';
+  const open=!!exp[si];
+  let body='';
+  if(open){
+    body=`<div style="padding:0 20px 20px;border-top:1px solid ${c}15"><div style="height:10px"></div>`;
+    if(s.viz==='hierarchy'&&profile)body+=buildHierarchy(profile.ranked);
+    if(s.viz==='loadbadges')body+=buildLoadBadges(s.loopP||0,s.reactP||0,s.drainP||0,s.neutP||0);
+    if(s.viz==='axis'&&s.affAxis)body+=buildAxisSlider(s.affAxis);
+    body+=buildSectionPars(s.pars,c);
+    body+='</div>';
+  }
+  return`<div style="border:1px solid ${c}25;background:${c}07;border-radius:18px;overflow:hidden;margin-bottom:10px">
+    <button onclick="toggleSec(${pi},${si})" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="min-width:26px;height:26px;border-radius:13px;background:${c}18;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:${c};flex-shrink:0">${s.num}</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px;line-height:1.3">${s.title}</p><p style="margin:2px 0 0;font-size:11px;color:${c}bb">${s.sub}</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:${c}15;display:flex;align-items:center;justify-content:center;color:${c};font-weight:900;font-size:13px;flex-shrink:0">${open?'−':'+'}</span>
+    </button>${body}
+  </div>`;
+}
+function buildTransit(pi){
+  const tr=S.tr[pi];const profile=S.p[pi].profile;
+  if(!profile)return'';
+  const c='#67e8f9';
+  let body='';
+  if(tr.open){
+    const res=tr.res;
+    const total=res?res.reduce((s,a)=>s+a.load,0):0;
+    const lbl=total>20?'Высокая нагрузка':total>10?'Умеренная нагрузка':total>0?'Лёгкая нагрузка':total<-5?'Период ресурса':'Нейтральный фон';
+    const lclr=total>20?'#ef4444':total>10?'#f97316':total>0?'#eab308':total<-5?'#22c55e':'#6b7280';
+    body=`<div style="padding:0 20px 20px;border-top:1px solid ${c}12">
+      <p style="margin:12px 0 10px;font-size:13px;color:#9ca3af;line-height:1.7">Укажи сегодняшнюю дату — покажу какие внешние паттерны сейчас влияют на нейросистему.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end">
+        ${['День:td'+pi+'d','Месяц:td'+pi+'m','Год:td'+pi+'y'].map(f=>{const[lb,fk]=f.split(':');return`<div style="flex:1"><p style="margin:0 0 4px;font-size:11px;color:#6b7280;font-weight:600">${lb}</p><input type="number" id="${fk}" value="${tr.date[fk.slice(3)]||''}" oninput="updateTrDate(${pi},'${fk.slice(3)}',this.value)" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 4px;color:white;font-weight:700;text-align:center;font-size:14px;outline:none;box-sizing:border-box"></div>`;}).join('')}
+        <button onclick="calcTransit(${pi})" style="padding:10px 14px;background:rgba(103,232,249,0.15);border:1px solid rgba(103,232,249,0.3);border-radius:10px;color:#67e8f9;font-weight:900;cursor:pointer;font-size:14px;flex-shrink:0">▶</button>
+      </div>
+      ${tr.err?`<p style="color:#ef4444;font-size:12px;margin:0 0 8px">${tr.err}</p>`:''}
+      ${res!==null?buildTransitResult(res,total,lbl,lclr):''}
+    </div>`;
+  }
+  return`<div style="border:1px solid rgba(103,232,249,0.2);background:rgba(103,232,249,0.04);border-radius:18px;overflow:hidden;margin-bottom:10px">
+    <button onclick="toggleTransit(${pi})" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="min-width:26px;height:26px;border-radius:13px;background:rgba(103,232,249,0.15);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#67e8f9;flex-shrink:0">13</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px">Текущий нейрохимический контекст</p><p style="margin:2px 0 0;font-size:11px;color:rgba(103,232,249,0.7)">Фоновая нагрузка на систему прямо сейчас</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:rgba(103,232,249,0.12);display:flex;align-items:center;justify-content:center;color:#67e8f9;font-weight:900;font-size:13px">${tr.open?'−':'+'}</span>
+    </button>${body}
+  </div>`;
+}
+function buildTransitResult(res,total,lbl,lclr){
+  if(res===null)return'';
+  let html=`<div style="background:${lclr}10;border:1px solid ${lclr}28;border-radius:12px;padding:11px 15px;margin-bottom:12px">
+    <p style="margin:0;font-weight:900;font-size:14px;color:${lclr}">${lbl}</p>
+    ${total!==0?`<p style="margin:3px 0 0;font-size:12px;color:#9ca3af">Суммарный балл: ${total>0?'+':''}${total}</p>`:''}
+  </div>`;
+  if(res.length>0){
+    html+=res.map(a=>`<div style="background:${a.clr}0a;border:1px solid ${a.clr}20;border-radius:12px;padding:12px 15px;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:5px">
+        <p style="margin:0;font-size:12px;color:${a.clr};font-weight:700;flex:1;line-height:1.4">${a.lbl}</p>
+        <span style="font-size:11px;color:${a.clr};background:${a.clr}18;padding:2px 8px;border-radius:20px;font-weight:700;flex-shrink:0">${a.load>0?'+':''}${a.load}</span>
+      </div>
+      <p style="margin:0 0 3px;font-size:11px;color:#6b7280">Длительность: ${a.dur}</p>
+      <p style="margin:0;font-size:13px;color:#cbd5e1;line-height:1.7">${a.txt}</p>
+    </div>`).join('');
+  } else {
+    html+=`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:16px;text-align:center"><p style="margin:0;font-weight:700;font-size:14px;color:#22c55e">Нейтральный фон</p><p style="margin:4px 0 0;font-size:12px;color:#9ca3af">Нет значимых внешних давлений.</p></div>`;
+  }
+  return html;
+}
+function buildPersonView(pi){
+  const data=S.p[pi];
+  const label=pi===0?'Я':'Партнёр';
+  let profileHTML='';
+  if(data.profile&&data.sections){
+    const profile=data.profile,sections=data.sections,exp=data.exp;
+    const pri=profile.primary,st=ST[pri]||ST.Mars;
+    const sub=getSubProfile(profile);
+    profileHTML=`<div id="profile-result-${pi}">
+      <div style="background:${st.clr}0d;border:1px solid ${st.clr}25;border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center">
+        <div style="font-size:42px;margin-bottom:10px;line-height:1">${st.em}</div>
+        <p style="margin:0 0 3px;font-weight:900;font-size:19px;background:linear-gradient(90deg,#c084fc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${st.name}</p>
+        <p style="margin:0 0 3px;font-weight:700;font-size:13px;color:${sub.freqClr}">${sub.freq}</p>
+        <p style="margin:0 0 10px;font-size:12px;color:${st.clr}bb">${st.nt}</p>
+        <p style="margin:0 0 10px;font-size:11px;color:${sub.vectorClr};font-weight:600">${sub.vectorDesc} · ${sub.circuit}</p>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-bottom:8px">
+          ${profile.ranked.slice(0,3).map(r=>{const s2=ST[r.planet];return`<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-size:11px;color:#9ca3af"><span>${s2?s2.em:''}</span><span style="font-weight:700;color:#e2e8f0">${NCN[r.planet]||r.planet}</span><span>${r.pct}%</span></span>`;}).join('')}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px">
+          ${profile.dominantChannel?`<span style="padding:3px 10px;border-radius:20px;background:${profile.channelClr}18;border:1px solid ${profile.channelClr}33;font-size:10px;color:${profile.channelClr};font-weight:700">${profile.dominantChannel} путь</span>`:''}
+          ${profile.hasEcl?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.22);font-size:10px;color:#ef4444;font-weight:700">Ограничение каналов</span>':''}
+          ${profile.affAxis&&profile.affAxis.active?`<span style="padding:3px 10px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.22);font-size:10px;color:#818cf8;font-weight:700">≋ ${profile.affAxis.posLabel}</span>`:''}
+          ${profile.captured?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.28);font-size:10px;color:#ef4444;font-weight:700">Захват доминанты</span>':''}
+        </div>
+      </div>
+      ${sections.map((s,si)=>buildSCard(s,pi,si,exp,profile)).join('')}
+      ${buildTransit(pi)}
+      <div style="text-align:center;padding:20px 16px 0;border-top:1px solid rgba(255,255,255,0.04);margin-top:8px">
+        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;line-height:1.9">Это карта предрасположенностей нервной системы — не диагноз и не предсказание.</p>
+        <p style="margin:0;font-size:11px;color:#7c3aed;font-weight:800;letter-spacing:0.06em">BIOCHEMICAL RESONANCE · Eva White ❤</p>
+      </div>
+    </div>`;
+  }
+  return`<div style="max-width:540px;margin:0 auto;padding:0 16px">
+    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:24px;margin-top:16px;margin-bottom:16px">
+      <p style="margin:0 0 16px;font-weight:800;color:white;font-size:14px">Дата рождения · ${label}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+        ${[['День','d','11'],['Месяц','m','7'],['Год','y','1988']].map(([lb,f,ph])=>`<div>
+          <p style="margin:0 0 6px;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">${lb}</p>
+          <input type="number" placeholder="${ph}" value="${data.date[f]||''}" oninput="updateDate(${pi},'${f}',this.value)" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:13px 6px;color:white;font-weight:700;text-align:center;font-size:16px;outline:none;box-sizing:border-box">
+        </div>`).join('')}
+      </div>
+      <div id="calc-err-${pi}" style="font-size:12px;color:#ef4444;font-weight:600;margin-bottom:10px;display:none"></div>
+      <button id="calc-btn-${pi}" onclick="doCalc(${pi})" style="width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#6d28d9,#8b5cf6,#a78bfa);color:white;font-weight:900;font-size:15px;cursor:pointer">✦ Получить профиль</button>
+    </div>
+    <div id="profile-area-${pi}">${profileHTML}</div>
+  </div>`;
+}
+function buildCompatibility(){
+  const p1=S.p[0].profile,p2=S.p[1].profile;
+  if(!p1&&!p2)return`<div style="padding:40px 20px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🧬</div><p style="color:white;font-weight:900;font-size:18px;margin-bottom:8px">Нейропереводчик</p><p style="color:#6b7280;font-size:14px;line-height:1.7">Введи даты рождения на вкладках «Я» и «Партнёр» — увидишь нейрохимическую совместимость и протоколы коммуникации.</p></div>`;
+  if(!p1||!p2){const miss=!p1?'Я':'Партнёр';return`<div style="padding:40px 20px;text-align:center"><div style="font-size:48px;margin-bottom:16px">⚡</div><p style="color:white;font-weight:900;font-size:16px;margin-bottom:8px">Не хватает профиля «${miss}»</p><p style="color:#6b7280;font-size:14px">Перейди на вкладку «${miss}» и введи дату рождения.</p></div>`;}
+  const s1=getSubProfile(p1),s2=getSubProfile(p2);
+  const isSame=p1.primary===p2.primary;
+  const aa1=p1.affAxis,aa2=p2.affAxis;
+  const isComplement=aa1&&aa2&&((aa1.pv==='in'&&aa2.pv==='out')||(aa1.pv==='out'&&aa2.pv==='in'));
+  const isBothIn=aa1&&aa2&&aa1.pv==='in'&&aa2.pv==='in';
+  const{sit,goal,rev,aiOpen,aiText}=S.compat;
+  const goalCfg=GOALS3.find(g=>g.id===goal);
+  const sitCfg=SITS3.find(s=>s.id===sit);
+  let transHTML='';
+  if(sit){
+    const nat=(NATURAL3[s1.primary]&&NATURAL3[s1.primary][sit])||'...';
+    const sitHint=(SIT_HINTS3[s2.primary]&&SIT_HINTS3[s2.primary][sit]&&SIT_HINTS3[s2.primary][sit][goal])||'';
+    const hint=goal==='win'?s2.winHint:s2.agreeHint;
+    const extra=s2.name+' · слышит: «'+s2.hears+'» · триггер: «'+s2.trigger+'»';
+    transHTML=`
+    <div style="background:${s1.freqClr}0d;border:1px solid ${s1.freqClr}33;border-radius:14px;padding:14px 16px;margin-bottom:8px">
+      <p style="margin:0 0 6px;font-weight:900;font-size:10px;color:${s1.freqClr}">${s1.em} ${s1.freq} · ${sitCfg?sitCfg.em:''} ${sitCfg?sitCfg.lb:''} · естественная реакция:</p>
+      <p style="margin:0;font-size:13px;color:white;font-style:italic;font-weight:500;line-height:1.7">${nat}</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div><span style="font-size:10px;color:#ef4444;font-weight:700">нейрохимический разрыв</span><div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div></div>
+    <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:10px 14px;margin-bottom:8px">
+      <p style="margin:0 0 3px;font-size:10px;color:#ef4444;font-weight:700">${s2.em} их фильтр:</p>
+      <p style="margin:0;font-size:12px;color:#9ca3af">«${s2.speaks}» vs слышит «${s2.hears}»</p>
+    </div>
+    ${!rev?`<button onclick="setCompat('rev',true)" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,${goalCfg.clr},${goalCfg.clr}bb);color:white;font-weight:900;font-size:14px;cursor:pointer;margin-top:4px">${goal==='win'?'⚔️ Как сказать — Защита позиции':'🤝 Как сказать — Договориться'}</button>`
+    :`<div style="background:${goalCfg.clr}0d;border:1px solid ${goalCfg.clr}44;border-radius:14px;padding:16px;margin-top:4px">
+      <p style="margin:0 0 8px;font-weight:900;font-size:10px;color:${goalCfg.clr}">${s2.em} ${s2.freq} · ПЕРЕВОД для ${sitCfg?sitCfg.lb:''}</p>
+      ${sitHint?`<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px;margin-bottom:8px"><p style="margin:0;font-size:13px;color:white;line-height:1.7">${sitHint}</p></div>`:''}
+      ${hint?`<div style="border-left:3px solid ${s2.freqClr}55;padding-left:10px;margin-bottom:8px"><p style="margin:0;font-weight:700;font-size:11px;color:${s2.freqClr}">↳ ${hint}</p></div>`:''}
+      <p style="margin:0;font-size:10px;color:#4b5563">${extra}</p>
+      <button onclick="setCompat('rev',false);setCompat('sit',null)" style="margin-top:10px;font-size:11px;color:#6b7280;background:none;border:none;cursor:pointer;text-decoration:underline">Другая ситуация</button>
+    </div>`}`;
+  }
+  const aiSection=`<div style="border:1px solid rgba(192,132,252,0.3);background:rgba(192,132,252,0.05);border-radius:18px;overflow:hidden;margin-top:14px">
+    <button onclick="toggleAI()" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px">🧬</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px">AI Отчёт · Нейрохимический синтез пары</p><p style="margin:2px 0 0;font-size:11px;color:rgba(192,132,252,0.7)">Полный анализ для передачи специалисту</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;color:#c084fc;font-weight:900;font-size:13px;flex-shrink:0">${aiOpen?'−':'+'}</span>
+    </button>
+    ${aiOpen&&aiText?`<div style="padding:0 20px 20px;border-top:1px solid rgba(192,132,252,0.15)">
+      <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(192,132,252,0.2);border-radius:12px;padding:14px 16px;margin-top:12px;max-height:340px;overflow-y:auto">
+        ${aiText.split('\n').map(line=>`<p style="margin:0 0 2px;font-size:12px;color:${line.startsWith('══')||line.startsWith('──')?'#c084fc':line.startsWith('⚠')?'#f97316':line.startsWith('✓')?'#22c55e':'#d1d5db'};font-weight:${line.startsWith('══')?700:400};line-height:1.7">${line||'&nbsp;'}</p>`).join('')}
+      </div>
+      <p style="margin:8px 0 0;font-size:11px;color:#4b5563;text-align:center">Скопируй отчёт и передай в GPT-4 / Claude для расширенного анализа</p>
+    </div>`:''}
+  </div>`;
+  return`<div style="max-width:540px;margin:0 auto;padding:0 16px 32px">
+    <div style="text-align:center;padding:20px 0 14px">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:800;letter-spacing:0.1em;color:#818cf8">НЕЙРОПЕРЕВОДЧИК</p>
+      <p style="margin:0;font-weight:900;font-size:20px;color:white">Архитектура пары</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      ${[[p1,s1,'Я'],[p2,s2,'Партнёр']].map(([p,s,lb])=>`<div style="background:${s.clr}0d;border:1px solid ${s.clr}25;border-radius:16px;padding:14px 12px;text-align:center">
+        <p style="margin:0 0 4px;font-size:9px;color:#6b7280;font-weight:700">${lb}</p>
+        <div style="font-size:26px;margin-bottom:5px">${s.em}</div>
+        <p style="margin:0 0 2px;font-weight:900;font-size:11px;color:white;line-height:1.3">${s.name}</p>
+        <p style="margin:0 0 4px;font-size:10px;color:${s.freqClr};font-weight:700">${s.freq}</p>
+        <p style="margin:0;font-size:9px;color:${s.vectorClr}">${s.vectorDesc}</p>
+        ${p.dominantChannel?`<span style="display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;background:${p.channelClr}18;font-size:9px;color:${p.channelClr};font-weight:700">${p.dominantChannel}</span>`:''}
+        ${p.affAxis&&p.affAxis.active?`<p style="margin:4px 0 0;font-size:9px;color:#818cf8">≋ ${p.affAxis.posLabel}</p>`:''}
+      </div>`).join('')}
+    </div>
+    ${isSame?`<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#ef4444">⚠ Резонанс напряжения</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">Идентичные типы: ${s1.name}. Два одинаковых контура — взаимное усиление. Прямой конфликт усиливает обоих. Рекомендован письменный канал.</p></div>`:''}
+    ${isComplement?`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#22c55e">✓ Комплементарность векторов</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">Один вектор внутрь, другой наружу — взаимное дополнение в кризисе. Потенциально очень ресурсная пара.</p></div>`:''}
+    ${isBothIn?`<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#f97316">⚠ Оба вектора внутрь</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">В кризисе оба закрываются одновременно. Важно иметь договорённость о внешнем сигнале безопасности.</p></div>`:''}
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <p style="margin:0 0 10px;font-weight:900;font-size:12px;color:white">Нейрохимический разрыв</p>
+      <div style="margin-bottom:8px;padding:10px 12px;border-radius:10px;background:${s1.freqClr}0f;border-left:3px solid ${s1.freqClr}55"><p style="margin:0 0 3px;font-size:10px;color:${s1.freqClr};font-weight:700">${s1.em} Я говорю естественно через:</p><p style="margin:0;font-size:12px;color:#cbd5e1">${s1.speaks}</p></div>
+      <div style="padding:10px 12px;border-radius:10px;background:${s2.freqClr}0f;border-left:3px solid ${s2.freqClr}55"><p style="margin:0 0 3px;font-size:10px;color:${s2.freqClr};font-weight:700">${s2.em} Партнёр слышит через фильтр:</p><p style="margin:0;font-size:12px;color:#cbd5e1">${s2.hears}</p><p style="margin:2px 0 0;font-size:10px;color:#6b7280">триггер: «${s2.trigger}»</p></div>
+    </div>
+    <p style="margin:0 0 8px;font-weight:900;font-size:13px;color:white">Переводчик · 3 ситуации</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      ${GOALS3.map(g=>`<button onclick="setCompat('goal','${g.id}');setCompat('rev',false)" style="padding:10px 8px;border-radius:12px;border:1px solid;cursor:pointer;background:${goal===g.id?g.clr+'22':'rgba(255,255,255,0.04)'};border-color:${goal===g.id?g.clr+'66':'rgba(255,255,255,0.07)'}"><p style="margin:0 0 2px;font-weight:900;font-size:12px;color:${goal===g.id?g.clr:'#9ca3af'}">${g.lb}</p><p style="margin:0;font-size:10px;color:#4b5563">${g.sub}</p></button>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      ${SITS3.map(s=>`<button onclick="setCompat('sit','${s.id}');setCompat('rev',false)" style="padding:10px 8px;border-radius:12px;border:1px solid;cursor:pointer;text-align:left;background:${sit===s.id?'rgba(129,140,248,0.15)':'rgba(255,255,255,0.03)'};border-color:${sit===s.id?'rgba(129,140,248,0.5)':'rgba(255,255,255,0.07)'}"><span style="font-size:18px">${s.em}</span><p style="margin:4px 0 2px;font-weight:700;font-size:10px;color:white">${s.lb}</p><p style="margin:0;font-size:9px;color:#6b7280">${s.sub}</p></button>`).join('')}
+    </div>
+    ${transHTML}
+    ${aiSection}
+    <p style="text-align:center;font-size:10px;color:#374151;line-height:1.7;margin-top:16px">Нейропереводчик показывает нейрохимические фильтры — не характеры людей.<br>Это карта, не приговор.</p>
+  </div>`;
+}
+function buildApp(){
+  const tabs=['Я','Партнёр','Нейропереводчик'];
+  const tabDot=[!!S.p[0].profile,!!S.p[1].profile,!!(S.p[0].profile&&S.p[1].profile)];
+  return`<div style="min-height:100vh;background:#030712;padding-bottom:48px">
+    <div style="background:linear-gradient(180deg,#080115 0%,#030712 100%);padding:24px 20px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <div style="display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.22);margin-bottom:10px"><span style="font-size:10px;color:#a5b4fc;font-weight:800;letter-spacing:0.1em">НЕЙРОХИМИЧЕСКИЙ АРХИТЕКТУРНЫЙ ПРОФИЛЬ</span></div>
+      <h1 style="margin:0 0 5px;font-weight:900;font-size:21px;line-height:1.25;background:linear-gradient(90deg,#c084fc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Архитектура нервной системы</h1>
+      <p style="margin:0;font-size:12px;color:#6b7280">Профиль · Нейропереводчик · AI отчёт · Транзиты</p>
+    </div>
+    <div style="max-width:540px;margin:0 auto;padding:10px 16px 0">
+      <div style="display:flex;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden">
+        ${tabs.map((t,i)=>`<button onclick="setTab(${i})" style="flex:1;padding:11px 4px;border:none;cursor:pointer;background:${S.tab===i?'rgba(124,58,237,0.35)':'transparent'};color:${S.tab===i?'white':'#6b7280'};font-weight:${S.tab===i?900:500};font-size:12px;border-right:${i<2?'1px solid rgba(255,255,255,0.06)':'none'};position:relative">${t}${tabDot[i]?`<span style="position:absolute;top:6px;right:calc(50% - 14px);width:5px;height:5px;border-radius:50%;background:${i===2?'#22c55e':'#818cf8'}"></span>`:''}</button>`).join('')}
+      </div>
+    </div>
+    <div id="tab-content">
+      ${S.tab===0?buildPersonView(0):S.tab===1?buildPersonView(1):'<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>'}
+    </div>
+  </div>`;
+}
+
+// ═══ EVENT HANDLERS ═══
+function render(){document.getElementById('app').innerHTML=buildApp();}
+function setTab(i){S.tab=i;render();}
+function updateDate(pi,f,v){S.p[pi].date[f]=v;}
+function updateTrDate(pi,f,v){S.tr[pi].date[f]=v;}
+function toggleSec(pi,si){
+  S.p[pi].exp[si]=!S.p[pi].exp[si];
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function buildProfileArea(pi){
+  const data=S.p[pi];
+  if(!data.profile||!data.sections)return'';
+  const profile=data.profile,sections=data.sections,exp=data.exp;
+  const pri=profile.primary,st=ST[pri]||ST.Mars;
+  const sub=getSubProfile(profile);
+  return`<div id="profile-result-${pi}">
+    <div style="background:${st.clr}0d;border:1px solid ${st.clr}25;border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center">
+      <div style="font-size:42px;margin-bottom:10px;line-height:1">${st.em}</div>
+      <p style="margin:0 0 3px;font-weight:900;font-size:19px;background:linear-gradient(90deg,#c084fc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${st.name}</p>
+      <p style="margin:0 0 3px;font-weight:700;font-size:13px;color:${sub.freqClr}">${sub.freq}</p>
+      <p style="margin:0 0 10px;font-size:12px;color:${st.clr}bb">${st.nt}</p>
+      <p style="margin:0 0 10px;font-size:11px;color:${sub.vectorClr};font-weight:600">${sub.vectorDesc} · ${sub.circuit}</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-bottom:8px">
+        ${profile.ranked.slice(0,3).map(r=>{const s2=ST[r.planet];return`<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-size:11px;color:#9ca3af"><span>${s2?s2.em:''}</span><span style="font-weight:700;color:#e2e8f0">${NCN[r.planet]||r.planet}</span><span>${r.pct}%</span></span>`;}).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px">
+        ${profile.dominantChannel?`<span style="padding:3px 10px;border-radius:20px;background:${profile.channelClr}18;border:1px solid ${profile.channelClr}33;font-size:10px;color:${profile.channelClr};font-weight:700">${profile.dominantChannel} путь</span>`:''}
+        ${profile.hasEcl?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.22);font-size:10px;color:#ef4444;font-weight:700">Ограничение каналов</span>':''}
+        ${profile.affAxis&&profile.affAxis.active?`<span style="padding:3px 10px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.22);font-size:10px;color:#818cf8;font-weight:700">≋ ${profile.affAxis.posLabel}</span>`:''}
+        ${profile.captured?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.28);font-size:10px;color:#ef4444;font-weight:700">Захват доминанты</span>':''}
+      </div>
+    </div>
+    ${sections.map((s,si)=>buildSCard(s,pi,si,exp,profile)).join('')}
+    ${buildTransit(pi)}
+    <div style="text-align:center;padding:20px 16px 0;border-top:1px solid rgba(255,255,255,0.04);margin-top:8px">
+      <p style="margin:0 0 6px;font-size:12px;color:#6b7280;line-height:1.9">Это карта предрасположенностей нервной системы — не диагноз и не предсказание.</p>
+      <p style="margin:0;font-size:11px;color:#7c3aed;font-weight:800;letter-spacing:0.06em">BIOCHEMICAL RESONANCE · Eva White ❤</p>
+    </div>
+  </div>`;
+}
+function doCalc(pi){
+  const data=S.p[pi];
+  const d=parseInt(data.date.d),m=parseInt(data.date.m),y=parseInt(data.date.y);
+  const errEl=document.getElementById('calc-err-'+pi);
+  const btn=document.getElementById('calc-btn-'+pi);
+  if(!d||!m||!y||m<1||m>12||d<1||d>31||y<1800||y>2100){
+    if(errEl){errEl.style.display='block';errEl.textContent='Введи корректную дату рождения';}
+    return;
+  }
+  if(errEl)errEl.style.display='none';
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Анализирую систему...';}
+  setTimeout(()=>{
+    try{
+      const r=calcPlanets(y,m,d);
+      const asp=findAspects(r.pos,r.signs);
+      const profile=calcProfile(asp,r.signs,r.pos);
+      const sections=generateNC(profile);
+      const exp={};sections.forEach((_,i)=>{exp[i]=i<2;});
+      S.p[pi].profile=profile;S.p[pi].sections=sections;S.p[pi].exp=exp;
+      const area=document.getElementById('profile-area-'+pi);
+      if(area){
+        area.innerHTML=buildProfileArea(pi);
+        area.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+      if(btn){btn.disabled=false;btn.innerHTML='✦ Получить профиль';}
+      // Update tab dots
+      const tabContent=document.getElementById('tab-content');
+      if(tabContent){
+        const tabs=document.querySelectorAll('#app button[onclick^="setTab"]');
+        // Just re-render header tabs area
+        render();
+      }
+    }catch(e){
+      if(btn){btn.disabled=false;btn.innerHTML='✦ Получить профиль';}
+      if(errEl){errEl.style.display='block';errEl.textContent='Ошибка: '+e.message;}
+    }
+  },700);
+}
+function toggleTransit(pi){
+  S.tr[pi].open=!S.tr[pi].open;
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function calcTransit(pi){
+  const tr=S.tr[pi];
+  const d=parseInt(tr.date.d),m=parseInt(tr.date.m),y=parseInt(tr.date.y);
+  if(!d||!m||!y||m<1||m>12||d<1||d>31){S.tr[pi].err='Проверь дату';S.tr[pi].res=null;}
+  else{
+    try{
+      const r=calcPlanets(y,m,d);
+      S.tr[pi].res=findTransitsNC(r.pos,S.p[pi].profile.pos);
+      S.tr[pi].err='';
+    }catch(e){S.tr[pi].err='Ошибка';S.tr[pi].res=null;}
+  }
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function setCompat(key,val){
+  S.compat[key]=val;
+  const tc=document.getElementById('tab-content');
+  if(tc)tc.innerHTML='<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>';
+}
+function toggleAI(){
+  if(!S.compat.aiText){
+    const p1=S.p[0].profile,p2=S.p[1].profile;
+    if(!p1||!p2)return;
+    const s1=getSubProfile(p1),s2=getSubProfile(p2);
+    const aa1=p1.affAxis,aa2=p2.affAxis;
+    const isSame=s1.primary===s2.primary;
+    const isComplement=aa1&&aa2&&((aa1.pv==='in'&&aa2.pv==='out')||(aa1.pv==='out'&&aa2.pv==='in'));
+    const loopP1=Math.round((p1.mc['LOOP']||0)/(Object.values(p1.mc).reduce((s,v)=>s+v,0)||1)*100);
+    const loopP2=Math.round((p2.mc['LOOP']||0)/(Object.values(p2.mc).reduce((s,v)=>s+v,0)||1)*100);
+    const t1=p1.tense[0],t2=p2.tense[0];
+    let r='══ НЕЙРОХИМИЧЕСКИЙ ОТЧЁТ · Архитектура пары ══\n\n';
+    r+='СИСТЕМА А\n';r+='Тип: '+s1.name+'\n';r+='Частота: '+s1.freq+'\n';r+='Цепь: '+s1.circuit+'\n';r+='Говорит: '+s1.speaks+'\n';r+='Слышит: '+s1.hears+'\n';r+='Триггер: '+s1.trigger+'\n';r+='Вектор: '+s1.vectorDesc+'\n';
+    if(aa1&&aa1.active)r+='Мерцающая ось: '+aa1.posLabel+' · вектор '+(aa1.pv==='in'?'внутрь':aa1.pv==='out'?'наружу':aa1.pv==='free'?'∞':aa1.pv)+'\n';
+    r+='Нагрузка: петля '+loopP1+'%'+(p1.captured?' · ЗАХВАТ':'')+'\n';
+    if(t1)r+='Главная ось: '+(NCN[t1.p1]||t1.p1)+' ↔ '+(NCN[t1.p2]||t1.p2)+'\n';
+    r+='\nСИСТЕМА Б\n';r+='Тип: '+s2.name+'\n';r+='Частота: '+s2.freq+'\n';r+='Цепь: '+s2.circuit+'\n';r+='Говорит: '+s2.speaks+'\n';r+='Слышит: '+s2.hears+'\n';r+='Триггер: '+s2.trigger+'\n';r+='Вектор: '+s2.vectorDesc+'\n';
+    if(aa2&&aa2.active)r+='Мерцающая ось: '+aa2.posLabel+' · вектор '+(aa2.pv==='in'?'внутрь':aa2.pv==='out'?'наружу':aa2.pv==='free'?'∞':aa2.pv)+'\n';
+    r+='Нагрузка: петля '+loopP2+'%'+(p2.captured?' · ЗАХВАТ':'')+'\n';
+    if(t2)r+='Главная ось: '+(NCN[t2.p1]||t2.p1)+' ↔ '+(NCN[t2.p2]||t2.p2)+'\n';
+    r+='\nАНАЛИЗ ПАРЫ\n';
+    if(isSame)r+='⚠ Резонанс: идентичные типы ('+s1.name+'). Взаимное усиление напряжения.\n';
+    if(isComplement)r+='✓ Комплементарность векторов — потенциально ресурсная пара.\n';
+    r+='\nКЛЮЧЕВОЙ РАЗРЫВ\n';r+='А говорит: «'+s1.speaks+'»\nБ фильтрует через: «'+s2.hears+'»\nТриггер закрытия Б: «'+s2.trigger+'»\n';
+    r+='\nПРОТОКОЛ А→Б\n';r+='Говори через «'+s2.hears+'».\n';r+='Не активировать триггер: «'+s2.trigger+'»\n';r+='Подсказка (защита): '+(s2.winHint||'—')+'\n';r+='Подсказка (договор): '+(s2.agreeHint||'—')+'\n';
+    r+='\nПРОТОКОЛ Б→А\n';r+='Говори через «'+s1.hears+'».\n';r+='Не активировать триггер: «'+s1.trigger+'»\n';r+='Подсказка (защита): '+(s1.winHint||'—')+'\n';r+='Подсказка (договор): '+(s1.agreeHint||'—')+'\n';
+    r+='\n── Eva White · Biochemical Resonance ──';
+    S.compat.aiText=r;
+  }
+  S.compat.aiOpen=!S.compat.aiOpen;
+  const tc=document.getElementById('tab-content');
+  if(tc)tc.innerHTML='<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>';
+}
+// Init
+render();
+</script>
+</body>
+</html>
