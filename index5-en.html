@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Nervous System Architecture · Biochemical Resonance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030712;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:white}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;display:inline-block;animation:spin 1s linear infinite}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══ STATE ═══
+const S={
+  tab:0,
+  p:[
+    {date:{d:'',m:'',y:''},profile:null,sections:null,exp:{}},
+    {date:{d:'',m:'',y:''},profile:null,sections:null,exp:{}}
+  ],
+  tr:[
+    {date:{d:String(new Date().getDate()),m:String(new Date().getMonth()+1),y:String(new Date().getFullYear())},res:null,open:false,err:''},
+    {date:{d:String(new Date().getDate()),m:String(new Date().getMonth()+1),y:String(new Date().getFullYear())},res:null,open:false,err:''}
+  ],
+  compat:{sit:null,goal:'win',rev:false,aiOpen:false,aiText:null}
+};
+
+// ═══ ASTRONOMY ═══
+const D2R=Math.PI/180;
+const n360=x=>((x%360)+360)%360;
+function jd(Y,M,D){if(M<=2){Y--;M+=12;}const A=Math.floor(Y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+D+B-1524.5+0.5;}
+function kepE(Md,e){let M=n360(Md)*D2R,E=M;for(let k=0;k<50;k++){const dE=(M-E+e*Math.sin(E))/(1-e*Math.cos(E));E+=dE;if(Math.abs(dE)<1e-8)break;}return E;}
+function gL(N,i,w,a,e,Md,eX,eY){const E=kepE(Md,e),xv=Math.cos(E)-e,yv=Math.sqrt(1-e*e)*Math.sin(E),v=Math.atan2(yv,xv),r=a*(1-e*Math.cos(E)),Nr=N*D2R,ir=i*D2R,wvr=w*D2R+v,xh=r*(Math.cos(Nr)*Math.cos(wvr)-Math.sin(Nr)*Math.sin(wvr)*Math.cos(ir)),yh=r*(Math.sin(Nr)*Math.cos(wvr)+Math.cos(Nr)*Math.sin(wvr)*Math.cos(ir));return n360(Math.atan2(yh-eY,xh-eX)*180/Math.PI);}
+function calcPlanets(y,m,d){
+  const dd=jd(y,m,d)-2451545,T=dd/36525;
+  const sW=n360(282.9404+4.70935e-5*dd),sE=0.016708634-4.2037e-5*T,sM=n360(357.52911+0.9856003*dd);
+  const sEc=kepE(sM,sE),sV=Math.atan2(Math.sqrt(1-sE*sE)*Math.sin(sEc),Math.cos(sEc)-sE);
+  const sunL=n360(sV*180/Math.PI+sW),sR=1-sE*Math.cos(sEc),sLR=sV+sW*D2R;
+  const eX=sR*Math.cos(sLR+Math.PI),eY=sR*Math.sin(sLR+Math.PI);
+  const Lm=n360(218.316+13.176396*dd),Mm=n360(134.963+13.064993*dd)*D2R,De=n360(297.850+12.190749*dd)*D2R,Ms=n360(357.529+0.985600*dd)*D2R,Ee=1-0.002516*T;
+  const moonL=n360(Lm+6.289*Math.sin(Mm)-1.274*Math.sin(2*De-Mm)+0.658*Math.sin(2*De)-0.214*Math.sin(2*Mm)-0.186*Math.sin(Ms)*Ee);
+  const pos={Sun:sunL,Moon:moonL,Mercury:gL(n360(48.33-3.4e-6*dd),7.005,n360(29.12+7.8e-6*dd),0.3871,0.2056,n360(174.79+4.0923*dd),eX,eY),Venus:gL(n360(76.68+1.7e-6*dd),3.395,n360(54.88),0.7233,0.0068,n360(50.42+1.6021*dd),eX,eY),Mars:gL(n360(49.56-8e-6*dd),1.850,n360(286.5+2e-5*dd),1.5237,0.0934,n360(19.37+0.524*dd),eX,eY),Jupiter:gL(n360(100.45+2.8e-5*dd),1.303,n360(273.88+1.6e-5*dd),5.2026,0.0485,n360(19.9+0.0831*dd),eX,eY),Saturn:gL(n360(113.66+2.4e-5*dd),2.489,n360(339.39+3e-5*dd),9.5548,0.0556,n360(316.97+0.0334*dd),eX,eY),Uranus:gL(n360(74.0+1.4e-5*dd),0.773,n360(96.66+3.1e-5*dd),19.182,0.0473,n360(142.6+0.0117*dd),eX,eY),Neptune:gL(n360(131.78+3e-5*dd),1.770,n360(272.85),30.058,0.0086,n360(260.25+0.006*dd),eX,eY),Pluto:gL(n360(110.3+3.9e-5*dd),17.14,n360(113.76),39.48,0.2488,n360(14.82+0.004*dd),eX,eY)};
+  const SN=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const signs={};Object.entries(pos).forEach(([p,lon])=>{signs[p]=SN[Math.floor(lon/30)%12];});
+  return{pos,signs};
+}
+
+// ═══ DATA TABLES ═══
+const PW={Pluto:10,Mars:10,Saturn:9,Moon:9,Sun:8,Uranus:7,Mercury:7,Neptune:6,Jupiter:6,Venus:5};
+const EL={Aries:'Fire',Leo:'Fire',Sagittarius:'Fire',Taurus:'Earth',Virgo:'Earth',Capricorn:'Earth',Gemini:'Air',Libra:'Air',Aquarius:'Air',Cancer:'Water',Scorpio:'Water',Pisces:'Water'};
+const CD={Mars:{Fire:1.3,Earth:0.85,Air:0.95,Water:0.7},Pluto:{Fire:1.2,Earth:1.1,Air:0.85,Water:1.15},Saturn:{Fire:0.8,Earth:1.3,Air:0.9,Water:1.0},Moon:{Fire:0.8,Earth:1.0,Air:0.9,Water:1.3},Sun:{Fire:1.2,Earth:0.95,Air:1.0,Water:0.9},Mercury:{Fire:0.95,Earth:0.95,Air:1.3,Water:0.85},Uranus:{Fire:1.1,Earth:0.8,Air:1.25,Water:0.9},Neptune:{Fire:0.9,Earth:0.85,Air:1.0,Water:1.25},Venus:{Fire:1.0,Earth:1.0,Air:1.0,Water:1.15},Jupiter:{Fire:1.15,Earth:0.95,Air:1.0,Water:0.9}};
+const AC={0:0.81,60:0.362,120:0.328,90:0.929,180:0.991};
+const AD=[{a:0,tense:true,orb:10},{a:60,tense:false,orb:6},{a:120,tense:false,orb:8},{a:90,tense:true,orb:9},{a:180,tense:true,orb:10}];
+const CC={'Moon_Pluto':4,'Pluto_Saturn':4,'Mars_Moon':3,'Mars_Sun':3,'Mars_Uranus':3,'Mercury_Pluto':3,'Moon_Uranus':3,'Pluto_Sun':3,'Mars_Pluto':3,'Mars_Saturn':2,'Mars_Neptune':2,'Mars_Mercury':2,'Mercury_Uranus':2,'Moon_Neptune':2,'Moon_Saturn':2,'Neptune_Sun':2,'Saturn_Sun':2,'Saturn_Uranus':2,'Pluto_Uranus':2,'Moon_Sun':2,'Jupiter_Mars':2,'Mercury_Moon':2,'Pluto_Venus':2,'Mercury_Neptune':2,'Jupiter_Saturn':1,'Mercury_Saturn':1,'Neptune_Saturn':1,'Saturn_Venus':1,'Jupiter_Sun':0,'Jupiter_Venus':0,'Moon_Venus':0,'Jupiter_Moon':0,'Sun_Venus':0,'Mercury_Venus':0,'Jupiter_Mercury':0,'Jupiter_Neptune':0};
+const BP={'Mars_Pluto':{bw:21,md:'LOOP'},'Mars_Moon':{bw:20,md:'LOOP'},'Moon_Pluto':{bw:20,md:'LOOP'},'Mars_Saturn':{bw:20,md:'LOOP'},'Pluto_Saturn':{bw:20,md:'LOOP'},'Moon_Saturn':{bw:19,md:'LOOP'},'Mars_Sun':{bw:18,md:'LOOP'},'Pluto_Sun':{bw:18,md:'LOOP'},'Mars_Uranus':{bw:18,md:'REACT'},'Mars_Mercury':{bw:17,md:'LOOP'},'Mercury_Pluto':{bw:17,md:'LOOP'},'Moon_Sun':{bw:17,md:'LOOP'},'Saturn_Sun':{bw:17,md:'LOOP'},'Pluto_Uranus':{bw:17,md:'REACT',gen:true},'Mercury_Moon':{bw:16,md:'LOOP'},'Moon_Uranus':{bw:16,md:'REACT'},'Mars_Neptune':{bw:16,md:'DRAIN'},'Jupiter_Mars':{bw:16,md:'LOOP'},'Mercury_Saturn':{bw:16,md:'LOOP'},'Neptune_Pluto':{bw:16,md:'MIX',gen:true},'Saturn_Uranus':{bw:16,md:'REACT'},'Jupiter_Pluto':{bw:16,md:'LOOP'},'Mars_Venus':{bw:15,md:'LOOP'},'Pluto_Venus':{bw:15,md:'LOOP'},'Moon_Neptune':{bw:15,md:'MIX'},'Jupiter_Moon':{bw:15,md:'LOOP'},'Neptune_Saturn':{bw:15,md:'MIX'},'Mercury_Sun':{bw:15,md:'NEUT'},'Sun_Uranus':{bw:15,md:'REACT'},'Jupiter_Saturn':{bw:15,md:'LOOP'},'Saturn_Venus':{bw:14,md:'LOOP'},'Moon_Venus':{bw:14,md:'LOOP'},'Mercury_Uranus':{bw:14,md:'REACT'},'Neptune_Sun':{bw:14,md:'DRAIN'},'Jupiter_Sun':{bw:14,md:'NEUT'},'Mercury_Neptune':{bw:13,md:'DRAIN'},'Jupiter_Mercury':{bw:13,md:'NEUT'},'Sun_Venus':{bw:13,md:'NEUT'},'Neptune_Uranus':{bw:13,md:'REACT',gen:true},'Jupiter_Uranus':{bw:13,md:'NEUT'},'Uranus_Venus':{bw:12,md:'REACT'},'Mercury_Venus':{bw:12,md:'NEUT'},'Jupiter_Neptune':{bw:12,md:'DRAIN'},'Neptune_Venus':{bw:11,md:'DRAIN'},'Jupiter_Venus':{bw:11,md:'NEUT'}};
+const ET={'Pluto_Saturn':{coeff:0.3,shortType:'ECLIPSE',color:'#ef4444',bio:'GABA sarcophagus · serotonin/OXT atrophy'},'Saturn_Uranus':{coeff:0.6,shortType:'INTERFERE⚡',color:'#f97316',bio:'Glutamate disrupts GABA stabilization · breakdown after accumulation'},'Neptune_Saturn':{coeff:0.8,shortType:'INTERFERE~',color:'#a78bfa',bio:'DMN noise devalues serotonin resource · "I don\'t deserve"'}};
+const AAP={'Moon_Neptune':{w:3.5,pole:'A'},'Neptune_Venus':{w:2.5,pole:'A'},'Moon_Uranus':{w:2.5,pole:'B'},'Neptune_Uranus':{w:1.5,pole:'mixed',gen:true},'Uranus_Venus':{w:1.5,pole:'B'}};
+const CHANNEL_MAP={'Fire_Fire':{ch:'Somatic',clr:'#ef4444'},'Fire_Earth':{ch:'Somatic',clr:'#ef4444'},'Fire_Air':{ch:'Mental',clr:'#22d3ee'},'Fire_Water':{ch:'Visceral',clr:'#3b82f6'},'Earth_Earth':{ch:'Body-Fixating',clr:'#94a3b8'},'Earth_Air':{ch:'Mental',clr:'#22d3ee'},'Earth_Water':{ch:'Visceral',clr:'#3b82f6'},'Air_Air':{ch:'Mental',clr:'#22d3ee'},'Air_Water':{ch:'Dissociative',clr:'#a78bfa'},'Water_Water':{ch:'Visceral',clr:'#3b82f6'}};
+const ELEM_ORD=['Fire','Earth','Air','Water'];
+function getChannelKey(e1,e2){const i=ELEM_ORD.indexOf(e1),j=ELEM_ORD.indexOf(e2);return i<=j?e1+'_'+e2:e2+'_'+e1;}
+const COMPENSATION_MAP={Water:{type:'Water pathway',em:'💧',substance:'Alcohol · opioids · escapism · overeating',seek:'Merger · access to suppressed sensitivity',clr:'#3b82f6'},Fire:{type:'Fire pathway',em:'🔥',substance:'Stimulants · extreme sports · gambling · aggression',seek:'Drive and expansion — suppressed by fear',clr:'#ef4444'},Air:{type:'Air pathway',em:'💨',substance:'Nicotine · caffeine · social media · overwork',seek:'Ease of connection · intellectual stimulation',clr:'#22d3ee'},Earth:{type:'Earth pathway',em:'🌱',substance:'Food · shopping · hoarding · hyper-control',seek:'Body stability · grounding',clr:'#94a3b8'}};
+const NCN={Mars:'Impulse',Sun:'Identity',Uranus:'Innovator',Pluto:'Transformation',Moon:'Emotional Receiver',Mercury:'Analytical Processor',Neptune:'Aesthetic Channel',Venus:'Connection Channel',Jupiter:'Expansion Channel',Saturn:'Structural Module'};
+const ST={Mars:{name:'Noradrenergic Reactor',nt:'Noradrenaline · Adrenaline',clr:'#ef4444',em:'⚡'},Sun:{name:'D1-Integrator',nt:'Dopamine D1 · Noradrenaline',clr:'#fbbf24',em:'☀'},Pluto:{name:'HPA-Transformer',nt:'Cortisol · Vasopressin',clr:'#c084fc',em:'🔥'},Moon:{name:'Neurochemical Radar',nt:'Serotonin · Oxytocin',clr:'#93c5fd',em:'🌙'},Mercury:{name:'ACh-Processor',nt:'Acetylcholine · Dopamine',clr:'#4ade80',em:'🔬'},Uranus:{name:'Gamma-Innovator',nt:'Glutamate · Dopamine (novelty)',clr:'#67e8f9',em:'🌩'},Neptune:{name:'DMN-Processor',nt:'Serotonin 5HT2A · Endorphins',clr:'#c4b5fd',em:'🌊'},Venus:{name:'OXT-Buffer',nt:'Oxytocin · Dopamine',clr:'#f9a8d4',em:'🌸'},Jupiter:{name:'D2-Expander',nt:'Dopamine D2 · BDNF',clr:'#fdba74',em:'🌟'},Saturn:{name:'GABA-Controller',nt:'GABA · Cortisol',clr:'#94a3b8',em:'🏛'}};
+const SDESC={Mars:['Primary neurotransmitter — noradrenaline. Default working state — readiness for action. Sympathetic division operates as the primary mode.','Causal vector — external. When the system reacts, the first hypothesis: "something is happening outside".'],Sun:['Primary neurotransmitter — D1-dopamine pathway. The thalamus constantly checks: "do I see myself reflected in another?" When the answer is "yes" — the system works at full power.','The system activates through external recognition. Neurochemical need for confirmation of existence as significant.'],Pluto:['Primary neurotransmitter — cortisol and vasopressin. The nervous system constantly scans reality in search of the true, hidden, extreme.','You sense truth where others see words. A hypervigilant HPA-axis delivers inhuman precision and requires conscious rest.'],Moon:['Primary neurotransmitter — serotonin and oxytocin. The limbic system — one of the most sensitive instruments of perception.','When something happens, the system first turns inward — "what do I feel?"'],Mercury:['Primary neurotransmitter — acetylcholine and dopamine. The brain thinks faster than it feels.','Verbalization — the primary way of processing reality. You understand something only when you have named it.'],Uranus:['Primary neurotransmitter — glutamate and novelty dopamine. The system operates nonlinearly.','The primary discomfort — predictability. When everything is too clear, the system starts generating changes on its own.'],Neptune:['Primary neurotransmitter — serotonin 5HT2A and endorphins. The brain\'s default mode network is constantly active.','The boundary between you and another is permeable. You feel others\' states as your own. A rare gift — and a challenge simultaneously.'],Venus:['Primary neurotransmitter — oxytocin and reward dopamine. The nervous system is oriented toward connection and value.','Harmony in relationships — a basic neurochemical need.'],Jupiter:['Primary neurotransmitter — dopamine D2 and BDNF. Natural optimism — this is neurobiology, not naivety.','Near you, others begin to see further. BDNF supports expansiveness at the biochemical level.'],Saturn:['Primary neurotransmitter — GABA. The inhibitory system constantly filters and keeps under control what bursts out in others.','Clear architecture matters to you — not for formalism\'s sake, but because without it the world feels physically uncomfortable.']};
+const MDESC={Mars:['Primary motor. Everything you do flows through the motor-impulse channel. Movement always precedes reflection.'],Sun:['D1-dopamine pathway — the identity system. The thalamus checks: "do I see myself reflected in another?"'],Uranus:['Built-in drive toward ruptures: you dislike the predictable. Any rigid structure triggers the desire to break it.'],Pluto:['Existential intensity, the ability to work with the dark, heavy, extreme.'],Moon:['Emotional module not in the top three: reaction through action. Emotion arrives later, as a consequence.'],Mercury:['ACh-processor — analytical channel. The primary way to understand reality — name it.'],Neptune:['DMN constantly active. Special sensitivity to images, meanings, the unspoken.'],Venus:['OXT-buffer — connection and values channel. Harmony in relationships — a basic neurochemical need.'],Jupiter:['D2-expander. Dopamine D2 and BDNF create natural optimism as the default mode.'],Saturn:['GABA circuit — structural brake. The ability to hold, wait, build — a neurochemical advantage.']};
+const ENV={Mars:{good:'crisis management · emergency medicine · security forces · professional sports · negotiations',hard:'prolonged routine without events · slow processes · static roles'},Sun:{good:'teaching · diplomacy · coaching · public speaking · team management',hard:'anonymous work without recognition · bureaucratic roles without autonomy'},Pluto:{good:'finance and audit · surgery · law · strategic planning · security',hard:'chaotic unpredictable environments · cold sales'},Moon:{good:'psychotherapy · care for people · music and poetry · work with children',hard:'rigid corporate environment · aggressive audiences'},Mercury:{good:'IT and programming · linguistics · medical diagnostics · journalism',hard:'monotonous physical labor · emotional care without information flow'},Uranus:{good:'startups · invention · system design · technological innovation',hard:'strict hierarchy without autonomy · identical routine'},Neptune:{good:'music · painting · poetry · media · pattern analytics',hard:'hard deadlines · real-time numerical accountability'},Venus:{good:'design · HR · mediation · client service · art therapy',hard:'hard confrontations · isolation'},Jupiter:{good:'entrepreneurship · investments · education · international activities',hard:'detailed routine work · auditing'},Saturn:{good:'data analytics · scientific research · risk management · accounting',hard:'constant improvisation · chaotic clients'}};
+const TNC={'Pluto_Sun':{lbl:'Transformation pressure on identity channel',txt:'The external environment creates intense pressure on the self. Old ways of being yourself stop working.',dur:'years',load:9,clr:'#ef4444'},'Pluto_Moon':{lbl:'Transformation of the emotional core',txt:'Old limbic patterns rise to the surface. This is not a signal that something is broken — it\'s what is finally ready for change.',dur:'years',load:10,clr:'#ef4444'},'Pluto_Mars':{lbl:'Transformation of the motor channel',txt:'Will and action energy pass through the crucible. A period that requires redefining the source of strength.',dur:'years',load:9,clr:'#c084fc'},'Pluto_Venus':{lbl:'Transformation of the connection channel',txt:'Relationships and values undergo serious testing.',dur:'years',load:8,clr:'#c084fc'},'Pluto_Mercury':{lbl:'Transformation of the analytical processor',txt:'Thinking becomes deeper and more intense. The desire to get to the bottom of things.',dur:'years',load:8,clr:'#c084fc'},'Neptune_Sun':{lbl:'Blurring of the identity channel',txt:'A period of blurred selfhood. Important not to make key decisions in the fog.',dur:'years',load:6,clr:'#a78bfa'},'Neptune_Moon':{lbl:'Dissolution of emotional boundaries',txt:'Boundaries between self and other blur. An anchor in daily rhythm is important.',dur:'years',load:7,clr:'#a78bfa'},'Neptune_Mars':{lbl:'Dissipation of motor impulse',txt:'The impulse to act exists — but without a vector. Find one main meaningful anchor.',dur:'years',load:6,clr:'#a78bfa'},'Neptune_Venus':{lbl:'Idealization of the connection channel',txt:'The oxytocin channel is more open than usual. Beautiful — and requires a reality check.',dur:'years',load:5,clr:'#a78bfa'},'Neptune_Mercury':{lbl:'Intuition replaces logic',txt:'Good time for creativity, worse for precise calculations.',dur:'years',load:6,clr:'#a78bfa'},'Uranus_Sun':{lbl:'Gamma discharges in the identity channel',txt:'A period of unexpected changes in the structure of life. Important to be flexible.',dur:'1-2 years',load:7,clr:'#67e8f9'},'Uranus_Moon':{lbl:'Non-standard in the emotional channel',txt:'Emotional reactions become unpredictable.',dur:'1-2 years',load:8,clr:'#67e8f9'},'Uranus_Mars':{lbl:'Explosive activation of the motor channel',txt:'High risk of impulsive actions without analysis.',dur:'1-2 years',load:8,clr:'#67e8f9'},'Uranus_Venus':{lbl:'Non-standard in the connection channel',txt:'Unexpected changes in relationships.',dur:'1-2 years',load:6,clr:'#67e8f9'},'Uranus_Mercury':{lbl:'Gamma discharges in the analytical channel',txt:'Lightning thoughts, breakthrough ideas. Write everything down.',dur:'1-2 years',load:7,clr:'#67e8f9'},'Saturn_Sun':{lbl:'Structural pressure on identity',txt:'What is being built now is being built to last.',dur:'~1 year',load:7,clr:'#94a3b8'},'Saturn_Moon':{lbl:'Inhibition of the emotional channel',txt:'GABA brake blocks the limbic system. A period for honest conversation with yourself.',dur:'~1 year',load:8,clr:'#94a3b8'},'Saturn_Mars':{lbl:'Inhibition of the motor channel',txt:'Everything moves slower. A test of consistency.',dur:'~1 year',load:7,clr:'#94a3b8'},'Saturn_Venus':{lbl:'Structure in the connection channel',txt:'Relationships are tested by maturity.',dur:'~1 year',load:6,clr:'#94a3b8'},'Saturn_Mercury':{lbl:'Structuring of the analytical channel',txt:'The ACh-processor slows down — but becomes deeper.',dur:'~1 year',load:6,clr:'#94a3b8'},'Jupiter_Sun':{lbl:'Expansion of the identity channel',txt:'D2-dopamine strengthens the D1-pathway. Use this window.',dur:'6 months',load:-4,clr:'#fdba74'},'Jupiter_Moon':{lbl:'Expansion of the emotional channel',txt:'D2-expansion into the limbic system. Good time for closeness.',dur:'6 months',load:-4,clr:'#fdba74'},'Jupiter_Mars':{lbl:'Strengthening of the motor channel',txt:'Energy and opportunities align. Act while the window is open.',dur:'6 months',load:-3,clr:'#fdba74'},'Jupiter_Venus':{lbl:'Expansion of the connection channel',txt:'Abundance in relationships.',dur:'6 months',load:-4,clr:'#fdba74'},'Jupiter_Mercury':{lbl:'Expansion of the analytical channel',txt:'New ideas, learning as pleasure.',dur:'6 months',load:-3,clr:'#fdba74'},'Mars_Sun':{lbl:'NA impulse into the identity channel',txt:'A brief burst of energy and confidence.',dur:'2-3 days',load:5,clr:'#fb923c'},'Mars_Moon':{lbl:'NA impulse into the emotional channel',txt:'The limbic system reacts more sharply.',dur:'2-3 days',load:6,clr:'#fb923c'},'Mars_Mars':{lbl:'Double NA activation',txt:'Maximum readiness for action.',dur:'2-3 days',load:6,clr:'#fb923c'},'Mars_Venus':{lbl:'NA impulse into the connection channel',txt:'A brief burst of passion.',dur:'1-2 days',load:4,clr:'#fb923c'},'Mars_Mercury':{lbl:'NA impulse into the analytical channel',txt:'Think fast — speak slowly.',dur:'1-2 days',load:5,clr:'#fb923c'}};
+
+const FMOD={
+  Mars:{Pluto:{freq:'HPA-Cascade',clr:'#7c3aed',circuit:'PAG→Amygdala→HPA loop',speaks:'through pressure and control',hears:'strength without manipulation',trigger:'weakness and inconsistency',vector:'external',winHint:'Directness without packaging',agreeHint:'Real truth — what I actually want'},Saturn:{freq:'GABA-Cage',clr:'#64748b',circuit:'PAG↔dlPFC: action-inhibition loop',speaks:'after restraint — explosion',hears:'facts, structure, order',trigger:'chaos and system violation',vector:'inverted',winHint:'Fact + concrete plan',agreeHint:'Concrete only'},Moon:{freq:'Limbic Wound',clr:'#818cf8',circuit:'PAG + Hippocampus: PTSD topology',speaks:'from pain and defensive aggression',hears:'safety and acceptance',trigger:'sense of vulnerability',vector:'external',winHint:'Define task without limbic pressure',agreeHint:'Safety contact first'},Sun:{freq:'Sympathetic Storm',clr:'#fb923c',circuit:'Thalamus + PAG: triple conflict',speaks:'through self-assertion',hears:'respect and equal status',trigger:'being ignored',vector:'external',winHint:'"You matter in this decision"',agreeHint:'Recognition + concrete request'},Neptune:{freq:'Adrenaline Drift',clr:'#a78bfa',circuit:'PAG→DMN: impulse drain',speaks:'through inspiration without completion',hears:'meaningful context',trigger:'harsh pressure without meaning',vector:'inverted',winHint:'Give meaningful context',agreeHint:'Task meaning matters more than pressure'},Mercury:{freq:'Verbal Strike',clr:'#4ade80',circuit:'PAG + Broca zones: impulse→speech',speaks:'precisely, sharply, without filter',hears:'logic and concreteness',trigger:'vagueness',vector:'external',winHint:'Fact → argument → solution',agreeHint:'Structural request'},Uranus:{freq:'Gamma-Discharge',clr:'#67e8f9',circuit:'PAG + Gamma burst 30-100Hz',speaks:'through sudden bursts',hears:'freedom and rule-breaking',trigger:'coercion and predictability',vector:'external',winHint:'Propose breaking a rule together',agreeHint:'Give space'},Jupiter:{freq:'Dopamine Storm',clr:'#f59e0b',circuit:'PAG + mPFC: impulse + expansion',speaks:'broadly and riskily',hears:'possibilities and growth',trigger:'pessimism',vector:'external',winHint:'Show the scale',agreeHint:'Big picture opens the ear'},Venus:{freq:'Passionate Kinetics',clr:'#f9a8d4',circuit:'PAG + NA: action through value',speaks:'through passion and value',hears:'desire and harmony',trigger:'aggression without warmth',vector:'external',winHint:'Warm background + concreteness',agreeHint:'Harmony in delivery'},Mars:{freq:'NA-Reactor',clr:'#ef4444',circuit:'PAG · Basal Ganglia: direct action',speaks:'directly through action',hears:'result and speed',trigger:'slowness and evasiveness',vector:'external',winHint:'Direct task without packaging',agreeHint:'Action + concrete step'}},
+  Pluto:{Mars:{freq:'HPA-Dominant',clr:'#ef4444',circuit:'Amygdala + PAG: dual reptilian circuit',speaks:'through pressure and ultimatums',hears:'strength without manipulation',trigger:'weakness',vector:'external',winHint:'Direct task without packaging',agreeHint:'Honesty — what I actually want'},Saturn:{freq:'Control-Loop',clr:'#64748b',circuit:'HPA + dlPFC: fear→control→fear',speaks:'through ultimatums and control',hears:'stability of power in the system',trigger:'loss of control',vector:'inverted',winHint:'Appeal to long-term structure',agreeHint:'Acknowledge their position first'},Moon:{freq:'Limbic Loop',clr:'#818cf8',circuit:'Amygdala + Hippocampus: PTSD-Loop',speaks:'through intense need',hears:'depth and safety',trigger:'threat of loss',vector:'inverted',winHint:"Don't threaten rupture",agreeHint:'Deep contact before any content'},Sun:{freq:'Existential Circuit',clr:'#fbbf24',circuit:'Amygdala + Thalamus: identity threat',speaks:'through existential challenges',hears:'real truth',trigger:'lies and superficiality',vector:'external',winHint:'Real truth immediately',agreeHint:'Honesty without packaging'},Uranus:{freq:'System Rupture',clr:'#67e8f9',circuit:'HPA + Gamma: transformation through rupture',speaks:'through pattern disruption',hears:'transformation and breakthrough',trigger:'stagnation',vector:'external',winHint:"Show the old system isn't working",agreeHint:'Transformation — not restoration'},Neptune:{freq:'Archetypal Circuit',clr:'#c4b5fd',circuit:'HPA + DMN: collective shadow',speaks:'through the archetypal',hears:'transformation through dissolution',trigger:'superficiality',vector:'internal',winHint:'Speak of the deep',agreeHint:'Allow transformation'},Mercury:{freq:'Truth Detector',clr:'#4ade80',circuit:'Amygdala + Broca zones',speaks:'through penetration to the essence',hears:'real truth',trigger:'superficiality',vector:'external',winHint:'Real truth immediately',agreeHint:'Without diplomacy'},Venus:{freq:'Obsessive Attractor',clr:'#f9a8d4',circuit:'NA + Amygdala + HPA',speaks:'through intensity',hears:'depth',trigger:'superficiality',vector:'external',winHint:'Deep without manipulation',agreeHint:'Honesty + warmth'},Jupiter:{freq:'Expansive Transformation',clr:'#fdba74',circuit:'mPFC + Amygdala',speaks:'through transformation',hears:'power and growth',trigger:'superficiality',vector:'external',winHint:'Scale + depth',agreeHint:'System transformation'},Pluto:{freq:'HPA-Transformer',clr:'#c084fc',circuit:'HPA axis · Central Amygdala: deep scan',speaks:'through intensity and depth',hears:'real truth',trigger:'superficiality and lies',vector:'external',winHint:'Direct honesty',agreeHint:'Real truth opens everything'}},
+  Saturn:{Pluto:{freq:'Control-Loop',clr:'#7c3aed',circuit:'dlPFC + Amygdala + HPA',speaks:'through structure and ultimatums',hears:'power within the system',trigger:'loss of control',vector:'inverted',winHint:'Appeal to the system',agreeHint:'Acknowledge position first'},Uranus:{freq:'Controlled Breakthrough',clr:'#67e8f9',circuit:'dlPFC + Gamma',speaks:'through non-standard solutions within limits',hears:'reliability + uniqueness',trigger:'complete chaos',vector:'internal',winHint:'Reform — not revolution',agreeHint:'"Let\'s change within the system"'},Mars:{freq:'GABA-Cage',clr:'#ef4444',circuit:'dlPFC↔PAG: action-inhibition',speaks:'after restraint — explosion',hears:'facts and results',trigger:'weakness and chaos',vector:'inverted',winHint:'Fact + concrete action',agreeHint:'Structural request'},Moon:{freq:'Neurochemical Freeze',clr:'#93c5fd',circuit:'dlPFC → Hippocampus',speaks:'through facts, hiding emotions',hears:'structure and reliability',trigger:'emotional storm',vector:'inverted',winHint:'Concrete plan = safety',agreeHint:"Don't demand emotions — only the plan"},Sun:{freq:'D1-GABA Conflict',clr:'#fbbf24',circuit:'Thalamus ↔ dlPFC',speaks:'through agreements',hears:'reliability and agreement',trigger:'agreement violation',vector:'external',winHint:'Name specific agreement point',agreeHint:'"Our agreement is the foundation"'},Neptune:{freq:'Structured Search',clr:'#c4b5fd',circuit:'dlPFC + DMN',speaks:'through the system in flow',hears:'structure and space',trigger:'chaos without structure',vector:'inverted',winHint:'Structure + space',agreeHint:'Concrete plan reduces anxiety'},Mercury:{freq:'Systematic Analysis',clr:'#4ade80',circuit:'dlPFC + Broca zones',speaks:'through system and analysis',hears:'facts and system',trigger:'chaotic information',vector:'inverted',winHint:'Structured argument',agreeHint:'Facts + plan'},Venus:{freq:'Mature Attachment',clr:'#f9a8d4',circuit:'dlPFC + NA',speaks:'through reliability',hears:'stability',trigger:'instability',vector:'inverted',winHint:'Appeal to the long-term',agreeHint:'Reliability is their value'},Jupiter:{freq:'Structural Growth',clr:'#fdba74',circuit:'dlPFC + mPFC',speaks:'through structural expansion',hears:'growth within the system',trigger:'chaotic growth',vector:'internal',winHint:'Growth through plan',agreeHint:'Expansion within limits'},Saturn:{freq:'GABA-Controller',clr:'#94a3b8',circuit:'dlPFC · ACC · Caudate',speaks:'through structure and facts',hears:'reliability and order',trigger:'chaos and unreliability',vector:'inverted',winHint:'Facts + concrete system',agreeHint:'Structural request'}},
+  Sun:{Saturn:{freq:'D1-GABA Conflict',clr:'#94a3b8',circuit:'Thalamus ↔ dlPFC',speaks:'through agreements',hears:'reliability',trigger:'agreement violation',vector:'external',winHint:'Specific agreement point',agreeHint:'"Our agreement is the foundation"'},Pluto:{freq:'Existential Circuit',clr:'#c084fc',circuit:'Thalamus + Amygdala + HPA',speaks:'through intensity',hears:'real truth',trigger:'lies',vector:'external',winHint:'Real truth — immediately',agreeHint:'Honesty without packaging'},Uranus:{freq:'Identity Breakthrough',clr:'#67e8f9',circuit:'Thalamus + Gamma',speaks:'through uniqueness',hears:'freedom',trigger:'demand to conform',vector:'external',winHint:'Offer a non-standard path',agreeHint:'Let them choose the form'},Moon:{freq:'Thalamo-Limbic Flow',clr:'#818cf8',circuit:'Thalamus + Hippocampus: FLOW',speaks:'through neurochemical contact',hears:'connection and acceptance',trigger:'neurochemical coldness',vector:'internal',winHint:'Contact first — then task',agreeHint:'"You matter to me"'},Mars:{freq:'Sympathetic Storm',clr:'#ef4444',circuit:'Thalamus + PAG',speaks:'through demand for recognition',hears:'respect and action',trigger:'being ignored',vector:'external',winHint:'Concrete task',agreeHint:'Recognition + concrete step'},Neptune:{freq:'Thalamic Filter',clr:'#c4b5fd',circuit:'Thalamus ↔ DMN',speaks:'through images',hears:'meaningful inspiration',trigger:'rigid logic',vector:'inverted',winHint:'Meaning → then specifics',agreeHint:'Speak in images'},Mercury:{freq:'Identity Through Words',clr:'#4ade80',circuit:'Thalamus + Broca zones',speaks:'through clear formulations',hears:'precision and clarity',trigger:'vagueness',vector:'external',winHint:'Clear formulation + recognition',agreeHint:'Name it directly'},Venus:{freq:'Harmonious Identity',clr:'#f9a8d4',circuit:'Thalamus + NA',speaks:'through beauty and connection',hears:'harmony and value',trigger:'rudeness',vector:'external',winHint:'Warmth + concreteness',agreeHint:'Harmony in delivery'},Jupiter:{freq:'D2-D1 Synergy',clr:'#fdba74',circuit:'mPFC + Thalamus + VTA: FLOW',speaks:'through scale and recognition',hears:'growth and recognition',trigger:'limitation',vector:'internal',winHint:'Show the scale',agreeHint:'Recognition + big picture'},Sun:{freq:'D1-Integrator',clr:'#fbbf24',circuit:'Thalamus · DMN (active) · ACC',speaks:'through self-assertion',hears:'respect and recognition',trigger:'being ignored and devalued',vector:'external',winHint:'"You matter in this decision"',agreeHint:'Recognition opens everything'}},
+  Moon:{Pluto:{freq:'Limbic Loop',clr:'#c084fc',circuit:'Hippocampus + Amygdala + HPA: PTSD Loop',speaks:'through intense emotion',hears:'safety and depth',trigger:'threat of loss of control',vector:'inverted',winHint:'Speak of the future — not trauma',agreeHint:'Full honesty opens contact'},Uranus:{freq:'Unstable Limbic',clr:'#67e8f9',circuit:'Hippocampus + Gamma',speaks:'through unexpected shifts',hears:'freedom in closeness',trigger:'demand for stability',vector:'external',winHint:"Don't hold on",agreeHint:'Space within contact'},Saturn:{freq:'Neurochemical Freeze',clr:'#64748b',circuit:'Hippocampus → dlPFC',speaks:'through facts, hiding feelings',hears:'structure and reliability',trigger:'emotional storm',vector:'inverted',winHint:'Facts only',agreeHint:'Concrete plan = safety'},Mars:{freq:'Limbic Wound',clr:'#ef4444',circuit:'Hippocampus + PAG',speaks:'from pain and defensive aggression',hears:'neurochemical safety',trigger:'threat to closeness',vector:'external',winHint:'Safety contact first',agreeHint:'Neurochemical contact before task'},Neptune:{freq:'Diffuse Limbic',clr:'#a78bfa',circuit:'Hippocampus → DMN',speaks:'through interoceptive signals',hears:'neurochemical background',trigger:'harshness without warmth',vector:'inverted',winHint:'Neurochemical warmth + concreteness',agreeHint:'Background signal — then words'},Sun:{freq:'Thalamo-Limbic Flow',clr:'#fbbf24',circuit:'Hippocampus + Thalamus',speaks:'through care and closeness',hears:'connection and recognition',trigger:'neurochemical coldness',vector:'internal',winHint:'Recognition + concrete request',agreeHint:'"You matter to me" first'},Mercury:{freq:'Limbic Encoding',clr:'#4ade80',circuit:'Hippocampus + Broca zones',speaks:'through emotionally charged words',hears:'warmth in words',trigger:'cold logic',vector:'inverted',winHint:'Words with warmth + concreteness',agreeHint:'Warmth first — then analysis'},Venus:{freq:'Serotonin-OXT Channel',clr:'#f9a8d4',circuit:'Hippocampus + NA + OFC',speaks:'through care and closeness',hears:'warmth and connection',trigger:'coldness',vector:'internal',winHint:'Warmth + concreteness',agreeHint:'"It matters to me that you\'re here"'},Jupiter:{freq:'Limbic Expansion',clr:'#fdba74',circuit:'Hippocampus + mPFC',speaks:'through emotional optimism',hears:'warmth and possibilities',trigger:'pessimism and coldness',vector:'internal',winHint:'Warmth + big picture',agreeHint:'Possibility through care'},Moon:{freq:'5HT-Modulator',clr:'#93c5fd',circuit:'Hippocampus · Hypothalamus · Insula',speaks:'through feeling',hears:'tone and warmth',trigger:'emotional coldness',vector:'internal',winHint:'"How are you feeling?"',agreeHint:'Presence matters more than words'}},
+  Mercury:{Mars:{freq:'Verbal Strike',clr:'#ef4444',circuit:'Broca zones + PAG',speaks:'precisely and sharply',hears:'logic and concreteness',trigger:'vagueness',vector:'external',winHint:'Fact → argument → solution',agreeHint:'Structural request'},Uranus:{freq:'Gamma-Cognition',clr:'#67e8f9',circuit:'Broca zones + Gamma',speaks:'through non-standard connections',hears:'non-standard',trigger:'banality',vector:'external',winHint:'Surprise with an unconventional move',agreeHint:'Nonlinear path'},Saturn:{freq:'Systematic Analysis',clr:'#64748b',circuit:'Broca zones + dlPFC',speaks:'through system and analysis',hears:'facts and system',trigger:'chaotic information',vector:'inverted',winHint:'Structured argument',agreeHint:'Facts + plan'},Pluto:{freq:'Truth Detector',clr:'#c084fc',circuit:'Broca zones + Amygdala',speaks:'through penetration to the essence',hears:'real truth',trigger:'superficiality',vector:'external',winHint:'Real truth immediately',agreeHint:'Without diplomacy'},Neptune:{freq:'Poetic Encoding',clr:'#a78bfa',circuit:'Broca zones + DMN',speaks:'through images',hears:'beauty of language',trigger:'dry logic',vector:'internal',winHint:'Image + concreteness',agreeHint:'Analogy opens the ear'},Moon:{freq:'Emotional Analysis',clr:'#93c5fd',circuit:'Broca zones + Hippocampus',speaks:'through analysis of emotions',hears:'logic + warmth',trigger:'complete coldness',vector:'external',winHint:'Logic + warmth together',agreeHint:'Explain and warm'},Sun:{freq:'Identity Through Words',clr:'#fbbf24',circuit:'Broca zones + Thalamus',speaks:'through clear formulations',hears:'precision',trigger:'vagueness',vector:'external',winHint:'Name it directly',agreeHint:'Precise formulation'},Venus:{freq:'Verbalization of Values',clr:'#f9a8d4',circuit:'Broca zones + NA',speaks:'through language of values',hears:'value in words',trigger:'blunt directness',vector:'external',winHint:'Words about value',agreeHint:'Language of importance'},Jupiter:{freq:'Expansion Through Thinking',clr:'#fdba74',circuit:'Broca zones + mPFC',speaks:'through big ideas',hears:'scale',trigger:'narrow thinking',vector:'internal',winHint:'The big idea',agreeHint:'Scale opens everything'},Mercury:{freq:'ACh-Processor',clr:'#4ade80',circuit:'Broca\'s/Wernicke\'s · Corpus callosum',speaks:'through analysis and verbalization',hears:'precision and logic',trigger:'illogicality',vector:'external',winHint:'"Let\'s break it down step by step"',agreeHint:'Precise structure'}},
+  Venus:{Mars:{freq:'Passion Circuit',clr:'#ef4444',circuit:'NA + PAG',speaks:'through passion and value',hears:'desire and harmony',trigger:'aggression without warmth',vector:'external',winHint:'Warm background + concreteness',agreeHint:'Harmony in delivery'},Pluto:{freq:'Obsessive Attractor',clr:'#c084fc',circuit:'NA + Amygdala + HPA',speaks:'through intensity',hears:'depth',trigger:'superficiality',vector:'external',winHint:'Deep without manipulation',agreeHint:'Honesty + warmth'},Saturn:{freq:'Mature Attachment',clr:'#94a3b8',circuit:'NA + dlPFC',speaks:'through reliability',hears:'stability',trigger:'instability',vector:'inverted',winHint:'Appeal to the long-term',agreeHint:'Reliability is their value'},Uranus:{freq:'Non-Standard Connection',clr:'#67e8f9',circuit:'NA + Gamma',speaks:'through freedom',hears:'uniqueness',trigger:'standard form',vector:'external',winHint:'Non-standard form of connection',agreeHint:'Freedom within contact'},Neptune:{freq:'OXT-DMN Flow',clr:'#c4b5fd',circuit:'NA + DMN',speaks:'through idealization',hears:'the ideal form',trigger:'harsh reality',vector:'inverted',winHint:'Present through value',agreeHint:'Ideal angle'},Moon:{freq:'Serotonin-OXT Channel',clr:'#93c5fd',circuit:'NA + Hippocampus + OFC',speaks:'through care and closeness',hears:'warmth and connection',trigger:'coldness',vector:'internal',winHint:'Warmth + concreteness',agreeHint:'"You matter to me"'},Sun:{freq:'Harmonious Identity',clr:'#fbbf24',circuit:'NA + Thalamus',speaks:'through beauty and connection',hears:'harmony and value',trigger:'rudeness',vector:'external',winHint:'Warmth + clarity',agreeHint:'Harmony in delivery'},Mercury:{freq:'Verbalization of Values',clr:'#4ade80',circuit:'NA + Broca zones',speaks:'through language of values',hears:'value in words',trigger:'blunt directness',vector:'external',winHint:'Words about value',agreeHint:'Language of values'},Jupiter:{freq:'Abundance in Connection',clr:'#fdba74',circuit:'NA + mPFC + VTA',speaks:'through abundance',hears:'possibilities through connection',trigger:'limitation',vector:'internal',winHint:'Abundance + warmth',agreeHint:'Possibility through closeness'},Venus:{freq:'OXT-Buffer',clr:'#f9a8d4',circuit:'Nucleus Accumbens · OFC · VTA',speaks:'through harmony and value',hears:'warmth and connection',trigger:'conflict and hostility',vector:'external',winHint:'"You are important to me"',agreeHint:'Warmth opens everything'}},
+  Neptune:{Moon:{freq:'Diffuse Limbic',clr:'#93c5fd',circuit:'DMN + Hippocampus',speaks:'through interoceptive signals',hears:'neurochemical background',trigger:'harshness without warmth',vector:'inverted',winHint:'Neurochemical warmth + concreteness',agreeHint:'Background signal matters more than words'},Mars:{freq:'Adrenaline Drift',clr:'#ef4444',circuit:'DMN + PAG',speaks:'through inspiration without vector',hears:'meaningful context',trigger:'pressure without context',vector:'inverted',winHint:'Action meaning',agreeHint:'Context + space'},Sun:{freq:'Thalamic Filter',clr:'#fbbf24',circuit:'Thalamus = DMN',speaks:'through images and ideals',hears:'meaningful inspiration',trigger:'harshness without context',vector:'inverted',winHint:'Meaning → then specifics',agreeHint:'Speak in images'},Saturn:{freq:'Structured Search',clr:'#64748b',circuit:'DMN + dlPFC',speaks:'through systematic search',hears:'system in the flow',trigger:'chaos without structure',vector:'inverted',winHint:'Structure + space',agreeHint:'Concrete plan reduces anxiety'},Pluto:{freq:'Archetypal Circuit',clr:'#c084fc',circuit:'DMN + HPA: collective shadow',speaks:'through pattern recognition',hears:'transformation',trigger:'superficiality',vector:'internal',winHint:'Deep is more important than surface',agreeHint:'Allow transformation'},Uranus:{freq:'Gamma-DMN Synthesis',clr:'#67e8f9',circuit:'DMN ↔ Gamma',speaks:'through images and nonlinear connections',hears:'synthesis',trigger:'rigid logic',vector:'internal',winHint:'Image + non-standard connection',agreeHint:'Space matters more than structure'},Venus:{freq:'OXT-DMN Flow',clr:'#c4b5fd',circuit:'DMN + NA',speaks:'through idealization of beauty',hears:'the ideal form',trigger:'harsh reality',vector:'inverted',winHint:'Present through beauty',agreeHint:'Ideal angle'},Mercury:{freq:'Poetic Encoding',clr:'#a78bfa',circuit:'DMN + Broca zones',speaks:'through images',hears:'beauty of language',trigger:'dry logic',vector:'internal',winHint:'Image + concreteness',agreeHint:'Analogy opens the ear'},Jupiter:{freq:'Expansive Flow',clr:'#a78bfa',circuit:'mPFC + DMN',speaks:'through inspiration',hears:'meaning and possibilities',trigger:'pessimism',vector:'internal',winHint:'Meaning + scale',agreeHint:'Inspiration opens'},Neptune:{freq:'DMN-Processor',clr:'#c4b5fd',circuit:'DMN passive · Claustrum · Thalamus',speaks:'through image and meaning',hears:'meaning behind words',trigger:'aggressive concreteness',vector:'internal',winHint:'"The meaning matters to me"',agreeHint:'Meaning matters more than form'}},
+  Uranus:{Mars:{freq:'Gamma-Discharge',clr:'#ef4444',circuit:'Gamma + PAG',speaks:'through rule-breaking',hears:'freedom and non-standard',trigger:'coercion',vector:'external',winHint:'Non-standard solution together',agreeHint:'Freedom within limits'},Saturn:{freq:'Controlled Breakthrough',clr:'#94a3b8',circuit:'Gamma + dlPFC',speaks:'through non-standard steps within limits',hears:'reliability + uniqueness',trigger:'complete chaos',vector:'internal',winHint:'Reform within the system',agreeHint:'"Let\'s change this together"'},Moon:{freq:'Unstable Limbic',clr:'#93c5fd',circuit:'Gamma + Hippocampus',speaks:'through unexpected shifts',hears:'freedom in closeness',trigger:'demand for stability',vector:'external',winHint:"Don't hold on",agreeHint:'Space within contact'},Sun:{freq:'Identity Breakthrough',clr:'#fbbf24',circuit:'Gamma + Thalamus',speaks:'through uniqueness',hears:'freedom without norms',trigger:'demand to conform',vector:'external',winHint:'Offer a non-standard path',agreeHint:'Let them choose the form'},Neptune:{freq:'Gamma-DMN Synthesis',clr:'#a78bfa',circuit:'Gamma ↔ DMN',speaks:'through non-standard connections',hears:'nonlinear synthesis',trigger:'banality',vector:'internal',winHint:'Show a non-standard connection',agreeHint:'Space matters more than structure'},Pluto:{freq:'System Rupture',clr:'#c084fc',circuit:'Gamma + HPA',speaks:'through radical changes',hears:'breakthrough',trigger:'stagnation',vector:'external',winHint:'Radical honesty',agreeHint:'Joint transformation'},Mercury:{freq:'Gamma-Cognition',clr:'#4ade80',circuit:'Gamma + Broca zones',speaks:'through non-standard ideas',hears:'non-standard',trigger:'banality',vector:'external',winHint:'Non-standard idea',agreeHint:'Nonlinear path'},Venus:{freq:'Non-Standard Connection',clr:'#f9a8d4',circuit:'Gamma + NA',speaks:'through freedom',hears:'uniqueness',trigger:'standard form',vector:'external',winHint:'Non-standard form of connection',agreeHint:'Freedom within contact'},Jupiter:{freq:'Revolutionary Visionary',clr:'#fdba74',circuit:'mPFC + Gamma',speaks:'through non-standard expansion',hears:'revolutionary possibilities',trigger:'status quo',vector:'external',winHint:'Non-standard big picture',agreeHint:'Revolution of meaning'},Uranus:{freq:'Gamma-Innovator',clr:'#67e8f9',circuit:'Gamma oscillations · Right hemisphere',speaks:'through breakthrough and non-standard',hears:'novelty and freedom',trigger:'forced conformity to template',vector:'external',winHint:'Breaking a rule together',agreeHint:'Space for choice'}},
+  Jupiter:{Sun:{freq:'D2-D1 Synergy',clr:'#fbbf24',circuit:'mPFC + Thalamus + VTA: FLOW',speaks:'through scale and recognition',hears:'growth and recognition',trigger:'limitation',vector:'internal',winHint:'Show the scale',agreeHint:'Recognition + big picture'},Saturn:{freq:'Structural Growth',clr:'#94a3b8',circuit:'mPFC + dlPFC',speaks:'through structural expansion',hears:'growth within the system',trigger:'chaotic growth',vector:'internal',winHint:'Growth through plan',agreeHint:'Expansion within limits'},Pluto:{freq:'Expansive Transformation',clr:'#c084fc',circuit:'mPFC + Amygdala',speaks:'through transformation',hears:'power and growth',trigger:'superficiality',vector:'external',winHint:'Scale + depth',agreeHint:'System transformation'},Uranus:{freq:'Revolutionary Visionary',clr:'#67e8f9',circuit:'mPFC + Gamma',speaks:'through non-standard expansion',hears:'revolutionary possibilities',trigger:'status quo',vector:'external',winHint:'Non-standard big picture',agreeHint:'Revolution of meaning'},Neptune:{freq:'Expansive Flow',clr:'#a78bfa',circuit:'mPFC + DMN',speaks:'through inspiration',hears:'meaning and possibilities',trigger:'pessimism',vector:'internal',winHint:'Meaning + scale',agreeHint:'Inspiration opens'},Moon:{freq:'Limbic Expansion',clr:'#93c5fd',circuit:'mPFC + Hippocampus',speaks:'through emotional optimism',hears:'warmth and possibilities',trigger:'pessimism and coldness',vector:'internal',winHint:'Warmth + big picture',agreeHint:'Possibility through care'},Mars:{freq:'Dopamine Storm',clr:'#ef4444',circuit:'mPFC + PAG',speaks:'broadly and riskily',hears:'possibilities and growth',trigger:'pessimism',vector:'external',winHint:'Show the scale',agreeHint:'Big picture'},Mercury:{freq:'Expansion Through Thinking',clr:'#4ade80',circuit:'mPFC + Broca zones',speaks:'through big ideas',hears:'scale',trigger:'narrow thinking',vector:'internal',winHint:'The big idea',agreeHint:'Scale opens everything'},Venus:{freq:'Abundance in Connection',clr:'#fdba74',circuit:'mPFC + NA + VTA',speaks:'through abundance',hears:'possibilities through connection',trigger:'limitation',vector:'internal',winHint:'Abundance + warmth',agreeHint:'Possibility through closeness'},Jupiter:{freq:'D2-Expander',clr:'#fdba74',circuit:'mPFC · Ventral striatum',speaks:'through possibilities and growth',hears:'the horizon',trigger:'pessimism and limitations',vector:'internal',winHint:'"I see a big opportunity here"',agreeHint:'The horizon opens everything'}}
+};
+
+const SITS3=[{id:'conflict',em:'⚔️',lb:'System Conflict',sub:'"Agreement broken"'},{id:'freeze',em:'🧊',lb:'Emotional Closure',sub:'"Wall of silence"'},{id:'help',em:'🆘',lb:'Support Request',sub:'Neurochemical signal'}];
+const GOALS3=[{id:'win',lb:'Defend Position',sub:'Boundary · Position',clr:'#ef4444'},{id:'agree',lb:'Reach Agreement',sub:'Connection · Protocol',clr:'#10b981'}];
+const NATURAL3={Mars:{conflict:'"Stop. Agreement broken. What do we do right now?"',freeze:'"The wall is data. What specifically closed?"',help:'"Need help. Specifically: X. Can you?"'},Pluto:{conflict:'"Tell me honestly: what\'s really happening?"',freeze:'"Closure is a signal. What\'s really behind it?"',help:'"I\'m really struggling. Need real support."'},Saturn:{conflict:'"Per agreement — violation of point X."',freeze:'"Specific reason — specific solution."',help:'"Define the problem clearly. We\'ll find a solution."'},Moon:{conflict:'"It\'s not about that... Something changed between us."',freeze:'"Your closure is also language. I hear it. I\'m here."',help:'"I\'m struggling. I want someone to just be here."'},Sun:{conflict:'"We had an agreement! You\'re breaking it again!"',freeze:'"You\'ve closed off — I feel it as a rupture."',help:'"I\'m hurting, and you\'re not noticing!"'},Mercury:{conflict:'"Discrepancy with point X. Need to clarify."',freeze:'"No data = no algorithm. Need at least some signal."',help:'"Need help with a specific point."'},Venus:{conflict:'"Look, there was an agreement... How do we find a solution?"',freeze:'"I want things to be okay between us."',help:'"I\'m feeling a little off. Don\'t want to burden you, but..."'},Jupiter:{conflict:'"Look — if we solve this, we\'ll both be free for something greater!"',freeze:'"This will pass. I see the path forward."',help:'"This is temporary! It leads to a better configuration!"'},Neptune:{conflict:'"Something changed in our shared space..."',freeze:'"I feel you — no rush. Just here."',help:'"I... can\'t structure this. It\'s just heavy."'},Uranus:{conflict:'"Why does this rule even exist? Let\'s create a better one."',freeze:'(left — gives space, system restructures)',help:'"What if the solution is completely elsewhere?"'}};
+const SIT_HINTS3={Mars:{conflict:{win:'Name the violation as a fact — no history or emotions. NA-reactor hears the task, not the hurt.',agree:'Frame as a joint task: "Agreement broken. What specifically do we fix?"'},freeze:{win:'"What\'s needed to move forward? Specifically — one step."',agree:'Offer a small joint action — it thaws faster than any words.'},help:{win:'"Need help: X. Specifically." NA hears a precise request — not suffering.',agree:'Give a point of application for force. Mars wants to help — just needs to know where.'}},Pluto:{conflict:{win:'Real truth immediately — no diplomacy. Pluto sees through packaging.',agree:'Show what\'s really behind the conflict — not the symptom, but the root.'},freeze:{win:'"What\'s really behind this closure?" Pluto sees protection.',agree:"Don't force it open — show that depth is safe."},help:{win:'"I\'m really struggling. Just be here in this." Depth, not surface.',agree:'Honesty about the scale of the situation opens the HPA-controller.'}},Saturn:{conflict:{win:'Fact + violated agreement point + concrete consequence.',agree:'"What changed in the algorithm? How do we restore the system?"'},freeze:{win:'"Specific reason for closure = specific solution. Waiting without pressure."',agree:'"A concrete plan reduces anxiety. Let\'s make one right now."'},help:{win:'"Problem X. Need solution Y." Concrete and structural.',agree:'"Describe exactly what\'s not working — we\'ll find a systematic solution."'}},Moon:{conflict:{win:'"It\'s not about that. Something changed between us." Limbic hears safety.',agree:'Neurochemical contact first — then content.'},freeze:{win:'"I feel your silence. I\'m here — not leaving and not pushing."',agree:'"No rush. You know I\'m here — whenever you\'re ready."'},help:{win:'"I\'m struggling. I want someone to just be here — not fix, just be."',agree:'5HT-modulator needs neurochemical presence. "I\'m here".'}},Sun:{conflict:{win:'"Agreement violated — specific point. This matters to me."',agree:'"It\'s important for both of us to resolve this. You matter in this resolution."'},freeze:{win:'"You\'ve closed off — I feel a rupture. This matters to me."',agree:'"When you\'re ready — I\'m here. You matter to me."'},help:{win:'"I\'m hurting — and I need you to see that."',agree:'"I need your support. Specifically yours — you matter to me."'}},Mercury:{conflict:{win:'"Discrepancy with point X. Clarify Y — specifically." ACh hears precision.',agree:'"What exactly isn\'t working? Describe it step by step."'},freeze:{win:'"No data = no algorithm. Need at least some signal — one word is enough."',agree:'"When you can — describe what\'s happening. One point."'},help:{win:'"Need help with X. Specifically, one point."',agree:'"Describe exactly what\'s happening — we\'ll find an exit algorithm."'}},Venus:{conflict:{win:'"There was an agreement — I want things to be good between us."',agree:'"Harmony between us matters to me — it\'s more valuable than being right."'},freeze:{win:'"I want everything to be okay between us. Are you alright?"',agree:'"No pressure. Just want it to be good for both of us."'},help:{win:'"I\'m feeling a little off. Don\'t want to burden you — but need support."',agree:'"It would be good if you were nearby. Not for a solution — just nearby."'}},Jupiter:{conflict:{win:'"If we solve this — we\'ll both be free for something greater."',agree:'"This leads to a better configuration — I see how."'},freeze:{win:'"This will pass. I see the path forward — and it\'s good."',agree:'"When ready — I\'ll show the path. It exists."'},help:{win:'"This is a temporary phase — I see the path forward."',agree:'"I see the exit — and it\'s better than the entrance."'}},Neptune:{conflict:{win:'"Something changed in our shared space..."',agree:'"Let\'s find the meaning in this — not the guilty one."'},freeze:{win:'(presence without pressure and without words — DMN senses the background)',agree:'"I\'m here — just nearby. Not leaving and not demanding."'},help:{win:'"I\'m struggling — and I can\'t structure it. Just nearby, without words."',agree:'Background neurochemical contact matters more than words.'}},Uranus:{conflict:{win:'"Why does this rule even exist? Let\'s create something better."',agree:'"What if the solution is completely elsewhere?"'},freeze:{win:'(leave, give space — Uranus thaws through freedom)',agree:'"Not holding on. When you return — we\'ll talk at a new level."'},help:{win:'Show an unconventional angle or unexpected solution.',agree:'"What if we try completely differently?"'}}};
+
+// ═══ ASTRONOMY (same calculation engine) ═══
+function ck(a,b){return[a,b].sort().join('_');}
+function getBP(p1,p2){const k=ck(p1,p2);return BP[k]||{bw:(PW[p1]||5)+(PW[p2]||5),md:'NEUT',gen:false};}
+function getEclipse(aspects){
+  const active=[];
+  for(const[k,d]of Object.entries(ET)){if(aspects.some(a=>a.tense&&ck(a.p1,a.p2)===k))active.push({...d,key:k});}
+  if(!active.length)return{coeff:1,active:[],hasAny:false};
+  active.sort((a,b)=>a.coeff-b.coeff);
+  return{coeff:active[0].coeff,active,dominant:active[0],hasAny:true};
+}
+function detectAA(aspects){
+  let dS=0,sS=0,facs=[];
+  aspects.forEach(asp=>{
+    const key=ck(asp.p1,asp.p2),pd=AAP[key];if(!pd)return;
+    const gm=pd.gen?0.35:1,tm=asp.tense?1.2:0.85,of=Math.max(0.25,1-asp.orb/12),w=pd.w*gm*tm*of;
+    if(pd.pole==='A')dS+=w;else if(pd.pole==='B')sS+=w;else{dS+=w*0.5;sS+=w*0.5;}
+    facs.push({key,w:+w.toFixed(2),pole:pd.pole,gen:!!pd.gen});
+  });
+  const total=dS+sS;if(total<1.2)return null;
+  const dr=dS/(total||1);
+  const dp=dr>0.62?'A':dr<0.38?'B':'mixed';
+  const axisPosition=Math.round((1-dr)*100);
+  let posLabel;
+  if(axisPosition<15)posLabel='dissolving';
+  else if(axisPosition<30)posLabel='inclining to dissolving';
+  else if(axisPosition<45)posLabel='closer to dissolving';
+  else if(axisPosition<=55)posLabel='center';
+  else if(axisPosition<70)posLabel='closer to sharp';
+  else if(axisPosition<85)posLabel='inclining to sharp';
+  else posLabel='hyper-sharp';
+  const hasMN=facs.some(f=>f.key==='Moon_Neptune'&&!f.gen),hasVN=facs.some(f=>f.key==='Neptune_Venus'&&!f.gen);
+  const hasMU=facs.some(f=>f.key==='Moon_Uranus'&&!f.gen),hasVU=facs.some(f=>f.key==='Uranus_Venus'&&!f.gen);
+  const isDouble=hasMU&&hasVU;
+  let pv='',dc='';
+  if(isDouble){pv='free';dc='both';}
+  else if(dp==='B'){pv='out';dc=hasVU?'Venus':(hasMU?'Moon':'generic');}
+  else if(dp==='A'){pv='in';dc=hasMN?'Moon':(hasVN?'Venus':'Moon');}
+  else{if(dS>sS){pv='in';dc=hasMN?'Moon':(hasVN?'Venus':'Moon');}else if(sS>dS){pv='out';dc=hasVU?'Venus':(hasMU?'Moon':'generic');}else{pv='balanced';dc=hasMN?'Moon':(hasMU?'Moon':'generic');}}
+  return{active:true,total:+total.toFixed(2),dS:+dS.toFixed(2),sS:+sS.toFixed(2),dp,pv,dc,isDouble,axisPosition,posLabel,hasMN,hasVN,hasMU,hasVU};
+}
+const OPAIRS=[{a:'Uranus',b:'Neptune',gen:true},{a:'Saturn',b:'Neptune',gen:true},{a:'Saturn',b:'Uranus',gen:true},{a:'Neptune',b:'Pluto',gen:true},{a:'Saturn',b:'Pluto',gen:false},{a:'Mars',b:'Pluto',gen:false},{a:'Uranus',b:'Pluto',gen:false}];
+const PERS2=['Sun','Moon','Mercury','Venus','Mars'];
+function detectTSq(pos){
+  if(!pos)return[];const res=[],seen=new Set();
+  for(const{a:pA,b:pB,gen}of OPAIRS){
+    if(!pos[pA]||!pos[pB])continue;
+    let od=Math.abs(pos[pA]-pos[pB]);if(od>180)od=360-od;
+    const dev=Math.abs(od-180),mx=gen?22:12;if(dev>mx)continue;
+    for(const pers of PERS2){
+      if(!pos[pers])continue;
+      const bo=['Sun','Moon'].includes(pers)?11:9;
+      let dA=Math.abs(pos[pers]-pos[pA]);if(dA>180)dA=360-dA;const sqA=Math.abs(dA-90);
+      let dB=Math.abs(pos[pers]-pos[pB]);if(dB>180)dB=360-dB;const sqB=Math.abs(dB-90);
+      if(sqA<=bo&&sqB<=bo){const k=[pA,pB,pers].sort().join('_');if(!seen.has(k)){seen.add(k);const t=Math.max(0.35,1-(sqA+sqB)/(2*bo));res.push({focal:pers,oA:pA,oB:pB,w:+(24*t).toFixed(1)});}}
+    }
+  }
+  return res.sort((a,b)=>b.w-a.w);
+}
+function findAspects(pos,signs){
+  const pl=Object.keys(pos),res=[];
+  for(let i=0;i<pl.length;i++){for(let j=i+1;j<pl.length;j++){
+    const p1=pl[i],p2=pl[j];
+    let diff=Math.abs(pos[p1]-pos[p2]);if(diff>180)diff=360-diff;
+    let best=null,bd=999;
+    for(const ad of AD){const mo=ad.orb+(['Sun','Moon'].includes(p1)?1:0)+(['Sun','Moon'].includes(p2)?1:0),dv=Math.abs(diff-ad.a);if(dv<=mo&&dv<bd){bd=dv;best={...ad,dv,mo};}}
+    if(!best)continue;
+    const bp=getBP(p1,p2),isGen=!!bp.gen,gm=isGen?0.1:1;
+    const ac=AC[best.a]||0.5,of=Math.max(0.05,1-best.dv/best.mo);
+    const el1=EL[signs[p1]]||'Fire',el2=EL[signs[p2]]||'Fire';
+    const c1=(CD[p1]&&CD[p1][el1])||1,c2=(CD[p2]&&CD[p2][el2])||1,cf=Math.sqrt(c1*c2);
+    let cm=1,tense=best.tense,cc=null;
+    if(best.a===0){const key=ck(p1,p2);if(key==='Mercury_Sun'){if(best.dv<3){tense=true;cc=2;cm=1.5;}else{tense=false;cc=-1;cm=0.4;}}else if(CC.hasOwnProperty(key)){const cat=CC[key];cc=cat;cm=cat===4?2.5:cat===3?2:cat===2?1.5:cat===1?0.8:0.35;if(cat<=0)tense=false;}}
+    const rw=bp.bw*ac*cm*of*cf*gm,w=tense?rw:rw*0.2;
+    res.push({p1,p2,a:best.a,orb:best.dv,tense,w:+w.toFixed(3),nw:+rw.toFixed(3),cc,md:bp.md,isGen,el1,el2});
+  }}
+  return res;
+}
+function calcProfile(aspects,signs,pos){
+  const sc={};Object.keys(PW).forEach(p=>{sc[p]=0;});
+  aspects.forEach(a=>{const w1=PW[a.p1]||5,w2=PW[a.p2]||5,t=w1+w2;sc[a.p1]+=a.w*(w1/t);sc[a.p2]+=a.w*(w2/t);});
+  Object.keys(sc).forEach(p=>{sc[p]*=(PW[p]||5)/10;});
+  const tsq=detectTSq(pos),seen=new Set();
+  tsq.forEach(t=>{const k=t.focal+'_'+t.oA+'_'+t.oB;if(!seen.has(k)){seen.add(k);sc[t.focal]=(sc[t.focal]||0)+t.w;}});
+  const ranked=Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([planet,score])=>({planet,score}));
+  const maxS=(ranked[0]&&ranked[0].score)||0.01,rp=ranked.map(r=>({...r,pct:Math.round(r.score/maxS*100)}));
+  const tense=aspects.filter(a=>a.tense).sort((a,b)=>b.w-a.w),arm=aspects.filter(a=>!a.tense);
+  const topW=tense.length?Math.max(...tense.map(a=>a.w)):0;
+  const topPW=tsq.length?Math.max(...tsq.map(t=>t.w)):0,captured=topW>12||topPW>=16;
+  const mc={};tense.forEach(a=>{mc[a.md]=(mc[a.md]||0)+a.w;});
+  const eclipseData=getEclipse(aspects),PPERS=new Set(['Sun','Moon','Venus','Mercury']);
+  const armorFull=arm.map(a=>{if((a.a===60||a.a===120)&&eclipseData.hasAny&&(PPERS.has(a.p1)||PPERS.has(a.p2)))return{...a,eclipsed:true};return{...a,eclipsed:false};});
+  const hasEcl=armorFull.some(a=>a.eclipsed);
+  const eclElSc={Fire:0,Earth:0,Air:0,Water:0};
+  armorFull.filter(a=>a.eclipsed).forEach(a=>{if(PPERS.has(a.p1)){const el=EL[signs[a.p1]]||'Fire';eclElSc[el]+=a.nw||1;}if(PPERS.has(a.p2)){const el=EL[signs[a.p2]]||'Fire';eclElSc[el]+=a.nw||1;}});
+  const eclDomEntry=Object.entries(eclElSc).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0)[0];
+  const eclDomEl=eclDomEntry?eclDomEntry[0]:null;
+  const compensationType=hasEcl&&eclDomEl?COMPENSATION_MAP[eclDomEl]:null;
+  const affAxis=detectAA(aspects);
+  const chSc={'Somatic':0,'Visceral':0,'Mental':0,'Body-Fixating':0,'Dissociative':0};
+  tense.forEach(a=>{const chk=getChannelKey(a.el1||'Fire',a.el2||'Fire'),chi=CHANNEL_MAP[chk];if(chi)chSc[chi.ch]=(chSc[chi.ch]||0)+a.w;});
+  const dcEntry=Object.entries(chSc).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0)[0];
+  const dominantChannel=dcEntry?dcEntry[0]:null;
+  const foundCh=dominantChannel?Object.values(CHANNEL_MAP).find(c=>c.ch===dominantChannel):null;
+  const channelClr=foundCh?foundCh.clr:'#6b7280';
+  return{ranked:rp,primary:rp[0].planet,modifier:(rp[1]&&rp[1].planet)||rp[0].planet,tense,armor:armorFull,topW,topPW,captured,mc,eclipseData,hasEcl,eclDomEl,compensationType,affAxis,tsq,signs,pos,dominantChannel,channelClr};
+}
+function getSubProfile(profile){
+  const{primary,modifier}=profile;
+  const base=ST[primary]||ST.Mars;
+  const mod=(FMOD[primary]&&FMOD[primary][modifier])||(FMOD[primary]&&FMOD[primary][primary])||{};
+  const vD={external:'Sympathetic capture → cause is external',inverted:'Inverted → psychosomatics and GABA block',internal:'Parasympathetic → processes internally'};
+  const vC={external:'#ef4444',inverted:'#f59e0b',internal:'#10b981'};
+  const vec=mod.vector||'external';
+  return{primary,modifier,em:base.em,name:base.name,nt:base.nt,clr:base.clr,freq:mod.freq||base.name,freqClr:mod.clr||base.clr,circuit:mod.circuit||base.name,speaks:mod.speaks||'directly',hears:mod.hears||'by neural circuit',trigger:mod.trigger||'expectation violation',vector:vec,vectorDesc:vD[vec],vectorClr:vC[vec],winHint:mod.winHint||'',agreeHint:mod.agreeHint||''};
+}
+const TASP2=[{a:0,orb:10},{a:60,orb:6},{a:120,orb:8},{a:90,orb:9},{a:180,orb:10}];
+function findTransitsNC(tPos,nPos){
+  const outer=['Pluto','Neptune','Uranus','Saturn','Jupiter','Mars'],pers=['Sun','Moon','Mercury','Venus','Mars'],res=[];
+  for(const tp of outer){for(const np of pers){
+    if(!tPos[tp]||!nPos[np])continue;
+    let diff=Math.abs(tPos[tp]-nPos[np]);if(diff>180)diff=360-diff;
+    const maxOrb=tp==='Mars'?2:(tp==='Jupiter'||tp==='Saturn')?4:3;
+    for(const ad of TASP2){const dev=Math.abs(diff-ad.a);if(dev<=maxOrb){const key=tp+'_'+np,d=TNC[key];if(!d)break;res.push({key,...d,orb:+dev.toFixed(1)});break;}}
+  }}
+  return res.sort((a,b)=>Math.abs(b.load)-Math.abs(a.load)).slice(0,6);
+}
+function generateNC(profile){
+  const{primary,ranked,mc,captured,hasEcl,affAxis,tense,tsq,armor,compensationType}=profile;
+  const sub=getSubProfile(profile);
+  const loopT=mc['LOOP']||0,drainT=mc['DRAIN']||0,reactT=mc['REACT']||0,neutT=mc['NEUT']||0,mixT=mc['MIX']||0;
+  const totalM=loopT+drainT+reactT+neutT+mixT||1;
+  const loopP=Math.round(loopT/totalM*100),drainP=Math.round(drainT/totalM*100),reactP=Math.round(reactT/totalM*100),neutP=Math.round(neutT/totalM*100);
+  const domMode=loopP>=reactP&&loopP>=drainP?'LOOP':reactP>=drainP?'REACT':'DRAIN';
+  const topTense=tense.length?tense[0]:null,topTsq=tsq.length?tsq[0]:null;
+  const tsqBonus=tsq.length>0?Math.min(2,Math.max(...tsq.map(t=>t.w))*0.08):0;
+  const captureBonus=captured?1.5:0;
+  const multiBonus=Math.min(2,tense.filter(a=>a.w>10).length*0.4);
+  const rawInt=topTense?topTense.w:0;
+  const normInt=Math.min(11,Math.max(1,Math.round((rawInt+tsqBonus+captureBonus+multiBonus)/2)));
+  const hasSP=tense.some(a=>ck(a.p1,a.p2)==='Pluto_Saturn'),hasMP=tense.some(a=>ck(a.p1,a.p2)==='Moon_Pluto');
+  const hasSU=tense.some(a=>ck(a.p1,a.p2)==='Saturn_Uranus'),hasMS=tense.some(a=>ck(a.p1,a.p2)==='Moon_Saturn');
+  const hasMPl=tense.some(a=>ck(a.p1,a.p2)==='Mars_Pluto'),hasMNep=tense.some(a=>ck(a.p1,a.p2)==='Mars_Neptune');
+  const sections=[],st=ST[primary]||ST.Mars,sd=SDESC[primary]||SDESC.Mars;
+  sections.push({num:'01',title:'System Type',sub:st.name+' · '+sub.freq,clr:st.clr,pars:[st.name+' · '+st.nt,'Frequency: '+sub.freq,'Circuit: '+sub.circuit,'Vector: '+sub.vectorDesc,...sd]});
+  const modPars=[],ord=['1st','2nd','3rd','4th','5th'];
+  ranked.slice(0,5).forEach((r,i)=>{const nm=NCN[r.planet]||r.planet,desc=(MDESC[r.planet]||['Active system module.'])[0];modPars.push(ord[i]+': '+nm+' — '+r.pct+' units. '+desc);});
+  sections.push({num:'02',title:'Neuromodule Hierarchy',sub:'Who\'s in charge of the system',clr:'#818cf8',pars:modPars,viz:'hierarchy'});
+  const modeLabel=domMode==='LOOP'?'a loop (internal cycle)':domMode==='REACT'?'acute reactive discharges':'quiet drain into activity';
+  sections.push({num:'03',title:'Load Profile',sub:'How the system discharges',clr:'#f97316',viz:'loadbadges',loopP,reactP,drainP,neutP,pars:['Loop — '+loopP+'%. '+(loopP>45?'A significant part of tension goes into the internal cycle.':loopP>20?'Moderate internal cycle.':'Low level.'),'Reactivity — '+reactP+'%. '+(reactP>40?'System discharges through acute episodes.':reactP>20?'Moderate reactivity.':'Low reactivity.'),'Drain — '+drainP+'%. '+(drainP>35?'Good channel for quiet discharge into work.':drainP>15?'Moderate drain.':'Weak drain channel.'),'Pause — '+neutP+'%. '+(neutP>20?'Noticeable pause resource.':neutP>8?'Small windows to exit active mode.':'Almost no pauses.'),'Result: your system discharges primarily through '+modeLabel+'.']});
+  let domChan='motor focus PAG · '+sub.circuit,domVal=0,domExpl='';
+  if(topTsq&&topTsq.w>=16){domChan='focal module: '+(NCN[topTsq.focal]||topTsq.focal);domVal=Math.round(topTsq.w);domExpl='Under overload, all energy is captured by this module sharply, without warning.';}
+  else if(topTense){domChan='axis '+(NCN[topTense.p1]||topTense.p1)+' ↔ '+(NCN[topTense.p2]||topTense.p2)+' · '+sub.circuit;domVal=Math.round(topTense.w);domExpl='Under serious load, the system first activates reaction through this axis.';}
+  const captureText=captured?'The system is in a state of dominance capture — one pattern pulls all attention. Exit is possible but requires awareness.':'Strength level — moderate. The dominance is active but has not captured the entire system.';
+  sections.push({num:'04',title:'Ukhtomsky Dominance',sub:'Primary reaction channel',clr:'#ef4444',pars:['Ukhtomsky Dominance — a neurophysiological principle: the system always has one main excitation focus that attracts any new stimuli to itself.','Your dominance — '+domChan+'. Strength — '+domVal+' units. '+domExpl,captureText]});
+  let cPars=[];
+  if(hasSP)cPars=['Main stress axis: Transformation ↔ Structural Module. System operates in the cycle "control → fear → control".','Inside — a silence almost devoid of lightness. Recovery channels are closed by this same control mechanism.','This is not permanent. A structure that is important to know — in order to begin working with it consciously.'];
+  else if(hasMP)cPars=['Main stress axis: Emotional Receiver ↔ Transformation. The limbic system and HPA-axis operate in a closed loop.','The depth of attachment is both a strength and vulnerability. What looks like empathy often operates as a threat radar.','The first task in contact — safety. Only then — everything else.'];
+  else if(hasSU)cPars=['Main stress axis: Structural Module ↔ Innovator. Inside — a constant war: one part wants order — another explodes everything.','Cycle: accumulation → tension → explosion → shame → control again. Understanding the cycle is the first step to exit.'];
+  else if(hasMS)cPars=['Main stress axis: Emotional Receiver ↔ Structural Module. The GABA brake blocks the emotional signal before it reaches consciousness.','You feel through facts, through action. Surface acquaintances often interpret this as coldness.'];
+  else if(hasMPl)cPars=['Main stress axis: Impulse ↔ Transformation. PAG and amygdala operate in dual mode.','You carry enormous life force. Important to direct it consciously.'];
+  else if(hasMNep)cPars=['Main stress axis: Impulse ↔ Aesthetic Channel. The noradrenergic impulse passes through a layer of intuition and image.','Many beautiful ideas await realization. The system works better when there is meaning and a concrete next step.'];
+  else if(topTense){const n1=NCN[topTense.p1]||topTense.p1,n2=NCN[topTense.p2]||topTense.p2;cPars=['Main stress axis: '+n1+' ↔ '+n2+'. The conflict of these modules creates background tension.','Some impulsive episodes happen not because of a specific situation, but because this axis needs discharge.'];}
+  else cPars=['No pronounced stress axis in the current configuration. Base system stability — above average.'];
+  sections.push({num:'05',title:'Internal System Conflict',sub:'What creates background tension',clr:'#6366f1',pars:cPars});
+  if(affAxis&&affAxis.active){
+    const{pv,dc,axisPosition:ap,posLabel,dS,sS}=affAxis;
+    let axPars=['The flickering axis — a marker of how you are distributed between inner and outer. Not a fixed state, but a living spectrum.'];
+    if(ap>=45&&ap<=55)axPars.push('Axis position: '+ap+'% — center. Both poles are roughly equal (A '+dS.toFixed(1)+' · B '+sS.toFixed(1)+'). Switching is determined by context.');
+    else if(ap<35)axPars.push('Axis position: '+ap+'% — '+posLabel+'. The boundary between self and other is permeable. Others\' states enter as your own.');
+    else if(ap>65)axPars.push('Axis position: '+ap+'% — '+posLabel+'. Perception is sharpened. The sensory environment is perceived directly.');
+    else axPars.push('Axis position: '+ap+'% — '+posLabel+'. The boundary holds, but in loaded moments — it shifts.');
+    if(dc==='Moon'&&pv==='in'){axPars.push('Carrier — limbic system. Sensitivity is directed not toward contact, but toward constant threat scanning.');axPars.push('Practically: safety first → then contact.');}
+    else if(dc==='Venus'&&pv==='in'){axPars.push('Carrier — oxytocin channel. The value system absorbs the incoming.');axPars.push('Practically: in close relationships, you can imperceptibly lose yourself.');}
+    else if(pv==='out')axPars.push('Power vector — outward. In crisis the system opens. Extending a hand when others close — a rare quality.');
+    else if(pv==='free')axPars.push('Double freedom capture: both anchors active. Rare configuration — system operates independently of context.');
+    else if(pv==='balanced')axPars.push('Axis in dynamic equilibrium. This is flexibility, not uncertainty.');
+    else if(pv==='in')axPars.push('Power vector — inward. In crisis the system turns inward. From outside you look composed.');
+    sections.push({num:'06',title:'Flickering Axis',sub:'Special system parameter',clr:'#818cf8',pars:axPars,viz:'axis',affAxis});
+  }
+  sections.push({num:'07',title:'Behavioral Synthesis',sub:sub.freq+' · circuit: '+sub.circuit,clr:'#22d3ee',pars:['Frequency: '+sub.freq,'How the system speaks: '+sub.speaks,'What it hears: '+sub.hears,'Closing trigger: '+sub.trigger,'Vector: '+sub.vectorDesc,'Activation circuit: '+sub.circuit]});
+  const chanMap={'Jupiter_Sun':'expansion and idealistic inspiration channel','Jupiter_Moon':'gentle emotional warmth','Moon_Neptune':'aesthetic-emotional sensitivity','Neptune_Venus':'creative dissolution and beauty','Jupiter_Venus':'abundance in the connection channel','Sun_Venus':'harmonious identity through connection','Mercury_Venus':'verbalization of values','Jupiter_Mercury':'expansion through thinking','Moon_Venus':'emotional closeness','Moon_Sun':'identity through feeling','Neptune_Sun':'dissolution in meaning','Jupiter_Saturn':'growth through structure'};
+  const resPars=['Available discharge channels — configurations working as pressure valves:'];
+  armor.filter(a=>!a.eclipsed&&a.w>0).sort((a,b)=>b.w-a.w).slice(0,4).forEach(a=>{const k=ck(a.p1,a.p2),lbl=chanMap[k]||(NCN[a.p1]||a.p1)+' + '+(NCN[a.p2]||a.p2);resPars.push('• '+lbl[0].toUpperCase()+lbl.slice(1));});
+  if(resPars.length===1)resPars.push('• Discharge channels are distributed — use any activity that gives a sense of completion.');
+  if(compensationType){resPars.push('');resPars.push(compensationType.em+' Vulnerable Resource · '+compensationType.type);resPars.push('System seeks: "'+compensationType.seek+'".');resPars.push('Compensation: '+compensationType.substance+'.');resPars.push('Neurochemical search for blocked state — not weak will.');}
+  sections.push({num:'08',title:'Vulnerable Resource',sub:'Pressure release channels + compensation',clr:'#34d399',pars:resPars});
+  if(hasEcl){
+    const ed=profile.eclipseData&&profile.eclipseData.dominant;
+    const eclPars=['Some harmonic channels operate in weakened mode:'];
+    if(profile.eclipseData&&profile.eclipseData.active)profile.eclipseData.active.forEach(d=>{eclPars.push('• '+d.shortType+': '+d.bio+' · efficiency '+Math.round(d.coeff*100)+'%');});
+    eclPars.push('Important: working channels exist. Targeted work with the resource is needed.');
+    sections.push({num:'08b',title:'Release Channel · Layer 2',sub:'Harmonic channel dampening',clr:(ed&&ed.color)||'#f97316',pars:eclPars});
+  }
+  const n1t=topTense?NCN[topTense.p1]||topTense.p1:'',n2t=topTense?NCN[topTense.p2]||topTense.p2:'';
+  sections.push({num:'09',title:'Stress Geometry',sub:'Architectural load intensity',clr:'#fb7185',pars:['Main stress axis: '+(topTense?n1t+' ↔ '+n2t:'no pronounced axis')+'. Intensity '+normInt+' of 11.','Scale: 1-3 — light. 4-6 — moderate. 7-9 — high, regular practices needed. 10-11 — maximum.','Your level — '+normInt+'. '+(normInt<=3?'Architectural load within light working norm.':normInt<=6?'Moderate load. Functional with conscious resource management.':normInt<=9?'High load. Regular recovery practices — a necessity, not an option.':'Maximum load. Professional support is important.')]});
+  let zPars=[];
+  if(domMode==='LOOP')zPars=['Your system keeps cortisol high. The body needs to be guided to relaxation through physical means.','• 4-7-8 breathing: inhale 4 counts, hold 7, exhale 8. Five cycles — vagus nerve switches the system.','• Cold water on face in moment of acute stress — diver reflex resets heart rate in seconds.','• Walk without phone or goal, 20 minutes — normalizes HPA-axis.','• Physical exercise every other day — burns cortisol with muscles.'];
+  else if(domMode==='REACT')zPars=['Your system produces glutamate discharges — unpredictable spikes. Key — background stabilization.','• Magnesium: pumpkin, cashews, dark greens — NMDA glutamate antagonist.','• Regular meals every 3-4 hours — skipping food triggers discharges.','• Remove blue screens after 8pm.','• Monotonous work: counting, editing — predictability reduces peaks.'];
+  else zPars=['Your system needs small victories — they accumulate completion dopamine.','• A list of three small tasks right now — and checkmarks next to them.','• Novelty in small doses: new route, new dish.','• Cold shower at the end of a regular one — sharp noradrenaline activation.'];
+  zPars.push('Acute techniques: count objects (2 min) · drink water in small sips (2 min) · squeeze a cold object in your hand (1 min) · write what happened in facts only (5 min).');
+  sections.push({num:'10',title:'Areas of Attention',sub:'Recovery practices',clr:'#22c55e',pars:zPars});
+  const env=ENV[primary]||ENV.Mars;
+  sections.push({num:'11',title:'Environment as Resource',sub:'Where the architecture works in your favor',clr:'#67e8f9',pars:['Your neural system is structured such that in some conditions you open fully — in others you spend enormous resources just to function.','Where you thrive: '+env.good+'.','Where it\'s hard for the system: '+env.hard+'.']});
+  const st2=ST[ranked[0].planet]||ST.Mars,nc1=NCN[ranked[0].planet]||ranked[0].planet,nc2=ranked[1]?NCN[ranked[1].planet]||ranked[1].planet:'',nc3=ranked[2]?NCN[ranked[2].planet]||ranked[2].planet:'';
+  sections.push({num:'12',title:'Overall Picture',sub:'Architectural synthesis',clr:'#c084fc',pars:['Architecture type: '+st2.name+' · '+sub.freq,'Dominant module — '+nc1+(nc2?', with support from '+nc2:'')+(nc3?' and '+nc3:'')+'.','Load profile: loop '+loopP+'%, reactivity '+reactP+'%, drain '+drainP+'%, pause '+neutP+'%.','Vector: '+sub.vectorDesc+'.','Recovery channels: '+(hasEcl?'partially limited. Targeted work with the resource is important.':'available.'),'Intensity '+normInt+' of 11 — '+(normInt<=3?'light load.':normInt<=6?'moderate load.':normInt<=9?'high load.':'maximum load.')]});
+  return sections;
+}
+
+// ═══ HTML BUILDERS ═══
+function buildHierarchy(ranked){
+  let html='<div style="padding:6px 0 2px">';
+  const ord=['1st','2nd','3rd','4th','5th'];
+  ranked.slice(0,5).forEach((r,i)=>{
+    const st=ST[r.planet],clr=st?st.clr:'#818cf8';
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="min-width:22px;font-size:9px;color:#6b7280;font-weight:700">${ord[i]}</span>
+      <span style="font-size:18px;line-height:1;min-width:22px">${st?st.em:'·'}</span>
+      <span style="min-width:96px;font-size:11px;color:white;font-weight:700;line-height:1.3">${NCN[r.planet]||r.planet}</span>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:22px;overflow:hidden;position:relative;min-width:50px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${r.pct}%;background:linear-gradient(90deg,${clr}88,${clr});border-radius:6px"></div>
+        <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:white;font-weight:900">${r.pct}</span>
+      </div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+function buildLoadBadges(loopP,reactP,drainP,neutP){
+  const items=[{lb:'Loop',pct:loopP,clr:'#ef4444'},{lb:'React',pct:reactP,clr:'#67e8f9'},{lb:'Drain',pct:drainP,clr:'#a78bfa'},{lb:'Pause',pct:neutP,clr:'#22c55e'}].filter(x=>x.pct>0);
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+items.map(item=>`<div style="display:flex;flex-direction:column;align-items:center;padding:10px 14px;border-radius:14px;background:${item.clr}18;border:1px solid ${item.clr}44;min-width:58px"><span style="font-size:20px;font-weight:900;color:${item.clr};line-height:1">${item.pct}%</span><span style="font-size:11px;font-weight:800;color:white;margin-top:3px">${item.lb}</span></div>`).join('')+'</div>';
+}
+function buildAxisSlider(affAxis){
+  if(!affAxis)return'';
+  const{axisPosition:pos,posLabel,pv,dS,sS}=affAxis;
+  const aClr='#93c5fd',bClr='#67e8f9';
+  const pvClr=pv==='free'?'#67e8f9':pv==='out'?'#22c55e':pv==='balanced'?'#818cf8':'#f97316';
+  return`<div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:10px;color:${aClr};font-weight:700">← Dissolving</span>
+      <span style="font-size:10px;color:#818cf8;font-weight:800">${posLabel}</span>
+      <span style="font-size:10px;color:${bClr};font-weight:700">Hyper-sharp →</span>
+    </div>
+    <div style="position:relative;height:18px;background:rgba(0,0,0,0.35);border-radius:9px">
+      <div style="position:absolute;inset:0;border-radius:9px;background:linear-gradient(90deg,${aClr}44,rgba(129,140,248,0.3),${bClr}44)"></div>
+      <div style="position:absolute;top:50%;left:${pos}%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:${pvClr};border:2px solid white;box-shadow:0 0 8px ${pvClr};z-index:2"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">
+      <span style="font-size:9px;color:#4b5563">A · ${dS.toFixed(1)}</span>
+      <span style="font-size:10px;font-weight:900;color:${pvClr}">${pos}% · ${pv==='free'?'∞ both':pv==='balanced'?'≈ center':pv==='out'?'↗ outward':'↩ inward'}</span>
+      <span style="font-size:9px;color:#4b5563">B · ${sS.toFixed(1)}</span>
+    </div>
+  </div>`;
+}
+function buildSectionPars(pars,c){
+  return pars.map(p=>{
+    if(p===''||p.startsWith('Carrier')||p.startsWith('System seeks')||p.startsWith('Compensation')||p.startsWith('Neurochemical search'))return`<p style="margin:0 0 8px;font-size:13px;color:#9ca3af;line-height:1.8;font-style:italic">${p}</p>`;
+    if(p.startsWith('•'))return`<div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start"><span style="color:${c};flex-shrink:0;margin-top:3px;font-size:11px;font-weight:700">→</span><p style="margin:0;font-size:13px;color:#d1d5db;line-height:1.8">${p.slice(1).trim()}</p></div>`;
+    if(p.includes('🔥')||p.includes('💧')||p.includes('💨')||p.includes('🌱'))return`<p style="margin:0 0 10px;font-size:13px;color:white;font-weight:700;line-height:1.8;background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 10px">${p}</p>`;
+    return`<p style="margin:0 0 11px;font-size:13px;color:#cbd5e1;line-height:1.8">${p}</p>`;
+  }).join('');
+}
+function buildSCard(s,pi,si,exp,profile){
+  const c=s.clr||'#818cf8';
+  const open=!!exp[si];
+  let body='';
+  if(open){
+    body=`<div style="padding:0 20px 20px;border-top:1px solid ${c}15"><div style="height:10px"></div>`;
+    if(s.viz==='hierarchy'&&profile)body+=buildHierarchy(profile.ranked);
+    if(s.viz==='loadbadges')body+=buildLoadBadges(s.loopP||0,s.reactP||0,s.drainP||0,s.neutP||0);
+    if(s.viz==='axis'&&s.affAxis)body+=buildAxisSlider(s.affAxis);
+    body+=buildSectionPars(s.pars,c);
+    body+='</div>';
+  }
+  return`<div style="border:1px solid ${c}25;background:${c}07;border-radius:18px;overflow:hidden;margin-bottom:10px">
+    <button onclick="toggleSec(${pi},${si})" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="min-width:26px;height:26px;border-radius:13px;background:${c}18;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:${c};flex-shrink:0">${s.num}</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px;line-height:1.3">${s.title}</p><p style="margin:2px 0 0;font-size:11px;color:${c}bb">${s.sub}</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:${c}15;display:flex;align-items:center;justify-content:center;color:${c};font-weight:900;font-size:13px;flex-shrink:0">${open?'−':'+'}</span>
+    </button>${body}
+  </div>`;
+}
+function buildTransit(pi){
+  const tr=S.tr[pi];const profile=S.p[pi].profile;
+  if(!profile)return'';
+  const c='#67e8f9';
+  let body='';
+  if(tr.open){
+    const res=tr.res;
+    const total=res?res.reduce((s,a)=>s+a.load,0):0;
+    const lbl=total>20?'High Load':total>10?'Moderate Load':total>0?'Light Load':total<-5?'Resource Period':'Neutral Background';
+    const lclr=total>20?'#ef4444':total>10?'#f97316':total>0?'#eab308':total<-5?'#22c55e':'#6b7280';
+    body=`<div style="padding:0 20px 20px;border-top:1px solid ${c}12">
+      <p style="margin:12px 0 10px;font-size:13px;color:#9ca3af;line-height:1.7">Enter today's date — I'll show which external patterns are currently influencing the neural system.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end">
+        ${['Day:td'+pi+'d','Month:td'+pi+'m','Year:td'+pi+'y'].map(f=>{const[lb,fk]=f.split(':');return`<div style="flex:1"><p style="margin:0 0 4px;font-size:11px;color:#6b7280;font-weight:600">${lb}</p><input type="number" id="${fk}" value="${tr.date[fk.slice(3)]||''}" oninput="updateTrDate(${pi},'${fk.slice(3)}',this.value)" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 4px;color:white;font-weight:700;text-align:center;font-size:14px;outline:none;box-sizing:border-box"></div>`;}).join('')}
+        <button onclick="calcTransit(${pi})" style="padding:10px 14px;background:rgba(103,232,249,0.15);border:1px solid rgba(103,232,249,0.3);border-radius:10px;color:#67e8f9;font-weight:900;cursor:pointer;font-size:14px;flex-shrink:0">▶</button>
+      </div>
+      ${tr.err?`<p style="color:#ef4444;font-size:12px;margin:0 0 8px">${tr.err}</p>`:''}
+      ${res!==null?buildTransitResult(res,total,lbl,lclr):''}
+    </div>`;
+  }
+  return`<div style="border:1px solid rgba(103,232,249,0.2);background:rgba(103,232,249,0.04);border-radius:18px;overflow:hidden;margin-bottom:10px">
+    <button onclick="toggleTransit(${pi})" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="min-width:26px;height:26px;border-radius:13px;background:rgba(103,232,249,0.15);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#67e8f9;flex-shrink:0">13</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px">Current Neurochemical Context</p><p style="margin:2px 0 0;font-size:11px;color:rgba(103,232,249,0.7)">Background load on the system right now</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:rgba(103,232,249,0.12);display:flex;align-items:center;justify-content:center;color:#67e8f9;font-weight:900;font-size:13px">${tr.open?'−':'+'}</span>
+    </button>${body}
+  </div>`;
+}
+function buildTransitResult(res,total,lbl,lclr){
+  if(res===null)return'';
+  let html=`<div style="background:${lclr}10;border:1px solid ${lclr}28;border-radius:12px;padding:11px 15px;margin-bottom:12px">
+    <p style="margin:0;font-weight:900;font-size:14px;color:${lclr}">${lbl}</p>
+    ${total!==0?`<p style="margin:3px 0 0;font-size:12px;color:#9ca3af">Total score: ${total>0?'+':''}${total}</p>`:''}
+  </div>`;
+  if(res.length>0){
+    html+=res.map(a=>`<div style="background:${a.clr}0a;border:1px solid ${a.clr}20;border-radius:12px;padding:12px 15px;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:5px">
+        <p style="margin:0;font-size:12px;color:${a.clr};font-weight:700;flex:1;line-height:1.4">${a.lbl}</p>
+        <span style="font-size:11px;color:${a.clr};background:${a.clr}18;padding:2px 8px;border-radius:20px;font-weight:700;flex-shrink:0">${a.load>0?'+':''}${a.load}</span>
+      </div>
+      <p style="margin:0 0 3px;font-size:11px;color:#6b7280">Duration: ${a.dur}</p>
+      <p style="margin:0;font-size:13px;color:#cbd5e1;line-height:1.7">${a.txt}</p>
+    </div>`).join('');
+  } else {
+    html+=`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:16px;text-align:center"><p style="margin:0;font-weight:700;font-size:14px;color:#22c55e">Neutral Background</p><p style="margin:4px 0 0;font-size:12px;color:#9ca3af">No significant external pressures.</p></div>`;
+  }
+  return html;
+}
+function buildPersonView(pi){
+  const data=S.p[pi];
+  const label=pi===0?'Me':'Partner';
+  let profileHTML='';
+  if(data.profile&&data.sections){
+    profileHTML=buildProfileArea(pi);
+  }
+  return`<div style="max-width:540px;margin:0 auto;padding:0 16px">
+    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:24px;margin-top:16px;margin-bottom:16px">
+      <p style="margin:0 0 16px;font-weight:800;color:white;font-size:14px">Date of Birth · ${label}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+        ${[['Day','d','11'],['Month','m','7'],['Year','y','1988']].map(([lb,f,ph])=>`<div>
+          <p style="margin:0 0 6px;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">${lb}</p>
+          <input type="number" placeholder="${ph}" value="${data.date[f]||''}" oninput="updateDate(${pi},'${f}',this.value)" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:13px 6px;color:white;font-weight:700;text-align:center;font-size:16px;outline:none;box-sizing:border-box">
+        </div>`).join('')}
+      </div>
+      <div id="calc-err-${pi}" style="font-size:12px;color:#ef4444;font-weight:600;margin-bottom:10px;display:none"></div>
+      <button id="calc-btn-${pi}" onclick="doCalc(${pi})" style="width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#6d28d9,#8b5cf6,#a78bfa);color:white;font-weight:900;font-size:15px;cursor:pointer">✦ Get Profile</button>
+    </div>
+    <div id="profile-area-${pi}">${profileHTML}</div>
+  </div>`;
+}
+function buildCompatibility(){
+  const p1=S.p[0].profile,p2=S.p[1].profile;
+  if(!p1&&!p2)return`<div style="padding:40px 20px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🧬</div><p style="color:white;font-weight:900;font-size:18px;margin-bottom:8px">Neuro-Translator</p><p style="color:#6b7280;font-size:14px;line-height:1.7">Enter birth dates in the "Me" and "Partner" tabs — see neurochemical compatibility and communication protocols.</p></div>`;
+  if(!p1||!p2){const miss=!p1?'Me':'Partner';return`<div style="padding:40px 20px;text-align:center"><div style="font-size:48px;margin-bottom:16px">⚡</div><p style="color:white;font-weight:900;font-size:16px;margin-bottom:8px">"${miss}" profile missing</p><p style="color:#6b7280;font-size:14px">Go to the "${miss}" tab and enter the date of birth.</p></div>`;}
+  const s1=getSubProfile(p1),s2=getSubProfile(p2);
+  const isSame=p1.primary===p2.primary;
+  const aa1=p1.affAxis,aa2=p2.affAxis;
+  const isComplement=aa1&&aa2&&((aa1.pv==='in'&&aa2.pv==='out')||(aa1.pv==='out'&&aa2.pv==='in'));
+  const isBothIn=aa1&&aa2&&aa1.pv==='in'&&aa2.pv==='in';
+  const{sit,goal,rev,aiOpen,aiText}=S.compat;
+  const goalCfg=GOALS3.find(g=>g.id===goal);
+  const sitCfg=SITS3.find(s=>s.id===sit);
+  let transHTML='';
+  if(sit){
+    const nat=(NATURAL3[s1.primary]&&NATURAL3[s1.primary][sit])||'...';
+    const sitHint=(SIT_HINTS3[s2.primary]&&SIT_HINTS3[s2.primary][sit]&&SIT_HINTS3[s2.primary][sit][goal])||'';
+    const hint=goal==='win'?s2.winHint:s2.agreeHint;
+    const extra=s2.name+' · hears: "'+s2.hears+'" · trigger: "'+s2.trigger+'"';
+    transHTML=`
+    <div style="background:${s1.freqClr}0d;border:1px solid ${s1.freqClr}33;border-radius:14px;padding:14px 16px;margin-bottom:8px">
+      <p style="margin:0 0 6px;font-weight:900;font-size:10px;color:${s1.freqClr}">${s1.em} ${s1.freq} · ${sitCfg?sitCfg.em:''} ${sitCfg?sitCfg.lb:''} · natural response:</p>
+      <p style="margin:0;font-size:13px;color:white;font-style:italic;font-weight:500;line-height:1.7">${nat}</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div><span style="font-size:10px;color:#ef4444;font-weight:700">neurochemical gap</span><div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div></div>
+    <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:10px 14px;margin-bottom:8px">
+      <p style="margin:0 0 3px;font-size:10px;color:#ef4444;font-weight:700">${s2.em} their filter:</p>
+      <p style="margin:0;font-size:12px;color:#9ca3af">"${s2.speaks}" vs hears "${s2.hears}"</p>
+    </div>
+    ${!rev?`<button onclick="setCompat('rev',true)" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,${goalCfg.clr},${goalCfg.clr}bb);color:white;font-weight:900;font-size:14px;cursor:pointer;margin-top:4px">${goal==='win'?'⚔️ How to say it — Defend Position':'🤝 How to say it — Reach Agreement'}</button>`
+    :`<div style="background:${goalCfg.clr}0d;border:1px solid ${goalCfg.clr}44;border-radius:14px;padding:16px;margin-top:4px">
+      <p style="margin:0 0 8px;font-weight:900;font-size:10px;color:${goalCfg.clr}">${s2.em} ${s2.freq} · TRANSLATION for ${sitCfg?sitCfg.lb:''}</p>
+      ${sitHint?`<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px;margin-bottom:8px"><p style="margin:0;font-size:13px;color:white;line-height:1.7">${sitHint}</p></div>`:''}
+      ${hint?`<div style="border-left:3px solid ${s2.freqClr}55;padding-left:10px;margin-bottom:8px"><p style="margin:0;font-weight:700;font-size:11px;color:${s2.freqClr}">↳ ${hint}</p></div>`:''}
+      <p style="margin:0;font-size:10px;color:#4b5563">${extra}</p>
+      <button onclick="setCompat('rev',false);setCompat('sit',null)" style="margin-top:10px;font-size:11px;color:#6b7280;background:none;border:none;cursor:pointer;text-decoration:underline">Different situation</button>
+    </div>`}`;
+  }
+  const aiSection=`<div style="border:1px solid rgba(192,132,252,0.3);background:rgba(192,132,252,0.05);border-radius:18px;overflow:hidden;margin-top:14px">
+    <button onclick="toggleAI()" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px">🧬</span>
+      <div style="flex:1"><p style="margin:0;font-weight:900;color:white;font-size:14px">AI Report · Neurochemical Pair Synthesis</p><p style="margin:2px 0 0;font-size:11px;color:rgba(192,132,252,0.7)">Full analysis for specialist referral</p></div>
+      <span style="width:22px;height:22px;border-radius:11px;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;color:#c084fc;font-weight:900;font-size:13px;flex-shrink:0">${aiOpen?'−':'+'}</span>
+    </button>
+    ${aiOpen&&aiText?`<div style="padding:0 20px 20px;border-top:1px solid rgba(192,132,252,0.15)">
+      <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(192,132,252,0.2);border-radius:12px;padding:14px 16px;margin-top:12px;max-height:340px;overflow-y:auto">
+        ${aiText.split('\n').map(line=>`<p style="margin:0 0 2px;font-size:12px;color:${line.startsWith('══')||line.startsWith('──')?'#c084fc':line.startsWith('⚠')?'#f97316':line.startsWith('✓')?'#22c55e':'#d1d5db'};font-weight:${line.startsWith('══')?700:400};line-height:1.7">${line||'&nbsp;'}</p>`).join('')}
+      </div>
+      <p style="margin:8px 0 0;font-size:11px;color:#4b5563;text-align:center">Copy the report and pass to GPT-4 / Claude for extended analysis</p>
+    </div>`:''}
+  </div>`;
+  return`<div style="max-width:540px;margin:0 auto;padding:0 16px 32px">
+    <div style="text-align:center;padding:20px 0 14px">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:800;letter-spacing:0.1em;color:#818cf8">NEURO-TRANSLATOR</p>
+      <p style="margin:0;font-weight:900;font-size:20px;color:white">Pair Architecture</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      ${[[p1,s1,'Me'],[p2,s2,'Partner']].map(([p,s,lb])=>`<div style="background:${s.clr}0d;border:1px solid ${s.clr}25;border-radius:16px;padding:14px 12px;text-align:center">
+        <p style="margin:0 0 4px;font-size:9px;color:#6b7280;font-weight:700">${lb}</p>
+        <div style="font-size:26px;margin-bottom:5px">${s.em}</div>
+        <p style="margin:0 0 2px;font-weight:900;font-size:11px;color:white;line-height:1.3">${s.name}</p>
+        <p style="margin:0 0 4px;font-size:10px;color:${s.freqClr};font-weight:700">${s.freq}</p>
+        <p style="margin:0;font-size:9px;color:${s.vectorClr}">${s.vectorDesc}</p>
+        ${p.dominantChannel?`<span style="display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;background:${p.channelClr}18;font-size:9px;color:${p.channelClr};font-weight:700">${p.dominantChannel}</span>`:''}
+        ${p.affAxis&&p.affAxis.active?`<p style="margin:4px 0 0;font-size:9px;color:#818cf8">≋ ${p.affAxis.posLabel}</p>`:''}
+      </div>`).join('')}
+    </div>
+    ${isSame?`<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#ef4444">⚠ Tension Resonance</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">Identical types: ${s1.name}. Two identical circuits — mutual amplification. Direct conflict intensifies both. Written channel recommended.</p></div>`:''}
+    ${isComplement?`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#22c55e">✓ Vector Complementarity</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">One vector inward, one outward — mutual complement in crisis. Potentially very resourceful pair.</p></div>`:''}
+    ${isBothIn?`<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:14px;padding:12px 16px;margin-bottom:10px"><p style="margin:0 0 4px;font-weight:900;font-size:13px;color:#f97316">⚠ Both vectors inward</p><p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.7">In crisis, both close simultaneously. Important to have an agreement on an external safety signal.</p></div>`:''}
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <p style="margin:0 0 10px;font-weight:900;font-size:12px;color:white">Neurochemical Gap</p>
+      <div style="margin-bottom:8px;padding:10px 12px;border-radius:10px;background:${s1.freqClr}0f;border-left:3px solid ${s1.freqClr}55"><p style="margin:0 0 3px;font-size:10px;color:${s1.freqClr};font-weight:700">${s1.em} I naturally speak through:</p><p style="margin:0;font-size:12px;color:#cbd5e1">${s1.speaks}</p></div>
+      <div style="padding:10px 12px;border-radius:10px;background:${s2.freqClr}0f;border-left:3px solid ${s2.freqClr}55"><p style="margin:0 0 3px;font-size:10px;color:${s2.freqClr};font-weight:700">${s2.em} Partner hears through filter:</p><p style="margin:0;font-size:12px;color:#cbd5e1">${s2.hears}</p><p style="margin:2px 0 0;font-size:10px;color:#6b7280">trigger: "${s2.trigger}"</p></div>
+    </div>
+    <p style="margin:0 0 8px;font-weight:900;font-size:13px;color:white">Translator · 3 Situations</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      ${GOALS3.map(g=>`<button onclick="setCompat('goal','${g.id}');setCompat('rev',false)" style="padding:10px 8px;border-radius:12px;border:1px solid;cursor:pointer;background:${goal===g.id?g.clr+'22':'rgba(255,255,255,0.04)'};border-color:${goal===g.id?g.clr+'66':'rgba(255,255,255,0.07)'}"><p style="margin:0 0 2px;font-weight:900;font-size:12px;color:${goal===g.id?g.clr:'#9ca3af'}">${g.lb}</p><p style="margin:0;font-size:10px;color:#4b5563">${g.sub}</p></button>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      ${SITS3.map(s=>`<button onclick="setCompat('sit','${s.id}');setCompat('rev',false)" style="padding:10px 8px;border-radius:12px;border:1px solid;cursor:pointer;text-align:left;background:${sit===s.id?'rgba(129,140,248,0.15)':'rgba(255,255,255,0.03)'};border-color:${sit===s.id?'rgba(129,140,248,0.5)':'rgba(255,255,255,0.07)'}"><span style="font-size:18px">${s.em}</span><p style="margin:4px 0 2px;font-weight:700;font-size:10px;color:white">${s.lb}</p><p style="margin:0;font-size:9px;color:#6b7280">${s.sub}</p></button>`).join('')}
+    </div>
+    ${transHTML}
+    ${aiSection}
+    <p style="text-align:center;font-size:10px;color:#374151;line-height:1.7;margin-top:16px">The Neuro-Translator shows neurochemical filters — not people's characters.<br>This is a map, not a verdict.</p>
+  </div>`;
+}
+function buildApp(){
+  const tabs=['Me','Partner','Neuro-Translator'];
+  const tabDot=[!!S.p[0].profile,!!S.p[1].profile,!!(S.p[0].profile&&S.p[1].profile)];
+  return`<div style="min-height:100vh;background:#030712;padding-bottom:48px">
+    <div style="background:linear-gradient(180deg,#080115 0%,#030712 100%);padding:24px 20px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <div style="display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.22);margin-bottom:10px"><span style="font-size:10px;color:#a5b4fc;font-weight:800;letter-spacing:0.1em">NEUROCHEMICAL ARCHITECTURAL PROFILE</span></div>
+      <h1 style="margin:0 0 5px;font-weight:900;font-size:21px;line-height:1.25;background:linear-gradient(90deg,#c084fc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Nervous System Architecture</h1>
+      <p style="margin:0;font-size:12px;color:#6b7280">Profile · Neuro-Translator · AI Report · Transits</p>
+    </div>
+    <div style="max-width:540px;margin:0 auto;padding:10px 16px 0">
+      <div style="display:flex;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden">
+        ${tabs.map((t,i)=>`<button onclick="setTab(${i})" style="flex:1;padding:11px 4px;border:none;cursor:pointer;background:${S.tab===i?'rgba(124,58,237,0.35)':'transparent'};color:${S.tab===i?'white':'#6b7280'};font-weight:${S.tab===i?900:500};font-size:12px;border-right:${i<2?'1px solid rgba(255,255,255,0.06)':'none'};position:relative">${t}${tabDot[i]?`<span style="position:absolute;top:6px;right:calc(50% - 14px);width:5px;height:5px;border-radius:50%;background:${i===2?'#22c55e':'#818cf8'}"></span>`:''}</button>`).join('')}
+      </div>
+    </div>
+    <div id="tab-content">
+      ${S.tab===0?buildPersonView(0):S.tab===1?buildPersonView(1):'<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>'}
+    </div>
+  </div>`;
+}
+
+// ═══ EVENT HANDLERS ═══
+function render(){document.getElementById('app').innerHTML=buildApp();}
+function setTab(i){S.tab=i;render();}
+function updateDate(pi,f,v){S.p[pi].date[f]=v;}
+function updateTrDate(pi,f,v){S.tr[pi].date[f]=v;}
+function toggleSec(pi,si){
+  S.p[pi].exp[si]=!S.p[pi].exp[si];
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function buildProfileArea(pi){
+  const data=S.p[pi];
+  if(!data.profile||!data.sections)return'';
+  const profile=data.profile,sections=data.sections,exp=data.exp;
+  const pri=profile.primary,st=ST[pri]||ST.Mars;
+  const sub=getSubProfile(profile);
+  return`<div id="profile-result-${pi}">
+    <div style="background:${st.clr}0d;border:1px solid ${st.clr}25;border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center">
+      <div style="font-size:42px;margin-bottom:10px;line-height:1">${st.em}</div>
+      <p style="margin:0 0 3px;font-weight:900;font-size:19px;background:linear-gradient(90deg,#c084fc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${st.name}</p>
+      <p style="margin:0 0 3px;font-weight:700;font-size:13px;color:${sub.freqClr}">${sub.freq}</p>
+      <p style="margin:0 0 10px;font-size:12px;color:${st.clr}bb">${st.nt}</p>
+      <p style="margin:0 0 10px;font-size:11px;color:${sub.vectorClr};font-weight:600">${sub.vectorDesc} · ${sub.circuit}</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-bottom:8px">
+        ${profile.ranked.slice(0,3).map(r=>{const s2=ST[r.planet];return`<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-size:11px;color:#9ca3af"><span>${s2?s2.em:''}</span><span style="font-weight:700;color:#e2e8f0">${NCN[r.planet]||r.planet}</span><span>${r.pct}%</span></span>`;}).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px">
+        ${profile.dominantChannel?`<span style="padding:3px 10px;border-radius:20px;background:${profile.channelClr}18;border:1px solid ${profile.channelClr}33;font-size:10px;color:${profile.channelClr};font-weight:700">${profile.dominantChannel} path</span>`:''}
+        ${profile.hasEcl?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.22);font-size:10px;color:#ef4444;font-weight:700">Channel limitation</span>':''}
+        ${profile.affAxis&&profile.affAxis.active?`<span style="padding:3px 10px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.22);font-size:10px;color:#818cf8;font-weight:700">≋ ${profile.affAxis.posLabel}</span>`:''}
+        ${profile.captured?'<span style="padding:3px 10px;border-radius:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.28);font-size:10px;color:#ef4444;font-weight:700">Dominance capture</span>':''}
+      </div>
+    </div>
+    ${sections.map((s,si)=>buildSCard(s,pi,si,exp,profile)).join('')}
+    ${buildTransit(pi)}
+    <div style="text-align:center;padding:20px 16px 0;border-top:1px solid rgba(255,255,255,0.04);margin-top:8px">
+      <p style="margin:0 0 6px;font-size:12px;color:#6b7280;line-height:1.9">This is a map of nervous system predispositions — not a diagnosis or prediction.</p>
+      <p style="margin:0;font-size:11px;color:#7c3aed;font-weight:800;letter-spacing:0.06em">BIOCHEMICAL RESONANCE · Eva White ❤</p>
+    </div>
+  </div>`;
+}
+function doCalc(pi){
+  const data=S.p[pi];
+  const d=parseInt(data.date.d),m=parseInt(data.date.m),y=parseInt(data.date.y);
+  const errEl=document.getElementById('calc-err-'+pi);
+  const btn=document.getElementById('calc-btn-'+pi);
+  if(!d||!m||!y||m<1||m>12||d<1||d>31||y<1800||y>2100){
+    if(errEl){errEl.style.display='block';errEl.textContent='Enter a valid date of birth';}
+    return;
+  }
+  if(errEl)errEl.style.display='none';
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Analyzing system...';}
+  setTimeout(()=>{
+    try{
+      const r=calcPlanets(y,m,d);
+      const asp=findAspects(r.pos,r.signs);
+      const profile=calcProfile(asp,r.signs,r.pos);
+      const sections=generateNC(profile);
+      const exp={};sections.forEach((_,i)=>{exp[i]=i<2;});
+      S.p[pi].profile=profile;S.p[pi].sections=sections;S.p[pi].exp=exp;
+      const area=document.getElementById('profile-area-'+pi);
+      if(area){
+        area.innerHTML=buildProfileArea(pi);
+        area.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+      if(btn){btn.disabled=false;btn.innerHTML='✦ Get Profile';}
+      render();
+    }catch(e){
+      if(btn){btn.disabled=false;btn.innerHTML='✦ Get Profile';}
+      if(errEl){errEl.style.display='block';errEl.textContent='Error: '+e.message;}
+    }
+  },700);
+}
+function toggleTransit(pi){
+  S.tr[pi].open=!S.tr[pi].open;
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function calcTransit(pi){
+  const tr=S.tr[pi];
+  const d=parseInt(tr.date.d),m=parseInt(tr.date.m),y=parseInt(tr.date.y);
+  if(!d||!m||!y||m<1||m>12||d<1||d>31){S.tr[pi].err='Check date';S.tr[pi].res=null;}
+  else{
+    try{
+      const r=calcPlanets(y,m,d);
+      S.tr[pi].res=findTransitsNC(r.pos,S.p[pi].profile.pos);
+      S.tr[pi].err='';
+    }catch(e){S.tr[pi].err='Error';S.tr[pi].res=null;}
+  }
+  const area=document.getElementById('profile-area-'+pi);
+  if(area)area.innerHTML=buildProfileArea(pi);
+}
+function setCompat(key,val){
+  S.compat[key]=val;
+  const tc=document.getElementById('tab-content');
+  if(tc)tc.innerHTML='<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>';
+}
+function toggleAI(){
+  if(!S.compat.aiText){
+    const p1=S.p[0].profile,p2=S.p[1].profile;
+    if(!p1||!p2)return;
+    const s1=getSubProfile(p1),s2=getSubProfile(p2);
+    const aa1=p1.affAxis,aa2=p2.affAxis;
+    const isSame=s1.primary===s2.primary;
+    const isComplement=aa1&&aa2&&((aa1.pv==='in'&&aa2.pv==='out')||(aa1.pv==='out'&&aa2.pv==='in'));
+    const loopP1=Math.round((p1.mc['LOOP']||0)/(Object.values(p1.mc).reduce((s,v)=>s+v,0)||1)*100);
+    const loopP2=Math.round((p2.mc['LOOP']||0)/(Object.values(p2.mc).reduce((s,v)=>s+v,0)||1)*100);
+    const t1=p1.tense[0],t2=p2.tense[0];
+    let r='══ NEUROCHEMICAL REPORT · Pair Architecture ══\n\n';
+    r+='SYSTEM A\n';r+='Type: '+s1.name+'\n';r+='Frequency: '+s1.freq+'\n';r+='Circuit: '+s1.circuit+'\n';r+='Speaks: '+s1.speaks+'\n';r+='Hears: '+s1.hears+'\n';r+='Trigger: '+s1.trigger+'\n';r+='Vector: '+s1.vectorDesc+'\n';
+    if(aa1&&aa1.active)r+='Flickering axis: '+aa1.posLabel+' · vector '+(aa1.pv==='in'?'inward':aa1.pv==='out'?'outward':aa1.pv==='free'?'∞':aa1.pv)+'\n';
+    r+='Load: loop '+loopP1+'%'+(p1.captured?' · CAPTURE':'')+'\n';
+    if(t1)r+='Main axis: '+(NCN[t1.p1]||t1.p1)+' ↔ '+(NCN[t1.p2]||t1.p2)+'\n';
+    r+='\nSYSTEM B\n';r+='Type: '+s2.name+'\n';r+='Frequency: '+s2.freq+'\n';r+='Circuit: '+s2.circuit+'\n';r+='Speaks: '+s2.speaks+'\n';r+='Hears: '+s2.hears+'\n';r+='Trigger: '+s2.trigger+'\n';r+='Vector: '+s2.vectorDesc+'\n';
+    if(aa2&&aa2.active)r+='Flickering axis: '+aa2.posLabel+' · vector '+(aa2.pv==='in'?'inward':aa2.pv==='out'?'outward':aa2.pv==='free'?'∞':aa2.pv)+'\n';
+    r+='Load: loop '+loopP2+'%'+(p2.captured?' · CAPTURE':'')+'\n';
+    if(t2)r+='Main axis: '+(NCN[t2.p1]||t2.p1)+' ↔ '+(NCN[t2.p2]||t2.p2)+'\n';
+    r+='\nPAIR ANALYSIS\n';
+    if(isSame)r+='⚠ Resonance: identical types ('+s1.name+'). Mutual tension amplification.\n';
+    if(isComplement)r+='✓ Vector complementarity — potentially very resourceful pair.\n';
+    r+='\nKEY GAP\n';r+='A speaks: "'+s1.speaks+'"\nB filters through: "'+s2.hears+'"\nB\'s closing trigger: "'+s2.trigger+'"\n';
+    r+='\nPROTOCOL A→B\n';r+='Speak through "'+s2.hears+'".\n';r+='Do not activate trigger: "'+s2.trigger+'"\n';r+='Hint (defense): '+(s2.winHint||'—')+'\n';r+='Hint (agreement): '+(s2.agreeHint||'—')+'\n';
+    r+='\nPROTOCOL B→A\n';r+='Speak through "'+s1.hears+'".\n';r+='Do not activate trigger: "'+s1.trigger+'"\n';r+='Hint (defense): '+(s1.winHint||'—')+'\n';r+='Hint (agreement): '+(s1.agreeHint||'—')+'\n';
+    r+='\n── Eva White · Biochemical Resonance ──';
+    S.compat.aiText=r;
+  }
+  S.compat.aiOpen=!S.compat.aiOpen;
+  const tc=document.getElementById('tab-content');
+  if(tc)tc.innerHTML='<div style="max-width:540px;margin:0 auto">'+buildCompatibility()+'</div>';
+}
+render();
+</script>
+</body>
+</html>
